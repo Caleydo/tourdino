@@ -1,0 +1,7 @@
+{
+  "name": "touring",
+  "version": "0.0.1",
+  "description": "TODO",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts"
+}
