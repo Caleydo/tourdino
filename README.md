@@ -7,20 +7,20 @@ Similarities between sets of items as well as attributes are supported.
 ### Item Set Similarity
 E.g., [Lockjaw, Captain Marvel, Black Widow] and [Captain Marvel, Black Widow, Wasp].
 
-**Work in progress**
+`Work in progress`
 
 
 ### Attribute Similarity
-e.g. *Species* and *Has Superpowers*
+E.g., *Species* and *Has Superpowers*
 
-**Work in progress**
+`Work in progress`
 
 ## Visualizations
 To better unterstand the results of similarity measures, small visualizations are created on-demand.
 
 ### Examples
 
-**Work in progress**
+`Work in progress`
 
 
 
