@@ -1,30 +1,26 @@
-touring [![Phovea][phovea-image]][phovea-url] [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
-=====================
+# Touring
+A library to calculate and visualize similarity measures.
 
-Calculate and visualize similarity measures.
+## Similarity Measures
+Similarities between sets of items as well as attributes are supported.
 
-Installation
-------------
+### Item Set Similarity
+E.g., [Lockjaw, Captain Marvel, Black Widow] and [Captain Marvel, Black Widow, Wasp].
 
-```
-git clone https://github.com/caleydo/touring.git
-cd touring
-npm install
-```
+**Work in progress**
 
-Testing
--------
 
-```
-npm test
-```
+### Attribute Similarity
+e.g. *Species* and *Has Superpowers*
 
-Building
---------
+**Work in progress**
 
-```
-npm run build
-```
+## Visualizations
+To better unterstand the results of similarity measures, small visualizations are created on-demand.
+
+### Examples
+
+**Work in progress**
 
 
 
