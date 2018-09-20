@@ -2,10 +2,10 @@
   "compilerOptions": {
     "module": "es6",
     "target": "es5",
-    "declaration": true,
     "importHelpers": true,
     "sourceMap": true,
     "moduleResolution": "node",
+    "jsx": "react",
     "experimentalDecorators": true,
     "lib": [
       "dom",

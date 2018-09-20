@@ -1,1 +1,2 @@
-export {sayHello, sayGoodbye} from './MethodManager'
+export * from './interfaces'
+export * from './MethodManager'

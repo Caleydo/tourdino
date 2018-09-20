@@ -1,0 +1,24 @@
+{
+  "generator-phovea": {
+    "type": "lib",
+    "libraries": [
+      "d3",
+      "jquery"
+    ],
+    "libraryAliases": {
+      "d3": "d3/d3"
+    },
+    "libraryExternals": [
+      "d3",
+      "jquery"
+    ],
+    "modules": [],
+    "entries": "./index.js",
+    "ignores": [],
+    "extensions": [],
+    "name": "touring",
+    "author": "Klaus Eckelt",
+    "today": "Wed, 19 Sep 2018 10:27:30 GMT",
+    "githubAccount": "caleydo"
+  }
+}
