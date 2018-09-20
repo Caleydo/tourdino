@@ -1,5 +1,5 @@
 # Touring
-A library to calculate and visualize similarity measures.
+A TypeScript library to calculate and visualize similarity measures.
 
 ## Similarity Measures
 Similarities between sets of items as well as attributes are supported.
