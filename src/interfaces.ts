@@ -4,6 +4,11 @@ export enum TYPE {
   CATEGORICAL = "CATEGORICAL"
 }
 
+export enum SCOPE {
+  ATTRIBUTES,
+  SETS
+}
+
 export type COMPARISON = [TYPE, TYPE]; // tuple, (e.g. NUM-NUM, CAT-CAT, NUM-CAT)
 
 /**
@@ -29,10 +34,12 @@ export interface IGroupDesc {
  * Base properties for a every similarity measure.
  */
 export interface ISimilarityClass {
+  id: string;
   label: string;
   description?: string;
 
   type: COMPARISON;
+  scope: SCOPE;
 }
 
 /**
@@ -47,4 +54,19 @@ export interface ISetSimilarityFunc {
  */
 export interface ISetSimilarityClass extends ISimilarityClass {
   calc : ISetSimilarityFunc;
+}
+
+export interface IMeasureOptions {
+  /**
+   * With custom weights, the order of similarity measures returned by the manager can be influenced.
+   * Measures with higher weight are prioritized.
+   * @default 0
+   */
+  weight: number;
+
+  /**
+   * Option to enable/disbale a measure.
+   * @default true
+   */
+  enabled: boolean;
 }
