@@ -12,6 +12,7 @@ export enum SCOPE {
 
 export type COMPARISON = [TYPE, TYPE]; // tuple, (e.g. NUM-NUM, CAT-CAT, NUM-CAT)
 // TODO can't check tuples for equality --> that sucks
+// TODO NUM-CAT and CAT-NUM should be the same
 
 /**
  * Describes an attribute.
