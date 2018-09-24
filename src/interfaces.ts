@@ -1,7 +1,7 @@
 
 export enum TYPE {
-  NUMERICAL = "NUMERICAL",
-  CATEGORICAL = "CATEGORICAL"
+  NUMERICAL = "number",
+  CATEGORICAL = "categorical"
 }
 
 export enum SCOPE {
@@ -9,7 +9,9 @@ export enum SCOPE {
   SETS
 }
 
+
 export type COMPARISON = [TYPE, TYPE]; // tuple, (e.g. NUM-NUM, CAT-CAT, NUM-CAT)
+// TODO can't check tuples for equality --> that sucks
 
 /**
  * Describes an attribute.

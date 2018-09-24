@@ -1,4 +1,4 @@
-import {IAttributeDesc, COMPARISON, SCOPE, ISimilarityClass} from './interfaces';
+import {IAttributeDesc, TYPE, COMPARISON, SCOPE, ISimilarityClass} from './interfaces';
 import {registeredClasses} from './Measures'
 
 
@@ -15,13 +15,13 @@ export class MethodManager{
 
     const measures = new Map<COMPARISON, Set<ISimilarityClass>>();
     
-    const aTypes = new Set(a.map((measure) => measure.type)) //first get all types, that make a set to get each type once
-    const bTypes = new Set(b.map((measure) => measure.type))
+    const aTypes = new Set(a.map((measure) => measure.type as TYPE)) //first get all types, that make a set to get each type once
+    const bTypes = new Set(b.map((measure) => measure.type as TYPE))
 
     for(let aType of aTypes) {
       for(let bType of bTypes) {
         for(let measure of registeredClasses) {
-          if(measure.scope == SCOPE.SETS && measure.type === [aType, bType]) {
+          if(measure.scope === SCOPE.SETS && measure.type.includes(aType) && measure.type.includes(bType) ) { // arrays [1,2,3] and [1,2,3] are never equal, use includes
             if(!measures.has(measure.type)) {
               measures.set(measure.type, new Set<ISimilarityClass>()) //init nested set
             }
