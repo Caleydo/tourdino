@@ -23,7 +23,6 @@ To better unterstand the results of similarity measures, small visualizations ar
 `Work in progress`
 
 
-
 ***
 
 <a href="https://caleydo.org"><img src="http://caleydo.org/assets/images/logos/caleydo.svg" align="left" width="200px" hspace="10" vspace="6"></a>
