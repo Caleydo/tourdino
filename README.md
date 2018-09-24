@@ -5,7 +5,7 @@ A TypeScript library to calculate and visualize similarity measures.
 Similarities between sets of items as well as attributes are supported.
 
 ### Item Set Similarity
-E.g., [Lockjaw, Captain Marvel, Black Widow] and [Captain Marvel, Black Widow, Wasp].
+E.g.,` [Lockjaw, Captain Marvel, Black Widow]` and `[Captain Marvel, Black Widow, Wasp]`.
 
 `Work in progress`
 
