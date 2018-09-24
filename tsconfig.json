@@ -4,6 +4,7 @@
     "target": "es5",
     "importHelpers": true,
     "sourceMap": true,
+    "downlevelIteration": true,
     "moduleResolution": "node",
     "jsx": "react",
     "experimentalDecorators": true,
