@@ -1,7 +1,7 @@
 
 export enum TYPE {
-  NUMERICAL = "number",
-  CATEGORICAL = "categorical"
+  NUMERICAL = 'number',
+  CATEGORICAL = 'categorical'
 }
 
 export enum SCOPE {
@@ -30,7 +30,7 @@ export interface IGroupDesc {
   label: string;
   parent: IAttributeDesc;
   type: TYPE;
-  values: [];
+  values: Array<any>;
 }
 
 /**
@@ -49,7 +49,7 @@ export interface ISimilarityClass {
  * A function to compare two sets of values
  */
 export interface ISetSimilarityFunc {
-  (setA: [], setB: []): number;
+  (setA: Array<any>, setB: Array<any>): number;
 }
 
 /**

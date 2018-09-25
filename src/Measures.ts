@@ -2,7 +2,7 @@ import {IAttributeDesc, COMPARISON, SCOPE, ISimilarityClass, ISetSimilarityClass
 import {defaultMeasureOptions} from './config';
 
 
-export const registeredClasses = [];
+export const registeredClasses = new Array<ASimilarityClass>();
 export function MeasureDecorator() {
      return function(target: typeof ASimilarityClass) {
           registeredClasses.push(new target()); //TODO apply options
@@ -44,7 +44,7 @@ export class JaccardSimilarity extends ASimilarityClass implements ISetSimilarit
   }
 
 
-  calc(setA: [], setB: []) {
+  calc(setA: Array<any>, setB: Array<any>) {
     return 1-Math.random(); // ]0,1]
   }
 }

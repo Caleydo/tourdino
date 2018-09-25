@@ -1,5 +1,5 @@
 import {IAttributeDesc, TYPE, COMPARISON, SCOPE, ISimilarityClass} from './interfaces';
-import {registeredClasses} from './Measures'
+import {registeredClasses, ASimilarityClass} from './Measures'
 
 
 export class MethodManager{
@@ -20,9 +20,10 @@ export class MethodManager{
       for(let bType of bTypes) {
         for(let measure of registeredClasses) {
           if(measure.scope === SCOPE.SETS && measure.type.includes(aType) && measure.type.includes(bType) ) { // arrays [1,2,3] and [1,2,3] are never equal, use includes
-            if(!measures.has(measure.type)) {
-              measures.set(JSON.stringify(measure.type), []) //init nested set
+            if(!measures.has(JSON.stringify(measure.type))) {
+              measures.set(JSON.stringify(measure.type), new Array<ISimilarityClass>()) //init nested set
             }
+
             measures.get(JSON.stringify(measure.type)).push(measure); // TODO: consider weights 
           }
         }
