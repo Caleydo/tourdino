@@ -34,7 +34,7 @@ export class Comparison {
     // [A,B] === [B,A]
     // [B,A] === [A,B]
     // [B,A] === [B,A]
-    return (this.typeA === anotherCmp.typeA && this.typeB === this.typeB) || (this.typeA === anotherCmp.typeB && this.typeB === this.typeA);
+    return (this.typeA === anotherCmp.typeA && this.typeB === anotherCmp.typeB) || (this.typeA === anotherCmp.typeB && this.typeB === anotherCmp.typeA);
   }
 
   static get(typeA, typeB) {

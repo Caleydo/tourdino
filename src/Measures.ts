@@ -48,3 +48,72 @@ export class JaccardSimilarity extends ASimilarityClass implements ISetSimilarit
     return 1-Math.random(); // ]0,1]
   }
 }
+
+
+@MeasureDecorator()
+export class OverlapSimilarity extends ASimilarityClass implements ISetSimilarityClass {
+
+  constructor(options?: IMeasureOptions) {
+    super(options);
+
+    // TODO improve the measure description somehow:
+    this.id = "overlap"
+    this.label = "Overlap coefficient" //Szymkiewicz-Simpson
+    this.description = "The size of the intersection divided by the size of the smaller set."
+
+    this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
+    this.scope = SCOPE.SETS;
+  }
+
+
+  calc(setA: Array<any>, setB: Array<any>) {
+    return 1-Math.random(); // ]0,1]
+  }
+}
+
+
+
+
+
+@MeasureDecorator()
+export class StudentTTest extends ASimilarityClass implements ISetSimilarityClass {
+
+  constructor(options?: IMeasureOptions) {
+    super(options);
+
+    // TODO improve the measure description somehow:
+    this.id = 'student_test';
+    this.label = "Student's t-test";
+    this.description = "Compares the means of two samples (assuimg equal variances in their respective distributions).";
+
+    this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
+    this.scope = SCOPE.SETS;
+  }
+
+
+  calc(setA: Array<any>, setB: Array<any>) {
+    return 1-Math.random(); // ]0,1]
+  }
+}
+
+
+@MeasureDecorator()
+export class WelchTTest extends ASimilarityClass implements ISetSimilarityClass {
+
+  constructor(options?: IMeasureOptions) {
+    super(options);
+
+    // TODO improve the measure description somehow:
+    this.id = 'welch_test';
+    this.label = "Welch's t-test";
+    this.description = "Compares the means of two samples.";
+
+    this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
+    this.scope = SCOPE.SETS;
+  }
+
+
+  calc(setA: Array<any>, setB: Array<any>) {
+    return 1-Math.random(); // ]0,1]
+  }
+}
