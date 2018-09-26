@@ -56,6 +56,8 @@ export enum SCOPE {
   SETS
 }
 
+export type MeasureMap = Map<Comparison, ISimilarityClass[]>;
+
 /**
  * Describes an attribute.
  * Compatible with lineupjs.

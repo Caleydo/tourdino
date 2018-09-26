@@ -1,4 +1,4 @@
-import {IAttributeDesc, Type, Comparison, SCOPE, ISimilarityClass} from './interfaces';
+import {IAttributeDesc, Type, Comparison, SCOPE, ISimilarityClass, MeasureMap} from './interfaces';
 import {registeredClasses} from './Measures'
 
 
@@ -6,12 +6,12 @@ export class MethodManager{
 
   constructor() {} //only work with the static functions
 
-  static getSetMethods(a: IAttributeDesc[] , b: IAttributeDesc[], type?: Comparison) : Map<Comparison, ISimilarityClass[]> {
+  static getSetMethods(a: IAttributeDesc[] , b: IAttributeDesc[], type?: Comparison) : MeasureMap {
 
     if(!a || !b)
       throw new Error("Attribute sets a & b must be defined.");
 
-    const measures = new Map<Comparison, ISimilarityClass[]>();
+    const measures = new Map<Comparison, ISimilarityClass[]>() as MeasureMap;
 
      //first get all types, that make a set to get each type once
     const aTypes = Array.from(new Set(a.map((measure) => measure.type as Type))); // TODO remove array.from (to iterate over sets, you needs at least typescript 2.3)
