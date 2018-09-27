@@ -2,16 +2,16 @@
  * Constants that describes a type like numerical or categorical.
  */
 export class Type {
-    // TODO make an enum again (string enums need at least typescript 2.4)
+  // TODO make an enum again (string enums need at least typescript 2.4)
 
-    private constructor(private value:string) {}
+  private constructor(private value: string) {}
 
-    public toString() {
-        return this.value;
-    }
+  public toString() {
+    return this.value;
+  }
 
-    static NUMERICAL = new Type("number");
-    static CATEGORICAL = new Type("categorical");
+  static NUMERICAL = new Type("number");
+  static CATEGORICAL = new Type("categorical");
 }
 
 /**
@@ -19,7 +19,7 @@ export class Type {
  */
 export class Comparison {
 
-  private static comparisons = new Map<String,Comparison>();
+  private static comparisons = new Map<String, Comparison>();
 
   constructor(public readonly typeA: Type, public readonly typeB: Type) {}
 
@@ -100,7 +100,7 @@ export interface ISetSimilarityFunc {
  * Similarity measures that compares sets.
  */
 export interface ISetSimilarityClass extends ISimilarityClass {
-  calc : ISetSimilarityFunc;
+  calc: ISetSimilarityFunc;
 }
 
 export interface IMeasureOptions {

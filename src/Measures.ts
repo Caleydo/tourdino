@@ -4,9 +4,9 @@ import {defaultMeasureOptions} from './config';
 
 export const registeredClasses = new Array<ASimilarityClass>();
 export function MeasureDecorator() {
-     return function(target: {new(): ASimilarityClass}) { //only instantiable subtypes of ASimilarityClass can be passed.
-          registeredClasses.push(new target()); //TODO apply options
-     };
+  return function (target: {new(): ASimilarityClass}) { //only instantiable subtypes of ASimilarityClass can be passed.
+    registeredClasses.push(new target()); //TODO apply options
+  };
 }
 
 
@@ -19,8 +19,8 @@ export abstract class ASimilarityClass implements ISimilarityClass {
   public type: Comparison;
   public scope: SCOPE;
 
-  protected readonly options : IMeasureOptions;
-  
+  protected readonly options: IMeasureOptions;
+
   constructor(options = defaultMeasureOptions()) {
     this.options = options;
   }
@@ -45,7 +45,7 @@ export class JaccardSimilarity extends ASimilarityClass implements ISetSimilarit
 
 
   calc(setA: Array<any>, setB: Array<any>) {
-    return 1-Math.random(); // ]0,1]
+    return 1 - Math.random(); // ]0,1]
   }
 }
 
@@ -67,12 +67,9 @@ export class OverlapSimilarity extends ASimilarityClass implements ISetSimilarit
 
 
   calc(setA: Array<any>, setB: Array<any>) {
-    return 1-Math.random(); // ]0,1]
+    return 1 - Math.random(); // ]0,1]
   }
 }
-
-
-
 
 
 @MeasureDecorator()
@@ -92,7 +89,7 @@ export class StudentTTest extends ASimilarityClass implements ISetSimilarityClas
 
 
   calc(setA: Array<any>, setB: Array<any>) {
-    return 1-Math.random(); // ]0,1]
+    return 1 - Math.random(); // ]0,1]
   }
 }
 
@@ -114,6 +111,6 @@ export class WelchTTest extends ASimilarityClass implements ISetSimilarityClass 
 
 
   calc(setA: Array<any>, setB: Array<any>) {
-    return 1-Math.random(); // ]0,1]
+    return 1 - Math.random(); // ]0,1]
   }
 }
