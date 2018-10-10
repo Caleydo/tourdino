@@ -178,6 +178,132 @@ export class MannWhitneyUTest extends ASimilarityClass implements ISetSimilarity
 
 
   calc(setA: Array<any>, setB: Array<any>) {
-    return 1-Math.random(); // ]0,1]
+    let selectionRankObj = setA.map((a) => { 
+        let returnObj = {
+          set: 'selection',
+          value: a
+        };
+        return returnObj; 
+      });
+
+    let categoryRankObj = setB.map((b) => { 
+        let returnObj = {
+          set: 'category',
+          value: b
+        };
+        return returnObj; 
+      });
+
+    let collectiveRankSet = selectionRankObj.concat(categoryRankObj);
+    //sort the set
+    collectiveRankSet.sort((a,b) => { return a.value - b.value;});
+
+    //assing rank 
+    let regionRange = [];
+    let region = false;
+    for(let i=0;i< collectiveRankSet.length; i++)
+    {
+      if(i>=1 && collectiveRankSet[i-1].value === collectiveRankSet[i].value)
+      {
+        region = true;
+        regionRange.push(i-1); 
+        regionRange.push(i); 
+      }
+
+      if(region && collectiveRankSet[i-1].value !== collectiveRankSet[i].value && regionRange.length > 1)
+      {
+        let uniqueRegionRange = regionRange.filter((v,i) => {return regionRange.indexOf(v) === i;});
+        let regionRank = (uniqueRegionRange.reduce((a, b) => a + b, 0) + uniqueRegionRange.length) / uniqueRegionRange.length;
+
+        for(let r=0;r<uniqueRegionRange.length; r++)
+        {
+          collectiveRankSet[uniqueRegionRange[r]]['rank'] = regionRank;
+        }
+        regionRange = [];
+        region = false;
+      }
+
+      collectiveRankSet[i]['rank'] = i+1;
+      
+    }
+
+    if(region && regionRange.length > 1)
+    {
+      let uniqueRegionRange = regionRange.filter((v,i) => {return regionRange.indexOf(v) === i;});
+      let regionRank = (uniqueRegionRange.reduce((a, b) => a + b, 0) + uniqueRegionRange.length) / uniqueRegionRange.length;
+
+      for(let r=0;r<uniqueRegionRange.length; r++)
+      {
+        collectiveRankSet[uniqueRegionRange[r]]['rank'] = regionRank;
+      }
+      regionRange = [];
+      region = false;
+    }
+
+
+    let selectionRanks = [];
+    let categoryRanks = [];
+
+    for(let i=0;i< collectiveRankSet.length; i++)
+    { 
+      if(collectiveRankSet[i].set === 'selection')
+      {
+        selectionRanks.push((collectiveRankSet[i] as any).rank);
+      }else
+      {
+        categoryRanks.push((collectiveRankSet[i] as any).rank);
+      }
+    }
+
+    let nSelection = selectionRanks.length;
+    let selectionRankSum = selectionRanks.reduce((a, b) => a + b, 0);
+    
+    let nCategroy = categoryRanks.length;
+    let categoryRankSum = categoryRanks.reduce((a, b) => a + b, 0);    
+
+
+
+    // ----- alternative
+    // let sBeforeC = 0;
+    // let cBeforeS = 0;
+    // let TTselectionRanks = [];
+    // let TTcategoryRanks = [];
+    // for(let i=0;i< collectiveRankSet.length; i++)
+    // {
+    //   if(collectiveRankSet[i].set === 'selection')
+    //   { // selection
+    //     TTcategoryRanks.push(cBeforeS);
+    //     sBeforeC++;
+    //   }else
+    //   { // category
+    //     TTselectionRanks.push(sBeforeC);
+    //     cBeforeS++;
+    //   }
+    // }
+
+
+
+    // console.log('collectiveRankSet: ',collectiveRankSet);
+    let selectionU = nSelection * nCategroy + ( nSelection*(nSelection+1)/2) - selectionRankSum;
+    let categoryU = nSelection * nCategroy + ( nCategroy*(nCategroy+1)/2) - categoryRankSum;
+
+
+    // console.log('selectionU: ',selectionU,' | TTselectionRanks-score: ',TTselectionRanks.reduce((a, b) => a + b, 0),' -> array: ',TTselectionRanks);
+    // console.log('categoryU: ',categoryU,' | TTcategoryRanks-score: ',TTcategoryRanks.reduce((a, b) => a + b, 0),' -> array: ',TTcategoryRanks);
+    // console.log('sBeforeC: ',sBeforeC,' | nSelection: ',nSelection);
+    // console.log('cBeforeS: ',cBeforeS,' | nCategroy: ',nCategroy);
+    // let minU = Math.min(TTselectionRanks.reduce((a, b) => a + b, 0),TTcategoryRanks.reduce((a, b) => a + b, 0));
+
+
+    let minU = Math.min(selectionU,categoryU);
+    
+    let zValue = (minU - (nSelection * nCategroy)/2) / Math.sqrt((nSelection * nCategroy * (nSelection + nCategroy +1))/12);
+    // console.log('minU: ',minU);
+    console.log('zValue: ',zValue);
+    
+    //TODO calculate p-value
+
+    let score = zValue;
+    return score || 0;
   }
 }
