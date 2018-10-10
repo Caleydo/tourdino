@@ -86,7 +86,7 @@ export class StudentTTest extends ASimilarityClass implements ISetSimilarityClas
     this.label = "Student's t-test";
     this.description = "Compares the means of two samples (assuimg equal variances in their respective distributions).";
 
-    this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
+    this.type = Comparison.get(Type.CATEGORICAL, Type.NUMERICAL);
     this.scope = SCOPE.SETS;
   }
 
@@ -109,6 +109,27 @@ export class WelchTTest extends ASimilarityClass implements ISetSimilarityClass 
     this.description = "Compares the means of two samples.";
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
+    this.scope = SCOPE.SETS;
+  }
+
+
+  calc(setA: Array<any>, setB: Array<any>) {
+    return 1-Math.random(); // ]0,1]
+  }
+}
+
+@MeasureDecorator()
+export class MannWhitneyUTest extends ASimilarityClass implements ISetSimilarityClass {
+
+  constructor(options?: IMeasureOptions) {
+    super(options);
+
+    // TODO improve the measure description somehow:
+    this.id = 'mwu_test';
+    this.label = "Mann-Whitney-U-Test";
+    this.description = "Compares two samples of homogenity (non-parametric test)";
+
+    this.type = Comparison.get(Type.CATEGORICAL, Type.NUMERICAL);
     this.scope = SCOPE.SETS;
   }
 
