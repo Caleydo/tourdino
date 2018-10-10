@@ -27,7 +27,9 @@ export abstract class ASimilarityClass implements ISimilarityClass {
 
 }
 
-
+/**
+ * Also known as the Tanimoto distance metric. 
+ */
 @MeasureDecorator()
 export class JaccardSimilarity extends ASimilarityClass implements ISetSimilarityClass {
 
@@ -81,7 +83,7 @@ export class StudentTTest extends ASimilarityClass implements ISetSimilarityClas
     // TODO improve the measure description somehow:
     this.id = 'student_test';
     this.label = "Student's t-test";
-    this.description = "Compares the means of two samples (assuimg equal variances in their respective distributions).";
+    this.description = "Compares the means of two samples (assuimg equal variances in their respective normal distributions).";
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
     this.scope = SCOPE.SETS;
@@ -103,7 +105,7 @@ export class WelchTTest extends ASimilarityClass implements ISetSimilarityClass 
     // TODO improve the measure description somehow:
     this.id = 'welch_test';
     this.label = "Welch's t-test";
-    this.description = "Compares the means of two samples.";
+    this.description = "Compares the means of two samples (normal distributed).";
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
     this.scope = SCOPE.SETS;
