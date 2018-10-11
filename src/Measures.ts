@@ -1,5 +1,6 @@
 import {IAttributeDesc, Comparison, SCOPE, ISimilarityClass, ISetSimilarityClass, IMeasureOptions, Type} from './interfaces';
 import {defaultMeasureOptions} from './config';
+import {intersection} from './util'
 import * as d3 from 'd3';
 
 export const registeredClasses = new Array<ASimilarityClass>();
@@ -47,22 +48,9 @@ export class JaccardSimilarity extends ASimilarityClass implements ISetSimilarit
 
 
   calc(setA: Array<any>, setB: Array<any>) {
-    let intersection = [];
-    const filteredsetA = setA.filter((itemA) => {
-      const indexB = setB.findIndex((itemB) => itemB === itemA); // check if there is a corresponding entry in the setB
-      if (indexB >= 0) {
-        intersection.push(itemA);
-        setB.splice(indexB, 1);
-        return false; // selItem will drop out of setA
-      }
-      return true;
-    });
-
-    // const intersection = selectionSet.filter(item => categorySet.indexOf(item) >= 0); // filter elements not in the second array
-    // const union = selectionSet.concat(categorySet).sort().filter((item, i, arr) => !i || item != arr[i-1]) // !i => if first elemnt, or if unqueal to previous item (item != arr[i-1]) include in arr
-
-    const score = intersection.length / (intersection.length + filteredsetA.length + setB.length);
-
+    const {intersection: intersect, arr1: filteredsetA, arr2: filteredsetB} = intersection(setA, setB);
+    const score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
+    
     return score || 0;
   }
 }
@@ -85,20 +73,8 @@ export class OverlapSimilarity extends ASimilarityClass implements ISetSimilarit
 
 
   calc(setA: Array<any>, setB: Array<any>) {
-    const minSize = Math.min(setA.length, setB.length);
-
-    let intersection = [];
-    setA.filter((selItem) => {
-      const indexB = setB.findIndex((catItem) => catItem === selItem);
-      if (indexB >= 0) {
-        intersection.push(selItem);
-        setB.splice(indexB, 1);
-        return false; // selItem will drop out of selectionSet
-      }
-      return true;
-    });
-
-    const score = intersection.length / minSize;
+    const {intersection: intersect} = intersection(setA, setB);
+    const score = intersect.length /  Math.min(setA.length, setB.length);
 
     return score || 0;
   }
