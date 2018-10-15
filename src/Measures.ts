@@ -116,6 +116,14 @@ export class StudentTTest extends ASimilarityMeasure {
     let scoreP2 = (muSelection - muCategory) / Math.sqrt((nSelection - 1) * varSelection + (nCategory - 1) * varCategory);
     let score = scoreP1 * scoreP2;
 
+    let intersect = intersection(setAValid,setBValid);
+    if((intersect.intersection.length === setAValid.length) && (setAValid.length === setBValid.length))
+    {
+      score = 0.000001;
+    }
+
+    console.log('T-Test - t-score (own): ',score, '| df: ',nCategory + nSelection-2);
+
     return score ? jStat.jStat.ttest(score, nCategory + nSelection, 2) : 0;
   }
 }
@@ -283,8 +291,11 @@ export class MannWhitneyUTest extends ASimilarityMeasure {
     let zValue = (minU - (nSelection * nCategroy)/2) / Math.sqrt((nSelection * nCategroy * (nSelection + nCategroy +1))/12);
     // console.log('minU: ',minU);
     console.log('zValue: ',zValue);
-    
-    //TODO calculate p-value
+    let intersect = intersection(setAValid,setBValid);
+    if(zValue === 0)
+    {
+      zValue = 0.000001;
+    }
 
     let score = zValue;
 
