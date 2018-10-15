@@ -1,4 +1,4 @@
-import {IAttributeDesc, Comparison, SCOPE, ISimilarityClass, ISetSimilarityClass, IMeasureOptions, Type} from './interfaces';
+import {IAttributeDesc, Comparison, SCOPE, ISimilarityClass, ISimilarityFunc, IMeasureOptions, Type} from './interfaces';
 import {defaultMeasureOptions} from './config';
 import {intersection} from './util'
 import * as d3 from 'd3';
@@ -14,27 +14,28 @@ export function MeasureDecorator() {
 
 
 export abstract class ASimilarityClass implements ISimilarityClass {
-
+  
   public id: string;
   public label: string;
   public description: string;
-
+  
   public type: Comparison;
   public scope: SCOPE;
-
+  
   protected readonly options: IMeasureOptions;
-
+  
   constructor(options = defaultMeasureOptions()) {
     this.options = options;
-  }
+  }  
 
+  public abstract calc(setA: Array<any>, setB: Array<any>);
 }
 
 /**
  * Also known as the Tanimoto distance metric. 
  */
 @MeasureDecorator()
-export class JaccardSimilarity extends ASimilarityClass implements ISetSimilarityClass {
+export class JaccardSimilarity extends ASimilarityClass {
 
   constructor(options?: IMeasureOptions) {
     super(options);
@@ -49,7 +50,7 @@ export class JaccardSimilarity extends ASimilarityClass implements ISetSimilarit
   }
 
 
-  calc(setA: Array<any>, setB: Array<any>) {
+  public calc(setA: Array<any>, setB: Array<any>) {
     const {intersection: intersect, arr1: filteredsetA, arr2: filteredsetB} = intersection(setA, setB);
     const score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
     
@@ -59,7 +60,7 @@ export class JaccardSimilarity extends ASimilarityClass implements ISetSimilarit
 
 
 @MeasureDecorator()
-export class OverlapSimilarity extends ASimilarityClass implements ISetSimilarityClass {
+export class OverlapSimilarity extends ASimilarityClass {
 
   constructor(options?: IMeasureOptions) {
     super(options);
@@ -84,7 +85,7 @@ export class OverlapSimilarity extends ASimilarityClass implements ISetSimilarit
 
 
 @MeasureDecorator()
-export class StudentTTest extends ASimilarityClass implements ISetSimilarityClass {
+export class StudentTTest extends ASimilarityClass {
 
   constructor(options?: IMeasureOptions) {
     super(options);
@@ -121,7 +122,7 @@ export class StudentTTest extends ASimilarityClass implements ISetSimilarityClas
 
 
 @MeasureDecorator()
-export class WelchTTest extends ASimilarityClass implements ISetSimilarityClass {
+export class WelchTTest extends ASimilarityClass {
 
   constructor(options?: IMeasureOptions) {
     super(options);
@@ -142,7 +143,7 @@ export class WelchTTest extends ASimilarityClass implements ISetSimilarityClass 
 }
 
 @MeasureDecorator()
-export class MannWhitneyUTest extends ASimilarityClass implements ISetSimilarityClass {
+export class MannWhitneyUTest extends ASimilarityClass {
 
   constructor(options?: IMeasureOptions) {
     super(options);

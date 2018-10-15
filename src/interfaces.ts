@@ -1,3 +1,4 @@
+import {ASimilarityClass} from './Measures';
 /**
  * Constants that describes a type like numerical or categorical.
  */
@@ -56,7 +57,7 @@ export enum SCOPE {
   SETS
 }
 
-export type MeasureMap = Map<Comparison, ISimilarityClass[]>;
+export type MeasureMap = Map<Comparison, ASimilarityClass[]>;
 
 /**
  * Describes an attribute.
@@ -87,21 +88,17 @@ export interface ISimilarityClass {
 
   type: Comparison;
   scope: SCOPE;
+
+  calc: ISimilarityFunc;
 }
 
 /**
- * A function to compare two sets of values
+ * A function to compare two arrays of values
  */
-export interface ISetSimilarityFunc {
+export interface ISimilarityFunc {
   (setA: Array<any>, setB: Array<any>): number;
 }
 
-/**
- * Similarity measures that compares sets.
- */
-export interface ISetSimilarityClass extends ISimilarityClass {
-  calc: ISetSimilarityFunc;
-}
 
 export interface IMeasureOptions {
   /**
