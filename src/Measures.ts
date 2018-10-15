@@ -1,6 +1,6 @@
 import {IAttributeDesc, Comparison, SCOPE, ISimilarityMeasure, IMeasureOptions, Type} from './interfaces';
 import {defaultMeasureOptions} from './config';
-import {intersection, binom2} from './util'
+import {intersection, binom2, sleep} from './util'
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
 
@@ -323,7 +323,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
   }
 
 
-  public calc(arr1: Array<any>, arr2: Array<any>) {
+  public async calc(arr1: Array<any>, arr2: Array<any>): Promise<number> {
     // deduce catgeories from strings, e.g.: ['Cat1', 'Cat3', 'Cat2', 'Cat2', 'Cat1', 'Cat3']
     // and build a contingency table:
     //        A.1   A.2   A.3
@@ -362,7 +362,8 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     const expectedIndex = (rowBinomSum * colBinomSum) / binom2(arr1.length);
     const maxIndex = 0.5 * (rowBinomSum + colBinomSum);
 
+    //await sleep(5000); //test asynchronous behaviour
     // calc 
-    return (index - expectedIndex) / (maxIndex - expectedIndex);
+    return (index - expectedIndex) / (maxIndex - expectedIndex); // async function --> returns promise
   }
 }

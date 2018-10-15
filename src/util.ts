@@ -24,3 +24,8 @@ export function intersection(arr1: Array<any>, arr2: Array<any>) {
 export function binom2(n: number): number {
   return n*(n-1)/2
 }
+
+/** Helper for async tests */
+export function sleep(millis: number) {
+  return new Promise(resolve => setTimeout(resolve, millis));
+}
