@@ -1,19 +1,19 @@
-import {IAttributeDesc, Comparison, SCOPE, ISimilarityClass, ISimilarityFunc, IMeasureOptions, Type} from './interfaces';
+import {IAttributeDesc, Comparison, SCOPE, ISimilarityMeasure, IMeasureOptions, Type} from './interfaces';
 import {defaultMeasureOptions} from './config';
 import {intersection} from './util'
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
 
 
-export const registeredClasses = new Array<ASimilarityClass>();
+export const registeredClasses = new Array<ASimilarityMeasure>();
 export function MeasureDecorator() {
-  return function (target: {new(): ASimilarityClass}) { //only instantiable subtypes of ASimilarityClass can be passed.
+  return function (target: {new(): ASimilarityMeasure}) { //only instantiable subtypes of ASimilarityClass can be passed.
     registeredClasses.push(new target()); //TODO apply options
   };
 }
 
 
-export abstract class ASimilarityClass implements ISimilarityClass {
+export abstract class ASimilarityMeasure implements ISimilarityMeasure {
   
   public id: string;
   public label: string;
@@ -35,7 +35,7 @@ export abstract class ASimilarityClass implements ISimilarityClass {
  * Also known as the Tanimoto distance metric. 
  */
 @MeasureDecorator()
-export class JaccardSimilarity extends ASimilarityClass {
+export class JaccardSimilarity extends ASimilarityMeasure {
 
   constructor(options?: IMeasureOptions) {
     super(options);
@@ -60,7 +60,7 @@ export class JaccardSimilarity extends ASimilarityClass {
 
 
 @MeasureDecorator()
-export class OverlapSimilarity extends ASimilarityClass {
+export class OverlapSimilarity extends ASimilarityMeasure {
 
   constructor(options?: IMeasureOptions) {
     super(options);
@@ -85,7 +85,7 @@ export class OverlapSimilarity extends ASimilarityClass {
 
 
 @MeasureDecorator()
-export class StudentTTest extends ASimilarityClass {
+export class StudentTTest extends ASimilarityMeasure {
 
   constructor(options?: IMeasureOptions) {
     super(options);
@@ -122,7 +122,7 @@ export class StudentTTest extends ASimilarityClass {
 
 
 @MeasureDecorator()
-export class WelchTTest extends ASimilarityClass {
+export class WelchTTest extends ASimilarityMeasure {
 
   constructor(options?: IMeasureOptions) {
     super(options);
@@ -143,7 +143,7 @@ export class WelchTTest extends ASimilarityClass {
 }
 
 @MeasureDecorator()
-export class MannWhitneyUTest extends ASimilarityClass {
+export class MannWhitneyUTest extends ASimilarityMeasure {
 
   constructor(options?: IMeasureOptions) {
     super(options);

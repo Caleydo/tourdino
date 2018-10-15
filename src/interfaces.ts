@@ -1,4 +1,3 @@
-import {ASimilarityClass} from './Measures';
 /**
  * Constants that describes a type like numerical or categorical.
  */
@@ -57,7 +56,7 @@ export enum SCOPE {
   SETS
 }
 
-export type MeasureMap = Map<Comparison, ASimilarityClass[]>;
+export type MeasureMap = Map<Comparison, ISimilarityMeasure[]>;
 
 /**
  * Describes an attribute.
@@ -81,7 +80,7 @@ export interface IGroupDesc {
 /**
  * Base properties for a every similarity measure.
  */
-export interface ISimilarityClass {
+export interface ISimilarityMeasure {
   id: string;
   label: string;
   description?: string;

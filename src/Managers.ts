@@ -1,5 +1,5 @@
-import {IAttributeDesc, Type, Comparison, SCOPE, MeasureMap} from './interfaces';
-import {registeredClasses, ASimilarityClass} from './Measures'
+import {IAttributeDesc, Type, Comparison, SCOPE, MeasureMap, ISimilarityMeasure} from './interfaces';
+import {registeredClasses} from './Measures'
 
 
 export class MethodManager {
@@ -18,7 +18,7 @@ export class MethodManager {
     if (!a || !b)
       throw new Error("Attribute arrays a & b must be defined.");
 
-    const measures = new Map<Comparison, ASimilarityClass[]>() as MeasureMap;
+    const measures = new Map<Comparison, ISimilarityMeasure[]>() as MeasureMap;
 
     //first get all types, that make a set to get each type once
     const aTypes = new Set(a.map((measure) => measure.type as Type));
@@ -29,7 +29,7 @@ export class MethodManager {
         for (let measure of registeredClasses) {
           if (measure.scope === scope && measure.type.equals(Comparison.get(aType, bType))) {
             if (!measures.has(measure.type)) {
-              measures.set(measure.type, new Array<ASimilarityClass>()) //init nested set
+              measures.set(measure.type, new Array<ISimilarityMeasure>()) //init nested set
             }
 
             measures.get(measure.type).push(measure); // TODO: consider weights 
