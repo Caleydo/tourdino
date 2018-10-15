@@ -2,6 +2,8 @@ import {IAttributeDesc, Comparison, SCOPE, ISimilarityClass, ISetSimilarityClass
 import {defaultMeasureOptions} from './config';
 import {intersection} from './util'
 import * as d3 from 'd3';
+import {jStat} from 'jStat';
+
 
 export const registeredClasses = new Array<ASimilarityClass>();
 export function MeasureDecorator() {
@@ -111,7 +113,7 @@ export class StudentTTest extends ASimilarityClass implements ISetSimilarityClas
     let scoreP2 = (muSelection - muCategory) / Math.sqrt((nSelection - 1) * varSelection + (nCategory - 1) * varCategory);
     let score = scoreP1 * scoreP2;
 
-    return score || 0;
+    return score ? jStat.jStat.ttest(score, nCategory + nSelection, 2) : 0;
   }
 }
 
@@ -280,6 +282,7 @@ export class MannWhitneyUTest extends ASimilarityClass implements ISetSimilarity
     //TODO calculate p-value
 
     let score = zValue;
-    return score || 0;
+
+    return score ? jStat.jStat.ztest(score, 2) : 0;
   }
 }

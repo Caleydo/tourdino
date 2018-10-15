@@ -58,7 +58,7 @@
     "raw-loader": "0.5.1",
     "sass-loader": "6.0.7",
     "style-loader": "0.16.1",
-    "thread-loader": "1.1.2",    
+    "thread-loader": "1.1.2",
     "ts-loader": "4.0.1",
     "tslib": "1.9.0",
     "tslint": "5.9.1",
@@ -70,8 +70,9 @@
   },
   "dependencies": {
     "@types/d3": "3.5.36",
-    "d3": "3.5.17",
     "@types/jquery": "2.0.33",
+    "d3": "3.5.17",
+    "jStat": "1.7.1",
     "jquery": "3.1.1"
   },
   "name": "touring",
