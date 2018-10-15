@@ -100,14 +100,16 @@ export class StudentTTest extends ASimilarityClass implements ISetSimilarityClas
 
 
   calc(setA: Array<any>, setB: Array<any>) {
-    const nSelection = setA.length;
-    const muSelection = d3.mean(setA);
-    const varSelection = d3.variance(setA);
+    const setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
+    const nSelection = setAValid.length;
+    const muSelection = d3.mean(setAValid);
+    const varSelection = d3.variance(setAValid);
 
     //category
-    const nCategory = setB.length;
-    const muCategory = d3.mean(setB);
-    const varCategory = d3.variance(setB);
+    const setBValid = setB.filter((value) => {return (value !== null && value !== undefined);});
+    const nCategory = setBValid.length;
+    const muCategory = d3.mean(setBValid);
+    const varCategory = d3.variance(setBValid);
 
     let scoreP1 = Math.sqrt((nSelection * nCategory * (nSelection + nCategory - 2)) / (nSelection + nCategory));
     let scoreP2 = (muSelection - muCategory) / Math.sqrt((nSelection - 1) * varSelection + (nCategory - 1) * varCategory);
@@ -156,7 +158,8 @@ export class MannWhitneyUTest extends ASimilarityClass implements ISetSimilarity
 
 
   calc(setA: Array<any>, setB: Array<any>) {
-    let selectionRankObj = setA.map((a) => { 
+    let setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
+    let selectionRankObj = setAValid.map((a) => { 
         let returnObj = {
           set: 'selection',
           value: a
@@ -164,7 +167,8 @@ export class MannWhitneyUTest extends ASimilarityClass implements ISetSimilarity
         return returnObj; 
       });
 
-    let categoryRankObj = setB.map((b) => { 
+    let setBValid = setB.filter((value) => {return (value !== null && value !== undefined);});
+    let categoryRankObj = setBValid.map((b) => { 
         let returnObj = {
           set: 'category',
           value: b
