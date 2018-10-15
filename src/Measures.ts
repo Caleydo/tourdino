@@ -1,6 +1,6 @@
 import {IAttributeDesc, Comparison, SCOPE, ISimilarityMeasure, IMeasureOptions, Type} from './interfaces';
 import {defaultMeasureOptions} from './config';
-import {intersection} from './util'
+import {intersection, binom2} from './util'
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
 
@@ -289,5 +289,69 @@ export class MannWhitneyUTest extends ASimilarityMeasure {
     let score = zValue;
 
     return score ? jStat.jStat.ztest(score, 2) : 0;
+  }
+}
+
+
+/**
+ * Also known as the Tanimoto distance metric. 
+ */
+@MeasureDecorator()
+export class AdjustedRandIndex extends ASimilarityMeasure {
+
+  constructor(options?: IMeasureOptions) {
+    super(options);
+
+    // TODO improve the measure description somehow:
+    this.id = "adjrand"
+    this.label = "Adjusted Rand Index"
+    this.description = "blablabla"
+
+    this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
+    this.scope = SCOPE.ATTRIBUTES;
+  }
+
+
+  public calc(arr1: Array<any>, arr2: Array<any>) {
+    // deduce catgeories from strings, e.g.: ['Cat1', 'Cat3', 'Cat2', 'Cat2', 'Cat1', 'Cat3']
+    // and build a contingency table:
+    //        A.1   A.2   A.3
+    //  B.1   n11   n12   n13
+    //  B.2   n21   n22   n23
+    //  B.3   n31   n32   n33
+
+    if (arr1.length != arr2.length) {
+      throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
+    }
+
+    const A = [...new Set(arr1)]; // The set removes duplicates, and the conversion to array gives the content an order
+    const B = [...new Set(arr2)];
+
+    const table = new Array(B.length).fill([]); // rows
+    table.forEach((row, i) => table[i] = new Array(A.length).fill(0)) // columns
+
+    for (let i of arr1.keys()) { // iterate over indices
+      const Ai = A.indexOf(arr1[i]);
+      const Bi = B.indexOf(arr2[i]);
+      table[Bi][Ai] += 1; // count the co-occurences 
+    }
+
+    // https://web.archive.org/web/20171205003116/https://davetang.org/muse/2017/09/21/adjusted-rand-index/
+    const rowsSums = table.map((row) => row.reduce((sum, curr) => sum += curr)); // reduce each row to the sum
+    const colSums = A.map((cat, i) => table.reduce((sum, curr) => sum += curr[i], 0)); // reduce each all rows to the sum of column i
+
+    //const cellBinomSum = table.reduce((rowsum, row) => rowsum + row.reduce((colsum, col) => colsum += binom2(col), 0), 0);
+    const cellBinomSum = table.reduce((sum, row) => {
+      return sum + row.reduce((colsum, col) => colsum += binom2(col), 0)
+    }, 0); // set accumulator to zero!
+    const rowBinomSum = rowsSums.reduce((sum, curr) => sum += binom2(curr));
+    const colBinomSum = colSums.reduce((sum, curr) => sum += binom2(curr));
+
+    const index = cellBinomSum;
+    const expectedIndex = (rowBinomSum * colBinomSum) / binom2(arr1.length);
+    const maxIndex = 0.5 * (rowBinomSum + colBinomSum);
+
+    // calc 
+    return (index - expectedIndex) / (maxIndex - expectedIndex);
   }
 }
