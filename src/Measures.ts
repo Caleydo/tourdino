@@ -98,13 +98,13 @@ export class StudentTTest extends ASimilarityClass implements ISetSimilarityClas
 
 
   calc(setA: Array<any>, setB: Array<any>) {
-    const setAValid = setA.filter(Boolean);
+    const setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
     const nSelection = setAValid.length;
     const muSelection = d3.mean(setAValid);
     const varSelection = d3.variance(setAValid);
 
     //category
-    const setBValid = setB.filter(Boolean);
+    const setBValid = setB.filter((value) => {return (value !== null && value !== undefined);});
     const nCategory = setBValid.length;
     const muCategory = d3.mean(setBValid);
     const varCategory = d3.variance(setBValid);
@@ -156,7 +156,7 @@ export class MannWhitneyUTest extends ASimilarityClass implements ISetSimilarity
 
 
   calc(setA: Array<any>, setB: Array<any>) {
-    let setAValid = setA.filter(Boolean);
+    let setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
     let selectionRankObj = setAValid.map((a) => { 
         let returnObj = {
           set: 'selection',
@@ -165,7 +165,7 @@ export class MannWhitneyUTest extends ASimilarityClass implements ISetSimilarity
         return returnObj; 
       });
 
-    let setBValid = setB.filter(Boolean);
+    let setBValid = setB.filter((value) => {return (value !== null && value !== undefined);});
     let categoryRankObj = setBValid.map((b) => { 
         let returnObj = {
           set: 'category',
