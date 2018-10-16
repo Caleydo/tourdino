@@ -151,15 +151,15 @@ export class WelchTTest extends ASimilarityMeasure {
 }
 
 @MeasureDecorator()
-export class MannWhitneyUTest extends ASimilarityMeasure {
+export class WilcoxonRankSumTest extends ASimilarityMeasure {
 
   constructor(options?: IMeasureOptions) {
     super(options);
 
     // TODO improve the measure description somehow:
-    this.id = 'mwu_test';
-    this.label = "Mann-Whitney-U-Test";
-    this.description = "Compares two samples of homogenity (non-parametric test)";
+    this.id = 'wilcoxon-rank-sum_test';
+    this.label = "Wilcoxon rank-sum test";
+    this.description = "Compares two samples of homogenity (non-parametric test).";
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.NUMERICAL);
     this.scope = SCOPE.SETS;
@@ -305,6 +305,21 @@ export class MannWhitneyUTest extends ASimilarityMeasure {
 
 
 /**
+ * MannWhitneyUTest === WilcoxonRankSumTest, therefore this class is just a rename
+ */
+@MeasureDecorator()
+export class MannWhitneyUTest extends WilcoxonRankSumTest {
+
+  constructor(options?: IMeasureOptions) {
+    super(options);
+
+    this.id = 'mwu_test';
+    this.label = "Mann-Whitney U Test";
+  }
+}
+
+
+/**
  * Also known as the Tanimoto distance metric. 
  */
 @MeasureDecorator()
@@ -362,7 +377,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     const expectedIndex = (rowBinomSum * colBinomSum) / binom2(arr1.length);
     const maxIndex = 0.5 * (rowBinomSum + colBinomSum);
 
-    //await sleep(5000); //test asynchronous behaviour
+    // await sleep(5000); //test asynchronous behaviour
     // calc 
     return (index - expectedIndex) / (maxIndex - expectedIndex); // async function --> returns promise
   }
