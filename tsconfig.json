@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "module": "es6",
-    "target": "es5",
+    "target": "es6",
     "importHelpers": true,
     "sourceMap": true,
-    "downlevelIteration": true,
     "moduleResolution": "node",
     "jsx": "react",
     "experimentalDecorators": true,
+    "downlevelIteration": true,
     "lib": [
       "dom",
       "es2015",

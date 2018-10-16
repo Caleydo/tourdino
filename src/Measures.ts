@@ -324,20 +324,20 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
 
 
   public async calc(arr1: Array<any>, arr2: Array<any>): Promise<number> {
+    
+    if (arr1.length != arr2.length) {
+      throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
+    }
+    
     // deduce catgeories from strings, e.g.: ['Cat1', 'Cat3', 'Cat2', 'Cat2', 'Cat1', 'Cat3']
+    const A = [...new Set(arr1)]; // The set removes duplicates, and the conversion to array gives the content an order
+    const B = [...new Set(arr2)];
+    
     // and build a contingency table:
     //        A.1   A.2   A.3
     //  B.1   n11   n12   n13
     //  B.2   n21   n22   n23
     //  B.3   n31   n32   n33
-
-    if (arr1.length != arr2.length) {
-      throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
-    }
-
-    const A = [...new Set(arr1)]; // The set removes duplicates, and the conversion to array gives the content an order
-    const B = [...new Set(arr2)];
-
     const table = new Array(B.length).fill([]); // rows
     table.forEach((row, i) => table[i] = new Array(A.length).fill(0)) // columns
 
