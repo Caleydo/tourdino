@@ -277,12 +277,18 @@ export class MannWhitneyUTest extends ASimilarityClass implements ISetSimilarity
     let selectionU = nSelection * nCategroy + ( nSelection*(nSelection+1)/2) - selectionRankSum;
     let categoryU = nSelection * nCategroy + ( nCategroy*(nCategroy+1)/2) - categoryRankSum;
 
-
-    // console.log('selectionU: ',selectionU,' | TTselectionRanks-score: ',TTselectionRanks.reduce((a, b) => a + b, 0),' -> array: ',TTselectionRanks);
-    // console.log('categoryU: ',categoryU,' | TTcategoryRanks-score: ',TTcategoryRanks.reduce((a, b) => a + b, 0),' -> array: ',TTcategoryRanks);
+    // console.log({TTselectionRanks,TTcategoryRanks});
+    // let selectionUalternative = TTselectionRanks.reduce((a, b) => a + b, 0);
+    // let categoryUalternative = TTcategoryRanks.reduce((a, b) => a + b, 0);
+    
+    // console.log('selectionU: ',selectionU,' | TTselectionRanks-U: ',selectionUalternative);
+    // console.log('categoryU: ',categoryU,' | TTcategoryRanks-U: ',categoryUalternative);
     // console.log('sBeforeC: ',sBeforeC,' | nSelection: ',nSelection);
     // console.log('cBeforeS: ',cBeforeS,' | nCategroy: ',nCategroy);
-    // let minU = Math.min(TTselectionRanks.reduce((a, b) => a + b, 0),TTcategoryRanks.reduce((a, b) => a + b, 0));
+    // let minUalternative = Math.min(selectionUalternative,categoryUalternative);
+    // let zValuealternative = (minUalternative - (sBeforeC * cBeforeS)/2) / Math.sqrt((sBeforeC * cBeforeS * (sBeforeC + cBeforeS +1))/12);
+    // console.log('zValuealternative: ',zValuealternative);
+    // console.log('UaltS + UaltC: ',selectionUalternative+categoryUalternative,'| sBc*cBs: ',sBeforeC*cBeforeS);
 
 
     let minU = Math.min(selectionU,categoryU);
@@ -290,6 +296,7 @@ export class MannWhitneyUTest extends ASimilarityClass implements ISetSimilarity
     let zValue = (minU - (nSelection * nCategroy)/2) / Math.sqrt((nSelection * nCategroy * (nSelection + nCategroy +1))/12);
     // console.log('minU: ',minU);
     console.log('zValue: ',zValue);
+    console.log('Us + Uc: ',selectionU+categoryU,'| n1*n2: ',nSelection*nCategroy);
     let intersect = intersection(setAValid,setBValid);
     if(zValue === 0)
     {
