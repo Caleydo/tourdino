@@ -1,40 +1,41 @@
-import {IAttributeDesc, Comparison, SCOPE, ISimilarityClass, ISetSimilarityClass, IMeasureOptions, Type} from './interfaces';
+import {IAttributeDesc, Comparison, SCOPE, ISimilarityMeasure, IMeasureOptions, Type} from './interfaces';
 import {defaultMeasureOptions} from './config';
-import {intersection} from './util'
+import {intersection, binom2, sleep} from './util'
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
 
 
-export const registeredClasses = new Array<ASimilarityClass>();
+export const registeredClasses = new Array<ASimilarityMeasure>();
 export function MeasureDecorator() {
-  return function (target: {new(): ASimilarityClass}) { //only instantiable subtypes of ASimilarityClass can be passed.
+  return function (target: {new(): ASimilarityMeasure}) { //only instantiable subtypes of ASimilarityClass can be passed.
     registeredClasses.push(new target()); //TODO apply options
   };
 }
 
 
-export abstract class ASimilarityClass implements ISimilarityClass {
-
+export abstract class ASimilarityMeasure implements ISimilarityMeasure {
+  
   public id: string;
   public label: string;
   public description: string;
-
+  
   public type: Comparison;
   public scope: SCOPE;
-
+  
   protected readonly options: IMeasureOptions;
-
+  
   constructor(options = defaultMeasureOptions()) {
     this.options = options;
-  }
+  }  
 
+  public abstract calc(setA: Array<any>, setB: Array<any>);
 }
 
 /**
  * Also known as the Tanimoto distance metric. 
  */
 @MeasureDecorator()
-export class JaccardSimilarity extends ASimilarityClass implements ISetSimilarityClass {
+export class JaccardSimilarity extends ASimilarityMeasure {
 
   constructor(options?: IMeasureOptions) {
     super(options);
@@ -49,7 +50,7 @@ export class JaccardSimilarity extends ASimilarityClass implements ISetSimilarit
   }
 
 
-  calc(setA: Array<any>, setB: Array<any>) {
+  public calc(setA: Array<any>, setB: Array<any>) {
     const {intersection: intersect, arr1: filteredsetA, arr2: filteredsetB} = intersection(setA, setB);
     const score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
     
@@ -59,7 +60,7 @@ export class JaccardSimilarity extends ASimilarityClass implements ISetSimilarit
 
 
 @MeasureDecorator()
-export class OverlapSimilarity extends ASimilarityClass implements ISetSimilarityClass {
+export class OverlapSimilarity extends ASimilarityMeasure {
 
   constructor(options?: IMeasureOptions) {
     super(options);
@@ -84,7 +85,7 @@ export class OverlapSimilarity extends ASimilarityClass implements ISetSimilarit
 
 
 @MeasureDecorator()
-export class StudentTTest extends ASimilarityClass implements ISetSimilarityClass {
+export class StudentTTest extends ASimilarityMeasure {
 
   constructor(options?: IMeasureOptions) {
     super(options);
@@ -129,7 +130,7 @@ export class StudentTTest extends ASimilarityClass implements ISetSimilarityClas
 
 
 @MeasureDecorator()
-export class WelchTTest extends ASimilarityClass implements ISetSimilarityClass {
+export class WelchTTest extends ASimilarityMeasure {
 
   constructor(options?: IMeasureOptions) {
     super(options);
@@ -150,15 +151,15 @@ export class WelchTTest extends ASimilarityClass implements ISetSimilarityClass 
 }
 
 @MeasureDecorator()
-export class MannWhitneyUTest extends ASimilarityClass implements ISetSimilarityClass {
+export class WilcoxonRankSumTest extends ASimilarityMeasure {
 
   constructor(options?: IMeasureOptions) {
     super(options);
 
     // TODO improve the measure description somehow:
-    this.id = 'mwu_test';
-    this.label = "Mann-Whitney-U-Test";
-    this.description = "Compares two samples of homogenity (non-parametric test)";
+    this.id = 'wilcoxon-rank-sum_test';
+    this.label = "Wilcoxon rank-sum test";
+    this.description = "Compares two samples of homogenity (non-parametric test).";
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.NUMERICAL);
     this.scope = SCOPE.SETS;
@@ -306,5 +307,85 @@ export class MannWhitneyUTest extends ASimilarityClass implements ISetSimilarity
     let score = zValue;
 
     return score ? jStat.jStat.ztest(score, 2) : 0;
+  }
+}
+
+
+/**
+ * MannWhitneyUTest === WilcoxonRankSumTest, therefore this class is just a rename
+ */
+@MeasureDecorator()
+export class MannWhitneyUTest extends WilcoxonRankSumTest {
+
+  constructor(options?: IMeasureOptions) {
+    super(options);
+
+    this.id = 'mwu_test';
+    this.label = "Mann-Whitney U Test";
+  }
+}
+
+
+/**
+ * Also known as the Tanimoto distance metric. 
+ */
+@MeasureDecorator()
+export class AdjustedRandIndex extends ASimilarityMeasure {
+
+  constructor(options?: IMeasureOptions) {
+    super(options);
+
+    // TODO improve the measure description somehow:
+    this.id = "adjrand"
+    this.label = "Adjusted Rand Index"
+    this.description = "blablabla"
+
+    this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
+    this.scope = SCOPE.ATTRIBUTES;
+  }
+
+
+  public async calc(arr1: Array<any>, arr2: Array<any>): Promise<number> {
+    
+    if (arr1.length != arr2.length) {
+      throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
+    }
+    
+    // deduce catgeories from strings, e.g.: ['Cat1', 'Cat3', 'Cat2', 'Cat2', 'Cat1', 'Cat3']
+    const A = [...new Set(arr1)]; // The set removes duplicates, and the conversion to array gives the content an order
+    const B = [...new Set(arr2)];
+    
+    // and build a contingency table:
+    //        A.1   A.2   A.3
+    //  B.1   n11   n12   n13
+    //  B.2   n21   n22   n23
+    //  B.3   n31   n32   n33
+    const table = new Array(B.length).fill([]); // rows
+    table.forEach((row, i) => table[i] = new Array(A.length).fill(0)) // columns
+
+    for (let i of arr1.keys()) { // iterate over indices
+      const Ai = A.indexOf(arr1[i]);
+      const Bi = B.indexOf(arr2[i]);
+      table[Bi][Ai] += 1; // count the co-occurences 
+    }
+
+    // https://web.archive.org/web/20171205003116/https://davetang.org/muse/2017/09/21/adjusted-rand-index/
+    const rowsSums = table.map((row) => row.reduce((sum, curr) => sum += curr)); // reduce each row to the sum
+    const colSums = A.map((cat, i) => table.reduce((sum, curr) => sum += curr[i], 0)); // reduce each all rows to the sum of column i
+
+    //const cellBinomSum = table.reduce((rowsum, row) => rowsum + row.reduce((colsum, col) => colsum += binom2(col), 0), 0);
+    const cellBinomSum = table.reduce((sum, row) => {
+      return sum + row.reduce((colsum, col) => colsum += binom2(col), 0)
+    }, 0); // set accumulator to zero!
+    const rowBinomSum = rowsSums.reduce((sum, curr) => sum += binom2(curr));
+    const colBinomSum = colSums.reduce((sum, curr) => sum += binom2(curr));
+
+    const index = cellBinomSum;
+    const expectedIndex = (rowBinomSum * colBinomSum) / binom2(arr1.length);
+    const maxIndex = 0.5 * (rowBinomSum + colBinomSum);
+
+    // await sleep(5000); //test asynchronous behaviour
+    // calc 
+    return (index - expectedIndex) / (maxIndex - expectedIndex); // async function --> returns promise
   }
 }

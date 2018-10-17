@@ -56,7 +56,7 @@ export enum SCOPE {
   SETS
 }
 
-export type MeasureMap = Map<Comparison, ISimilarityClass[]>;
+export type MeasureMap = Map<Comparison, ISimilarityMeasure[]>;
 
 /**
  * Describes an attribute.
@@ -80,28 +80,24 @@ export interface IGroupDesc {
 /**
  * Base properties for a every similarity measure.
  */
-export interface ISimilarityClass {
+export interface ISimilarityMeasure {
   id: string;
   label: string;
   description?: string;
 
   type: Comparison;
   scope: SCOPE;
+
+  calc: ISimilarityFunc;
 }
 
 /**
- * A function to compare two sets of values
+ * A function to compare two arrays of values
  */
-export interface ISetSimilarityFunc {
+export interface ISimilarityFunc {
   (setA: Array<any>, setB: Array<any>): number;
 }
 
-/**
- * Similarity measures that compares sets.
- */
-export interface ISetSimilarityClass extends ISimilarityClass {
-  calc: ISetSimilarityFunc;
-}
 
 export interface IMeasureOptions {
   /**

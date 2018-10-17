@@ -1,4 +1,4 @@
-
+import {jStat} from 'jStat';
 
 
 // const intersection = selectionSet.filter(item => categorySet.indexOf(item) >= 0); // filter elements not in the second array
@@ -19,4 +19,13 @@ export function intersection(arr1: Array<any>, arr2: Array<any>) {
   });
 
   return {"intersection": intersection, "arr1": filtered1, "arr2": filtered2};
+}
+
+export function binom2(n: number): number {
+  return n*(n-1)/2
+}
+
+/** Helper for async tests */
+export function sleep(millis: number) {
+  return new Promise(resolve => setTimeout(resolve, millis));
 }
