@@ -20,12 +20,22 @@ export class Type {
 export class Comparison {
 
   private static comparisons = new Map<String, Comparison>();
+  public readonly typeA: Type;
+  public readonly typeB: Type;
 
-  constructor(public readonly typeA: Type, public readonly typeB: Type) {}
+  constructor(typeA: Type, typeB: Type) {
+    if (typeA < typeB) {
+      this.typeA = typeA;
+      this.typeB = typeB;
+    } else {
+      this.typeA = typeB;
+      this.typeB = typeA;
+    }
+  }
 
   public toString() {
     // as Comparisons should be equal independent of the order, their string representations should be equal aswell, so the types are always sorted alphabetically
-    return this.typeA <= this.typeB ? `${this.typeA}-${this.typeB}` : `${this.typeB}-${this.typeA}`
+    return `${this.typeA}-${this.typeB}`;
   }
 
 
