@@ -374,11 +374,11 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     const colSums = A.map((cat, i) => table.reduce((sum, curr) => sum += curr[i], 0)); // reduce each all rows to the sum of column i
 
     //const cellBinomSum = table.reduce((rowsum, row) => rowsum + row.reduce((colsum, col) => colsum += binom2(col), 0), 0);
-    const cellBinomSum = table.reduce((sum, row) => {
-      return sum + row.reduce((colsum, col) => colsum += binom2(col), 0)
-    }, 0); // set accumulator to zero!
-    const rowBinomSum = rowsSums.reduce((sum, curr) => sum += binom2(curr));
-    const colBinomSum = colSums.reduce((sum, curr) => sum += binom2(curr));
+    const cellBinomSum = table.reduce((sum, row) => sum + row.reduce((colsum, col) => colsum += binom2(col), 0), 0); // set accumulator to zero!
+
+    //use 0 as initial value, otherwise reduce takes the first element as initial value and the binom coefficient is nt calculated for it!
+    const rowBinomSum = rowsSums.reduce((sum, curr) => sum += binom2(curr), 0); 
+    const colBinomSum = colSums.reduce((sum, curr) => sum += binom2(curr), 0);
 
     const index = cellBinomSum;
     const expectedIndex = (rowBinomSum * colBinomSum) / binom2(arr1.length);
@@ -386,6 +386,12 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
 
     // await sleep(5000); //test asynchronous behaviour
     // calc 
-    return (index - expectedIndex) / (maxIndex - expectedIndex); // async function --> returns promise
+
+    if (0 === (maxIndex - expectedIndex)) {
+      // division by zero --> adj_index = NaN
+      return 1;
+    }
+    const adj_index = (index - expectedIndex) / (maxIndex - expectedIndex);
+    return adj_index; // async function --> returns promise
   }
 }
