@@ -112,8 +112,8 @@ export class StudentTTest extends ASimilarityMeasure {
     const muCategory = d3.mean(setBValid);
     const varCategory = d3.variance(setBValid);
 
-    console.log('Input: ',{set : {setA,setB}, 
-                           ValidSet : {setAValid,setBValid}});
+    // console.log('Input: ',{set : {setA,setB}, 
+    //                        ValidSet : {setAValid,setBValid}});
 
     let scoreP1 = Math.sqrt((nSelection * nCategory * (nSelection + nCategory - 2)) / (nSelection + nCategory));
     let scoreP2 = (muSelection - muCategory) / Math.sqrt((nSelection - 1) * varSelection + (nCategory - 1) * varCategory);
@@ -125,12 +125,13 @@ export class StudentTTest extends ASimilarityMeasure {
       score = 0.000001;
     }
 
-    console.log('Result: ', {selction: {muSelection,varSelection},
-                            category: {muCategory,varCategory},
-                            scores: {scoreP1,scoreP2,score},
-                            intersectSets: {intersect}
-                            });
+    // console.log('Result: ', {selction: {muSelection,varSelection},
+    //                         category: {muCategory,varCategory},
+    //                         scores: {scoreP1,scoreP2,score},
+    //                         intersectSets: {intersect}
+    //                         });
     // console.log('T-Test: ',score, '| df: ',nCategory + nSelection-2);
+    // console.log('-------');
 
     return score ? jStat.jStat.ttest(score, nCategory + nSelection, 2) : 0;
   }
@@ -193,9 +194,9 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
         return returnObj; 
       });
 
-    console.log('Input: ',{set : {setA,setB}, 
-                           ValidSet : {setAValid,setBValid}, 
-                           RankObj: {selectionRankObj,categoryRankObj}});
+    // console.log('Input: ',{set : {setA,setB}, 
+    //                        ValidSet : {setAValid,setBValid}, 
+    //                        RankObj: {selectionRankObj,categoryRankObj}});
 
     //create array with all values and their affiliation
     let collectiveRankSet = selectionRankObj.concat(categoryRankObj);
@@ -260,7 +261,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
       region = false;
     }
     
-    console.log('collectiveRankSet: ',collectiveRankSet);
+    // console.log('collectiveRankSet: ',collectiveRankSet);
 
     // split the rankSet into the two categories and get only the rank property
     let selectionRanks = collectiveRankSet
@@ -292,11 +293,11 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
     // console.log('zValue: ',zValue);
     // console.log('Us + Uc: ',selectionU+categoryU,'| n1*n2: ',nSelection*nCategroy);
 
-    console.log('Results: ',{rankSum: {selectionRankSum,categoryRankSum},
-                             U_statistic: {selectionU,categoryU},
-                             minU: {minU},
-                             z_value: {zValue}});
-    console.log('-------');
+    // console.log('Results: ',{rankSum: {selectionRankSum,categoryRankSum},
+    //                          U_statistic: {selectionU,categoryU},
+    //                          minU: {minU},
+    //                          z_value: {zValue}});
+    // console.log('-------');
 
     if(zValue === 0)
     {
