@@ -92,7 +92,7 @@ export class StudentTTest extends ASimilarityMeasure {
 
     // TODO improve the measure description somehow:
     this.id = 'student_test';
-    this.label = "Student's t-test";
+    this.label = "Student's t-Test";
     this.description = "Compares the means of two samples (assuimg equal variances in their respective normal distributions).";
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.NUMERICAL);
@@ -122,7 +122,7 @@ export class StudentTTest extends ASimilarityMeasure {
       score = 0.000001;
     }
 
-    console.log('T-Test - t-score (own): ',score, '| df: ',nCategory + nSelection-2);
+    // console.log('T-Test: ',score, '| df: ',nCategory + nSelection-2);
 
     return score ? jStat.jStat.ttest(score, nCategory + nSelection, 2) : 0;
   }
@@ -158,7 +158,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
 
     // TODO improve the measure description somehow:
     this.id = 'wilcoxon-rank-sum_test';
-    this.label = "Wilcoxon rank-sum test";
+    this.label = "Wilcoxon Rank-Sum Test";
     this.description = "Compares two samples of homogenity (non-parametric test).";
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.NUMERICAL);
@@ -185,27 +185,38 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
         return returnObj; 
       });
 
+    //create array with all values and their affiliation
     let collectiveRankSet = selectionRankObj.concat(categoryRankObj);
-    //sort the set
+    //sort the set from low to high
     collectiveRankSet.sort((a,b) => { return a.value - b.value;});
 
-    //assing rank 
+    // assing rank 
+    // array for the idecies of the redion with the same values
     let regionRange = [];
+    // flag to indicate a two or more values are equal
     let region = false;
     for(let i=0;i< collectiveRankSet.length; i++)
     {
+      // check if previous and current values are equal  
       if(i>=1 && collectiveRankSet[i-1].value === collectiveRankSet[i].value)
       {
+        // if previous === current
+        // set region flag = ture and save indicies in regionRange array
         region = true;
         regionRange.push(i-1); 
         regionRange.push(i); 
       }
 
+      // check if a region exists (flag = true) and the previous != current values
       if(region && collectiveRankSet[i-1].value !== collectiveRankSet[i].value && regionRange.length > 1)
       {
+        // region = true and previous != current -> region over
+        // remove duplicate idex values
         let uniqueRegionRange = regionRange.filter((v,i) => {return regionRange.indexOf(v) === i;});
+        // calculate rank for the region
         let regionRank = (uniqueRegionRange.reduce((a, b) => a + b, 0) + uniqueRegionRange.length) / uniqueRegionRange.length;
 
+        //cahnge the ranks in the privous items
         for(let r=0;r<uniqueRegionRange.length; r++)
         {
           collectiveRankSet[uniqueRegionRange[r]]['rank'] = regionRank;
@@ -214,15 +225,21 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
         region = false;
       }
 
+      // set rank = index + 1
       collectiveRankSet[i]['rank'] = i+1;
       
     }
 
+    // check if the last values where in a region
     if(region && regionRange.length > 1)
     {
+      // region = true and previous != current -> region over
+      // remove duplicate idex values
       let uniqueRegionRange = regionRange.filter((v,i) => {return regionRange.indexOf(v) === i;});
+      // calculate rank for the region
       let regionRank = (uniqueRegionRange.reduce((a, b) => a + b, 0) + uniqueRegionRange.length) / uniqueRegionRange.length;
 
+      //cahnge the ranks in the privous items
       for(let r=0;r<uniqueRegionRange.length; r++)
       {
         collectiveRankSet[uniqueRegionRange[r]]['rank'] = regionRank;
@@ -230,22 +247,19 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
       regionRange = [];
       region = false;
     }
+    
+    // console.log('collectiveRankSet: ',collectiveRankSet);
 
+    // split the rankSet into the two categories and get only the rank property
+    let selectionRanks = collectiveRankSet
+      .filter((item) => (item.set === 'selection'))
+      .map((a) => {return (a as any).rank;});
 
-    let selectionRanks = [];
-    let categoryRanks = [];
+    let categoryRanks = collectiveRankSet
+      .filter((item) => (item.set === 'category'))
+      .map((a) => {return (a as any).rank;});
 
-    for(let i=0;i< collectiveRankSet.length; i++)
-    { 
-      if(collectiveRankSet[i].set === 'selection')
-      {
-        selectionRanks.push((collectiveRankSet[i] as any).rank);
-      }else
-      {
-        categoryRanks.push((collectiveRankSet[i] as any).rank);
-      }
-    }
-
+    // calculate rank sum for each category
     let nSelection = selectionRanks.length;
     let selectionRankSum = selectionRanks.reduce((a, b) => a + b, 0);
     
@@ -253,52 +267,19 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
     let categoryRankSum = categoryRanks.reduce((a, b) => a + b, 0);    
 
 
-
-    // ----- alternative
-    // let sBeforeC = 0;
-    // let cBeforeS = 0;
-    // let TTselectionRanks = [];
-    // let TTcategoryRanks = [];
-    // for(let i=0;i< collectiveRankSet.length; i++)
-    // {
-    //   if(collectiveRankSet[i].set === 'selection')
-    //   { // selection
-    //     TTcategoryRanks.push(cBeforeS);
-    //     sBeforeC++;
-    //   }else
-    //   { // category
-    //     TTselectionRanks.push(sBeforeC);
-    //     cBeforeS++;
-    //   }
-    // }
-
-
-
-    // console.log('collectiveRankSet: ',collectiveRankSet);
+    
+    // calculate the test statistic U
     let selectionU = nSelection * nCategroy + ( nSelection*(nSelection+1)/2) - selectionRankSum;
     let categoryU = nSelection * nCategroy + ( nCategroy*(nCategroy+1)/2) - categoryRankSum;
 
-    // console.log({TTselectionRanks,TTcategoryRanks});
-    // let selectionUalternative = TTselectionRanks.reduce((a, b) => a + b, 0);
-    // let categoryUalternative = TTcategoryRanks.reduce((a, b) => a + b, 0);
-    
-    // console.log('selectionU: ',selectionU,' | TTselectionRanks-U: ',selectionUalternative);
-    // console.log('categoryU: ',categoryU,' | TTcategoryRanks-U: ',categoryUalternative);
-    // console.log('sBeforeC: ',sBeforeC,' | nSelection: ',nSelection);
-    // console.log('cBeforeS: ',cBeforeS,' | nCategroy: ',nCategroy);
-    // let minUalternative = Math.min(selectionUalternative,categoryUalternative);
-    // let zValuealternative = (minUalternative - (sBeforeC * cBeforeS)/2) / Math.sqrt((sBeforeC * cBeforeS * (sBeforeC + cBeforeS +1))/12);
-    // console.log('zValuealternative: ',zValuealternative);
-    // console.log('UaltS + UaltC: ',selectionUalternative+categoryUalternative,'| sBc*cBs: ',sBeforeC*cBeforeS);
-
-
     let minU = Math.min(selectionU,categoryU);
     
+    // calculate z-value -> for big sample sizes each more than 10 use normal distribution (z-value)
     let zValue = (minU - (nSelection * nCategroy)/2) / Math.sqrt((nSelection * nCategroy * (nSelection + nCategroy +1))/12);
     // console.log('minU: ',minU);
-    console.log('zValue: ',zValue);
-    console.log('Us + Uc: ',selectionU+categoryU,'| n1*n2: ',nSelection*nCategroy);
-    let intersect = intersection(setAValid,setBValid);
+    // console.log('zValue: ',zValue);
+    // console.log('Us + Uc: ',selectionU+categoryU,'| n1*n2: ',nSelection*nCategroy);
+
     if(zValue === 0)
     {
       zValue = 0.000001;
