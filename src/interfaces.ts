@@ -28,6 +28,11 @@ export class Comparison {
     return this.typeA <= this.typeB ? `${this.typeA}-${this.typeB}` : `${this.typeB}-${this.typeA}`
   }
 
+
+  public compares(typeA: Type, typeB: Type) {
+    return this.equals(Comparison.get(typeA, typeB));
+  }
+
   public equals(anotherCmp: Comparison) {
     // NUM-CAT and CAT-NUM should be the same:
     // [A,B] === [A,B]
