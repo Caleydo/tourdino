@@ -110,7 +110,7 @@ export interface ISimilarityMeasure {
  * A function to compare two arrays of values
  */
 export interface ISimilarityFunc {
-  (setA: Array<any>, setB: Array<any>): number;
+  (setA: Array<any>, setB: Array<any>): Promise<number>;
 }
 
 

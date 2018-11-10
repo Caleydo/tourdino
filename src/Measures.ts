@@ -7,7 +7,7 @@ import {jStat} from 'jStat';
 
 export const registeredClasses = new Array<ASimilarityMeasure>();
 export function MeasureDecorator() {
-  return function (target: {new(): ASimilarityMeasure}) { //only instantiable subtypes of ASimilarityClass can be passed.
+  return function (target: {new(): ASimilarityMeasure}) { // only instantiable subtypes of ASimilarityClass can be passed.
     registeredClasses.push(new target()); //TODO apply options
   };
 }
@@ -28,7 +28,7 @@ export abstract class ASimilarityMeasure implements ISimilarityMeasure {
     this.options = options;
   }  
 
-  public abstract calc(setA: Array<any>, setB: Array<any>);
+  public abstract calc(setA: Array<any>, setB: Array<any>): Promise<number>;
 }
 
 /**
@@ -50,7 +50,7 @@ export class JaccardSimilarity extends ASimilarityMeasure {
   }
 
 
-  public calc(setA: Array<any>, setB: Array<any>) {
+  public async calc(setA: Array<any>, setB: Array<any>) {
     const {intersection: intersect, arr1: filteredsetA, arr2: filteredsetB} = intersection(setA, setB);
     const score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
     
@@ -75,7 +75,7 @@ export class OverlapSimilarity extends ASimilarityMeasure {
   }
 
 
-  calc(setA: Array<any>, setB: Array<any>) {
+  public async calc(setA: Array<any>, setB: Array<any>) {
     const {intersection: intersect} = intersection(setA, setB);
     const score = intersect.length /  Math.min(setA.length, setB.length);
 
@@ -100,7 +100,7 @@ export class StudentTTest extends ASimilarityMeasure {
   }
 
 
-  calc(setA: Array<any>, setB: Array<any>) {
+  public async calc(setA: Array<any>, setB: Array<any>) {
     const setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
     const nSelection = setAValid.length;
     const muSelection = d3.mean(setAValid);
@@ -154,7 +154,7 @@ export class WelchTTest extends ASimilarityMeasure {
   }
 
 
-  calc(setA: Array<any>, setB: Array<any>) {
+  public async calc(setA: Array<any>, setB: Array<any>) {
     return 1 - Math.random(); // ]0,1]
   }
 }
@@ -175,7 +175,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
   }
 
 
-  calc(setA: Array<any>, setB: Array<any>) {
+  public async calc(setA: Array<any>, setB: Array<any>) {
     let setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
     let selectionRankObj = setAValid.map((a) => { 
         let returnObj = {
@@ -345,7 +345,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
   }
 
 
-  public async calc(arr1: Array<any>, arr2: Array<any>): Promise<number> {
+  public async calc(arr1: Array<any>, arr2: Array<any>) {
     
     if (arr1.length != arr2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
