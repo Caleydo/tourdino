@@ -7,14 +7,14 @@ export class MethodManager {
   constructor() {} //only work with the static functions
 
   static getSetMethods(a: IAttributeDesc[], b: IAttributeDesc[], type?: Comparison): MeasureMap {
-    return MethodManager.getMeasures(a,b, SCOPE.SETS);
+    return MethodManager.getMeasuresbyData(a,b, SCOPE.SETS);
   }
 
   static getAttributeMethods(a: IAttributeDesc[], b: IAttributeDesc[], type?: Comparison): MeasureMap {
-    return MethodManager.getMeasures(a,b, SCOPE.ATTRIBUTES);
+    return MethodManager.getMeasuresbyData(a,b, SCOPE.ATTRIBUTES);
   }
 
-  private static getMeasures(a: IAttributeDesc[], b: IAttributeDesc[], scope: SCOPE) {
+  private static getMeasuresbyData(a: IAttributeDesc[], b: IAttributeDesc[], scope: SCOPE) {
     if (!a || !b)
       throw new Error("Attribute arrays a & b must be defined.");
 
@@ -26,18 +26,30 @@ export class MethodManager {
 
     for (let aType of aTypes) {
       for (let bType of bTypes) {
-        for (let measure of registeredClasses) {
-          if (measure.scope === scope && measure.type.equals(Comparison.get(aType, bType))) {
-            if (!measures.has(measure.type)) {
-              measures.set(measure.type, new Array<ISimilarityMeasure>()) //init nested set
-            }
-
-            measures.get(measure.type).push(measure); // TODO: consider weights 
-          }
+        const type = Comparison.get(a, b);
+        const typeMeasures = this.getMeasuresByType(aType, bType, scope);
+        if (!measures.has(type)) {
+          measures.set(type, typeMeasures) //init nested set
+        } else {
+          measures.get(type).concat(typeMeasures)
         }
       }
     }
 
     return measures;
   }
+
+  public static getMeasuresByType(a: Type, b: Type, scope: SCOPE) {
+    const measures = new Array<ISimilarityMeasure>();
+    for (let measure of registeredClasses) {
+      if (measure.scope === scope && measure.type.equals(Comparison.get(a, b))) {
+        measures.push(measure); // TODO: consider weights 
+      }
+    }
+
+    return measures;
+  }
 }
+
+
+     
