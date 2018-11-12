@@ -1,4 +1,5 @@
 import {jStat} from 'jStat';
+import { IMeasureResult } from './interfaces';
 
 
 // const intersection = selectionSet.filter(item => categorySet.indexOf(item) >= 0); // filter elements not in the second array
@@ -22,7 +23,12 @@ export function intersection(arr1: Array<any>, arr2: Array<any>) {
 }
 
 export function binom2(n: number): number {
-  return n*(n-1)/2
+  return n*(n-1)/2;
+}
+
+export function measureResultObj(scoreVal: number, pVal: number): IMeasureResult {
+  return {scoreValue: scoreVal,
+          pValue: pVal};
 }
 
 /** Helper for async tests */

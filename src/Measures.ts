@@ -1,6 +1,6 @@
-import {IAttributeDesc, Comparison, SCOPE, ISimilarityMeasure, IMeasureOptions, Type} from './interfaces';
+import {IAttributeDesc, Comparison, SCOPE, ISimilarityMeasure, IMeasureOptions, Type, IMeasureResult} from './interfaces';
 import {defaultMeasureOptions} from './config';
-import {intersection, binom2, sleep} from './util'
+import {intersection, binom2, measureResultObj, sleep} from './util'
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
 
@@ -52,9 +52,10 @@ export class JaccardSimilarity extends ASimilarityMeasure {
 
   public calc(setA: Array<any>, setB: Array<any>) {
     const {intersection: intersect, arr1: filteredsetA, arr2: filteredsetB} = intersection(setA, setB);
-    const score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
-    
-    return score || 0;
+    let score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
+    score = score || 0;
+
+    return measureResultObj(score,0);
   }
 }
 
@@ -77,9 +78,11 @@ export class OverlapSimilarity extends ASimilarityMeasure {
 
   calc(setA: Array<any>, setB: Array<any>) {
     const {intersection: intersect} = intersection(setA, setB);
-    const score = intersect.length /  Math.min(setA.length, setB.length);
+    let score = intersect.length /  Math.min(setA.length, setB.length);
 
-    return score || 0;
+    score = score || 0;
+
+    return measureResultObj(score,0);
   }
 }
 
@@ -118,11 +121,12 @@ export class StudentTTest extends ASimilarityMeasure {
     let scoreP1 = Math.sqrt((nSelection * nCategory * (nSelection + nCategory - 2)) / (nSelection + nCategory));
     let scoreP2 = (muSelection - muCategory) / Math.sqrt((nSelection - 1) * varSelection + (nCategory - 1) * varCategory);
     let score = scoreP1 * scoreP2;
+    let scoreForPCalc = score;
 
     let intersect = intersection(setAValid,setBValid);
     if((intersect.intersection.length === setAValid.length) && (setAValid.length === setBValid.length))
     {
-      score = 0.000001;
+      scoreForPCalc = 0.000001;
     }
 
     // console.log('Result: ', {selction: {muSelection,varSelection},
@@ -133,7 +137,12 @@ export class StudentTTest extends ASimilarityMeasure {
     // console.log('T-Test: ',score, '| df: ',nCategory + nSelection-2);
     // console.log('-------');
 
-    return score ? jStat.jStat.ttest(score, nCategory + nSelection, 2) : 0;
+    let pValue = jStat.jStat.ttest(scoreForPCalc, nCategory + nSelection, 2);
+
+    score = score || 0;
+    pValue = pValue || 0;
+
+    return measureResultObj(score,pValue);
   }
 }
 
@@ -155,7 +164,7 @@ export class WelchTTest extends ASimilarityMeasure {
 
 
   calc(setA: Array<any>, setB: Array<any>) {
-    return 1 - Math.random(); // ]0,1]
+    return measureResultObj(1 - Math.random(),0); // ]0,1]
   }
 }
 
@@ -298,15 +307,19 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
     //                          minU: {minU},
     //                          z_value: {zValue}});
     // console.log('-------');
+    let score = zValue;
 
     if(zValue === 0)
     {
       zValue = 0.000001;
     }
+    
+    let pValue = jStat.jStat.ztest(zValue, 2);
 
-    let score = zValue;
+    score = score || 0;
+    pValue = pValue || 0;
 
-    return score ? jStat.jStat.ztest(score, 2) : 0;
+    return measureResultObj(score,pValue);
   }
 }
 
@@ -345,7 +358,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
   }
 
 
-  public async calc(arr1: Array<any>, arr2: Array<any>): Promise<number> {
+  public async calc(arr1: Array<any>, arr2: Array<any>): Promise<IMeasureResult> {
     
     if (arr1.length != arr2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
@@ -389,9 +402,9 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
 
     if (0 === (maxIndex - expectedIndex)) {
       // division by zero --> adj_index = NaN
-      return 1;
+      return measureResultObj(1,0);
     }
     const adj_index = (index - expectedIndex) / (maxIndex - expectedIndex);
-    return adj_index; // async function --> returns promise
+    return measureResultObj(adj_index,0); // async function --> returns promise
   }
 }
