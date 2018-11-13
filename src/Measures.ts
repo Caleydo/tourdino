@@ -68,7 +68,7 @@ export class OverlapSimilarity extends ASimilarityMeasure {
 
     // TODO improve the measure description somehow:
     this.id = "overlap"
-    this.label = "Overlap coefficient" //Szymkiewicz-Simpson
+    this.label = "Overlap Coefficient" //Szymkiewicz-Simpson
     this.description = "The size of the intersection divided by the size of the smaller set."
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
@@ -351,7 +351,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     // TODO improve the measure description somehow:
     this.id = "adjrand"
     this.label = "Adjusted Rand Index"
-    this.description = "blablabla"
+    this.description = "Is a measure for the similarity between two data sets."
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
     this.scope = SCOPE.ATTRIBUTES;
