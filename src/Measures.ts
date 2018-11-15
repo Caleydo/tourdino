@@ -55,7 +55,7 @@ export class JaccardSimilarity extends ASimilarityMeasure {
     let score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
     score = score || 0;
 
-    return measureResultObj(score,0);
+    return measureResultObj(score, Number.NaN);
   }
 }
 
@@ -82,7 +82,7 @@ export class OverlapSimilarity extends ASimilarityMeasure {
 
     score = score || 0;
 
-    return measureResultObj(score,0);
+    return measureResultObj(score, Number.NaN);
   }
 }
 
@@ -98,7 +98,7 @@ export class StudentTTest extends ASimilarityMeasure {
     this.label = "Student's t-Test";
     this.description = "Compares the means of two samples (assuimg equal variances in their respective normal distributions).";
 
-    this.type = Comparison.get(Type.CATEGORICAL, Type.NUMERICAL);
+    this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
     this.scope = SCOPE.SETS;
   }
 
@@ -179,7 +179,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
     this.label = "Wilcoxon Rank-Sum Test";
     this.description = "Compares two samples of homogenity (non-parametric test).";
 
-    this.type = Comparison.get(Type.CATEGORICAL, Type.NUMERICAL);
+    this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
     this.scope = SCOPE.SETS;
   }
 
@@ -402,9 +402,9 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
 
     if (0 === (maxIndex - expectedIndex)) {
       // division by zero --> adj_index = NaN
-      return measureResultObj(1,0);
+      return measureResultObj(1, Number.NaN);
     }
     const adj_index = (index - expectedIndex) / (maxIndex - expectedIndex);
-    return measureResultObj(adj_index,0); // async function --> returns promise
+    return measureResultObj(adj_index, Number.NaN); // async function --> returns promise
   }
 }
