@@ -4,7 +4,6 @@ import {intersection, binom2, measureResultObj, sleep, binom, getModulo} from '.
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
 import {Big} from 'big.js'; // to calc binomial coefficient
-import {__await} from 'tslib';
 
 
 export const registeredClasses = new Array<ASimilarityMeasure>();
@@ -111,6 +110,7 @@ export class OverlapSimilarity extends ASimilarityMeasure {
 
 
   public async calc(setA: Array<any>, setB: Array<any>) {
+    await sleep(0);
     const {intersection: intersect} = intersection(setA, setB);
     let score = intersect.length /  Math.min(setA.length, setB.length);
 
@@ -138,6 +138,7 @@ export class StudentTTest extends ASimilarityMeasure {
 
 
   public async calc(setA: Array<any>, setB: Array<any>) {
+    await sleep(0);
     const setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
     const nSelection = setAValid.length;
     const muSelection = d3.mean(setAValid);
@@ -219,6 +220,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
 
 
   public async calc(setA: Array<any>, setB: Array<any>) {
+    await sleep(0);
     let setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
     let selectionRankObj = setAValid.map((a) => { 
         let returnObj = {
@@ -393,6 +395,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
 
 
   public async calc(arr1: Array<any>, arr2: Array<any>) {
+    await sleep(0);
     
     if (arr1.length != arr2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
