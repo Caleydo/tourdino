@@ -62,6 +62,15 @@ export function binom(n: number, k:number): Big {
   return binomCoeff;
 }
 
+/**
+ * Get a reasonable value to modulo against.
+ * @param n total number 
+ * @param hits number of times the modulo operator should equal 0
+ */
+export function getModulo(n: number, hits: number): number {
+  return Math.floor(n/hits); // this will happen hits times
+}
+
 export function measureResultObj(scoreVal: number, pVal: number): IMeasureResult {
   return {scoreValue: scoreVal,
           pValue: pVal};
