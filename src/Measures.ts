@@ -1,6 +1,6 @@
 import {IAttributeDesc, Comparison, SCOPE, ISimilarityMeasure, IMeasureOptions, Type, IMeasureResult} from './interfaces';
 import {defaultMeasureOptions} from './config';
-import {intersection, binom2, measureResultObj, sleep} from './util'
+import {intersection, binom2, measureResultObj, sleep, binom} from './util'
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
 
@@ -55,7 +55,20 @@ export class JaccardSimilarity extends ASimilarityMeasure {
     let score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
     score = score || 0;
 
-    return measureResultObj(score, Number.NaN);
+    const p = this.calcP(filteredsetA.length + filteredsetB.length + intersect.length, intersect.length)
+
+    return measureResultObj(score, p);
+  }
+
+
+  calcP(unionSize: number, intersectionSize: number): number {
+    let sum = 0;
+    for (let i = 0; i<= intersectionSize; i++) {
+      const step = binom(unionSize, i) * Math.pow(2, (unionSize-i));
+      sum += step;
+    }
+
+   return 1-sum/Math.pow(3, unionSize);
   }
 }
 
