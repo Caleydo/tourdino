@@ -3,6 +3,8 @@ import {defaultMeasureOptions} from './config';
 import {intersection, binom2, measureResultObj, sleep, binom} from './util'
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
+import {Big} from 'big.js'; // to calc binomial coefficient
+import {__await} from 'tslib';
 
 
 export const registeredClasses = new Array<ASimilarityMeasure>();
@@ -51,6 +53,7 @@ export class JaccardSimilarity extends ASimilarityMeasure {
 
 
   public async calc(setA: Array<any>, setB: Array<any>) {
+    await sleep(0);
     const {intersection: intersect, arr1: filteredsetA, arr2: filteredsetB} = intersection(setA, setB);
     let score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
     score = score || 0;
@@ -62,13 +65,21 @@ export class JaccardSimilarity extends ASimilarityMeasure {
 
 
   calcP(unionSize: number, intersectionSize: number): number {
-    let sum = 0;
+    const two = new Big(2);
+    const three = new Big(3);
+
+    console.time('calcP');
+    
+    let sum = new Big(0);
     for (let i = 0; i<= intersectionSize; i++) {
-      const step = binom(unionSize, i) * Math.pow(2, (unionSize-i));
-      sum += step;
+      const step = binom(unionSize, i).times(two.pow((unionSize-i)));
+      sum = sum.add(step);
     }
 
-   return 1-sum/Math.pow(3, unionSize);
+    
+    console.timeEnd('calcP')
+
+   return 1-Number(sum.div(three.pow(unionSize)).toString()); // convert back to Javascript Number (should be in the range of [0,1])
   }
 }
 
