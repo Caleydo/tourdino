@@ -218,7 +218,6 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
     this.scope = SCOPE.SETS;
   }
 
-
   public async calc(setA: Array<any>, setB: Array<any>) {
     await sleep(0);
     let setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
