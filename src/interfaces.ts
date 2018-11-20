@@ -99,6 +99,7 @@ export interface ISimilarityMeasure {
   id: string;
   label: string;
   description?: string;
+  visualization: IMeasureVisualization;
 
   type: Comparison;
   scope: SCOPE;
@@ -139,4 +140,25 @@ export interface IMeasureResult {
    * p-value of the used measure type 
    */
   pValue: number
+}
+
+export interface IMeasureVisualization {
+  generateVisualization: IGenerateVisualizationFunc;
+}
+
+export interface IFormatDataFunc {
+  (setParameters: ISetParameters);
+}
+
+export interface IGenerateVisualizationFunc {
+  (miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, data: any);
+}
+
+export interface ISetParameters {
+    setA: Array<any>,
+    setADesc: any,
+    setACategory?: any,
+    setB: Array<any>,
+    setBDesc: any,
+    setBCategory?: any
 }

@@ -1,5 +1,5 @@
 import {jStat} from 'jStat';
-import { IMeasureResult } from './interfaces';
+import { IMeasureResult} from './interfaces';
 import {Big} from 'big.js'; // to calc binomial coefficient
 
 // const intersection = selectionSet.filter(item => categorySet.indexOf(item) >= 0); // filter elements not in the second array

@@ -1,5 +1,7 @@
-import {IAttributeDesc, Comparison, SCOPE, ISimilarityMeasure, IMeasureOptions, Type, IMeasureResult} from './interfaces';
+import {IAttributeDesc, Comparison, SCOPE, ISimilarityMeasure, IMeasureOptions, Type, IMeasureResult, IMeasureVisualization} from './interfaces';
 import {defaultMeasureOptions} from './config';
+import {ParallelSets} from './measure_visualization/ParallelSets'
+import {BoxPlot} from './measure_visualization/BoxPlot'
 import {intersection, binom2, measureResultObj, sleep, binom, getModulo} from './util'
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
@@ -19,7 +21,8 @@ export abstract class ASimilarityMeasure implements ISimilarityMeasure {
   public id: string;
   public label: string;
   public description: string;
-  
+  public visualization: IMeasureVisualization;
+
   public type: Comparison;
   public scope: SCOPE;
   
@@ -45,6 +48,7 @@ export class JaccardSimilarity extends ASimilarityMeasure {
     this.id = "jaccard"
     this.label = "Jaccard Index"
     this.description = "The size of the intersection divided by the size of the union of the sample sets."
+    this.visualization = new ParallelSets();
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
     this.scope = SCOPE.SETS;
@@ -103,6 +107,7 @@ export class OverlapSimilarity extends ASimilarityMeasure {
     this.id = "overlap"
     this.label = "Overlap Coefficient" //Szymkiewicz-Simpson
     this.description = "The size of the intersection divided by the size of the smaller set."
+    this.visualization = new ParallelSets();
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
     this.scope = SCOPE.SETS;
@@ -131,6 +136,7 @@ export class StudentTTest extends ASimilarityMeasure {
     this.id = 'student_test';
     this.label = "Student's t-Test";
     this.description = "Compares the means of two samples (assuimg equal variances in their respective normal distributions).";
+    this.visualization = new BoxPlot();
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
     this.scope = SCOPE.SETS;
@@ -213,6 +219,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
     this.id = 'wilcoxon-rank-sum_test';
     this.label = "Wilcoxon Rank-Sum Test";
     this.description = "Compares two samples of homogenity (non-parametric test).";
+    this.visualization = new BoxPlot();
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
     this.scope = SCOPE.SETS;
