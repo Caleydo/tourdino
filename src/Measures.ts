@@ -2,6 +2,7 @@ import {IAttributeDesc, Comparison, SCOPE, ISimilarityMeasure, IMeasureOptions, 
 import {defaultMeasureOptions} from './config';
 import {ParallelSets} from './measure_visualization/ParallelSets'
 import {BoxPlot} from './measure_visualization/BoxPlot'
+import {ScatterPlot} from './measure_visualization/ScatterPlot'
 import {intersection, binom2, measureResultObj, sleep, binom, getModulo} from './util'
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
@@ -395,6 +396,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     this.id = "adjrand"
     this.label = "Adjusted Rand Index"
     this.description = "Is a measure for the similarity between two data sets."
+    this.visualization = new ParallelSets();
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
     this.scope = SCOPE.ATTRIBUTES;
@@ -452,3 +454,130 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     return measureResultObj(adj_index, Number.NaN); // async function --> returns promise
   }
 }
+
+@MeasureDecorator()
+export class SpearmanCorrelation extends ASimilarityMeasure {
+
+  constructor(options?: IMeasureOptions) {
+    super(options);
+
+    // TODO improve the measure description somehow:
+    this.id = "spearmanCor"
+    this.label = "Spearman's Rank Correlation Coefficient"
+    this.description = "The Spearman's rank correlation coefficient is a nonparametic measure for statistical dependence between rankings of two sets. "+
+    "The p-value describes the probability that the Spearmann correlation between the two sets happend by chance, for the null hypothesis of a Spearmann Correlation of 0 (no correlation)."
+    this.visualization = new ScatterPlot();
+
+    this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
+    this.scope = SCOPE.ATTRIBUTES;
+  }
+
+
+  public async calc(set1: Array<any>, set2: Array<any>) {
+    await sleep(0);
+    
+    if (set1.length != set2.length) {
+      throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
+    }
+
+    // calculation: https://www.statisticshowto.datasciencecentral.com/spearman-rank-correlation-definition-calculate/
+    const n = set1.length;
+    
+    // set1
+    const rankSet1 = jStat.jStat.rank(set1);
+    const rankMeanSet1 = d3.mean(rankSet1);
+    const rankVarSet1 = d3.variance(rankSet1);
+    const rankSstdDevSet1 = Math.sqrt(rankVarSet1);
+
+    // set2
+    const rankSet2 = jStat.jStat.rank(set2);
+    const rankMeanSet2 = d3.mean(rankSet2);
+    const rankVarSet2 = d3.variance(rankSet2);
+    const rankStdDevSet2 = Math.sqrt(rankVarSet2);
+
+    let rankDeviation = [];
+    for(let i=0; i<n; i++){
+      let set1Dev = set1[i]-rankMeanSet1;
+      let set2Dev = set2[i]-rankMeanSet2;
+      rankDeviation.push(set1Dev*set2Dev);
+
+    }
+
+    const spearmanCorr = ((1/n)*d3.sum(rankDeviation)) / (rankSstdDevSet1 * rankStdDevSet2);
+
+    const df = n-2;
+    let tValue = (spearmanCorr * Math.sqrt(n-2)) / Math.sqrt(1 - spearmanCorr * spearmanCorr); 
+
+    if(tValue === 0)
+    {
+      tValue = 0.000001;
+    }
+
+
+    let pValue = jStat.jStat.ttest(tValue, n, 2);
+    pValue = pValue || 0;
+
+    return measureResultObj(spearmanCorr,pValue); // async function --> returns promise
+  }
+}
+
+@MeasureDecorator()
+export class PearsonCorrelation extends ASimilarityMeasure {
+
+  constructor(options?: IMeasureOptions) {
+    super(options);
+
+    // TODO improve the measure description somehow:
+    this.id = "pearsonCor"
+    this.label = "Pearson Correlation Coefficient"
+    this.description = "The Pearson correlation coefficient is a measure for the linear correlation between two data sets. "+
+    "The p-value describes the probability that the Pearson correlation between the two sets happend by chance, for the null hypothesis of a Pearson Correlation of 0 (no correlation)."
+    this.visualization = new ScatterPlot();
+
+    this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
+    this.scope = SCOPE.ATTRIBUTES;
+  }
+
+
+  public async calc(set1: Array<any>, set2: Array<any>) {
+    await sleep(0);
+    
+    if (set1.length != set2.length) {
+      throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
+    }
+
+    const n = set1.length;
+    
+    // set1
+    const meanSet1 = d3.mean(set1);
+    const varSet1 = d3.variance(set1);
+    const stdDevSet1 = Math.sqrt(varSet1);
+
+    // set2
+    const meanSet2 = d3.mean(set2);
+    const varSet2 = d3.variance(set2);
+    const stdDevSet2 = Math.sqrt(varSet2);
+
+    let setMulti = [];
+    for(let i=0; i<n; i++){
+      setMulti.push(set1[i]*set2[i]);
+    }
+
+    const pearsonCorr = (d3.sum(setMulti) - n * meanSet1 * meanSet2) / ((n-1) * stdDevSet1 * stdDevSet2); 
+
+    const df = n-2;
+    let tValue = (pearsonCorr * Math.sqrt(n-2)) / Math.sqrt(1 - pearsonCorr * pearsonCorr); 
+
+    if(tValue === 0)
+    {
+      tValue = 0.000001;
+    }
+
+
+    let pValue = jStat.jStat.ttest(tValue, n, 2);
+    pValue = pValue || 0;
+
+    return measureResultObj(pearsonCorr,pValue); // async function --> returns promise
+  }
+}
+

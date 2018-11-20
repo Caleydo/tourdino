@@ -71,10 +71,14 @@ export class BoxPlot implements IMeasureVisualization{
     let formatData = this.formatData(setParameters);
     // console.log('Box Plot - generateVisualization');
 
-    let tooltipParSets = d3.select("body").selectAll("div.boxplot.tooltip").remove();
+    //remove old tooltip
+    d3.select("body").selectAll("div.boxplot.tooltip").remove();
 
-    let tooltipBoxplot = d3.select("body").append("div").style("display", "none").attr("class", "tooltip boxplot");
-    tooltipBoxplot.style("display", "none");
+    let tooltipBoxplot = d3.select("body").append("div")
+                                          // .style("display", "none")
+                                          .style('opacity', 0)
+                                          .attr("class", "tooltip boxplot");
+    
 
     let data = formatData.data;                                            
     let min = Math.min(...data.map((a) => (a[2].min)));
@@ -92,9 +96,10 @@ export class BoxPlot implements IMeasureVisualization{
 
     let calcWidth = Math.max(containerWidth,data.length * 50 + 30);
 
+    let maxHeight = 220;
     let margin = {top: 10, right: 0, bottom: 50, left: 100};
     let  width = calcWidth - margin.left - margin.right;
-    let height = 220 - margin.top - margin.bottom;
+    let height = maxHeight - margin.top - margin.bottom;
 
     let chart = (d3 as any).box()
           .whiskers(function(d) {
@@ -202,7 +207,7 @@ export class BoxPlot implements IMeasureVisualization{
                   // console.log('boxplot.tooltip.d',d)		
                   let m = d3.mouse(d3.select("body").node());
                   tooltipBoxplot.transition()		
-                      .duration(200)		
+                      .duration(500)		
                       .style("opacity", .9);
                   let min = (d[1][0]).toFixed(2);
                   let q1 = (d[1].quartiles[0]).toFixed(2);
@@ -210,14 +215,12 @@ export class BoxPlot implements IMeasureVisualization{
                   let q3 = (d[1].quartiles[2]).toFixed(2);
                   let max = (d[1][d[1].length-1]).toFixed(2);
                   tooltipBoxplot	.html(`min = ${min}</br>q1 = ${q1}</br>median = ${median}</br>q3 = ${q3}</br>max = ${max}`)	
-                      .style("display", null)
                       .style("left", m[0] + 30 + "px")
                       .style("top", m[1] - 20 + "px")	
                 })					
                 .on("mouseout", function(d) {		
                   tooltipBoxplot.transition()		
-                        .duration(500)		
-                        .style("display", 'none')
+                        .duration(500)
                         .style("opacity", 0);	
                 });
 
