@@ -59,8 +59,8 @@ export class BoxPlot implements IMeasureVisualization{
     let rowBoxObj = {
       color: boxColor,
       data: rowBoxData,
-      domainMin: setParameters.setBDesc.domain[0],
-      domainMax: setParameters.setBDesc.domain[1]
+      domainMin: setParameters.setBDesc.domain ? setParameters.setBDesc.domain[0] : Math.min(rowBoxData[0][2].min,rowBoxData[1][2].min),
+      domainMax: setParameters.setBDesc.domain ? setParameters.setBDesc.domain[1] : Math.min(rowBoxData[0][2].max,rowBoxData[1][2].max)
     };
 
     return rowBoxObj;
