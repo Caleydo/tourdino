@@ -465,7 +465,7 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
     this.id = "spearmanCor"
     this.label = "Spearman's Rank Correlation Coefficient"
     this.description = "The Spearman's rank correlation coefficient is a nonparametic measure for statistical dependence between rankings of two sets. "+
-    "The p-value describes the probability that the Spearmann correlation between the two sets happend by chance, for the null hypothesis of a Spearmann Correlation of 0 (no correlation)."
+    "The p-value describes the probability that the Spearmann correlation between the two sets happend by chance, for the null hypothesis of a Spearmann correlation of 0 (no correlation)."
     this.visualization = new ScatterPlot();
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
@@ -503,16 +503,16 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
 
     }
 
+
     const spearmanCorr = ((1/n)*d3.sum(rankDeviation)) / (rankSstdDevSet1 * rankStdDevSet2);
 
+    // calc p-value
     const df = n-2;
     let tValue = (spearmanCorr * Math.sqrt(n-2)) / Math.sqrt(1 - spearmanCorr * spearmanCorr); 
 
-    if(tValue === 0)
-    {
+    if(tValue === 0) {
       tValue = 0.000001;
     }
-
 
     let pValue = jStat.jStat.ttest(tValue, n, 2);
     pValue = pValue || 0;
@@ -531,7 +531,7 @@ export class PearsonCorrelation extends ASimilarityMeasure {
     this.id = "pearsonCor"
     this.label = "Pearson Correlation Coefficient"
     this.description = "The Pearson correlation coefficient is a measure for the linear correlation between two data sets. "+
-    "The p-value describes the probability that the Pearson correlation between the two sets happend by chance, for the null hypothesis of a Pearson Correlation of 0 (no correlation)."
+    "The p-value describes the probability that the Pearson correlation between the two sets happend by chance, for the null hypothesis of a Pearson correlation of 0 (no correlation)."
     this.visualization = new ScatterPlot();
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
@@ -565,14 +565,13 @@ export class PearsonCorrelation extends ASimilarityMeasure {
 
     const pearsonCorr = (d3.sum(setMulti) - n * meanSet1 * meanSet2) / ((n-1) * stdDevSet1 * stdDevSet2); 
 
+    // calc p-value
     const df = n-2;
     let tValue = (pearsonCorr * Math.sqrt(n-2)) / Math.sqrt(1 - pearsonCorr * pearsonCorr); 
 
-    if(tValue === 0)
-    {
+    if(tValue === 0){
       tValue = 0.000001;
     }
-
 
     let pValue = jStat.jStat.ttest(tValue, n, 2);
     pValue = pValue || 0;
