@@ -14,8 +14,12 @@
       "es2017.object"
     ],
     "baseUrl": "../",
+    "declaration": true,
     "noImplicitAny": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
   },
   "include": [
     "src/**/*.ts",
