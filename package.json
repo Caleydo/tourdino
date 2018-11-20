@@ -71,6 +71,7 @@
   "dependencies": {
     "@types/d3": "3.5.36",
     "@types/jquery": "2.0.33",
+    "big.js": "^5.2.2",
     "d3": "3.5.17",
     "jStat": "1.7.1",
     "jquery": "3.1.1"
