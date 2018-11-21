@@ -161,7 +161,7 @@ export interface IFormatDataFunc {
 }
 
 export interface IGenerateVisualizationFunc {
-  (miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, data: any);
+  (miniVisualisation: d3.Selection<any>, setParameters: ISetParameters);
 }
 
 export interface ISetParameters {
