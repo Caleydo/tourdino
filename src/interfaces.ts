@@ -12,6 +12,16 @@ export class Type {
 
   static NUMERICAL = new Type('number');
   static CATEGORICAL = new Type('categorical');
+
+  public static get(type: string): Type {
+    if(type === Type.NUMERICAL.toString()) {
+      return Type.NUMERICAL;
+    } else if (type === Type.CATEGORICAL.toString()) {
+      return Type.CATEGORICAL;
+    } else {
+      throw new Error(`Given type '${type}' does not exist.`);
+    }
+  }
 }
 
 /**
