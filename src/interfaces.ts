@@ -10,8 +10,8 @@ export class Type {
     return this.value;
   }
 
-  static NUMERICAL = new Type("number");
-  static CATEGORICAL = new Type("categorical");
+  static NUMERICAL = new Type('number');
+  static CATEGORICAL = new Type('categorical');
 }
 
 /**
@@ -54,7 +54,7 @@ export class Comparison {
 
   static get(typeA, typeB) {
     const helper = new Comparison(typeA, typeB);
-    const stored = this.comparisons.get(helper.toString())
+    const stored = this.comparisons.get(helper.toString());
     if (stored) {
       return stored;
     } else {
@@ -139,7 +139,7 @@ export interface IMeasureResult {
   /**
    * p-value of the used measure type
    */
-  pValue: number
+  pValue: number;
 }
 
 export interface IMeasureVisualization {
@@ -155,10 +155,10 @@ export interface IGenerateVisualizationFunc {
 }
 
 export interface ISetParameters {
-    setA: Array<any>,
-    setADesc: any,
-    setACategory?: any,
-    setB: Array<any>,
-    setBDesc: any,
-    setBCategory?: any
+    setA: Array<any>;
+    setADesc: any;
+    setACategory?: any;
+    setB: Array<any>;
+    setBDesc: any;
+    setBCategory?: any;
 }
