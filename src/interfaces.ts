@@ -135,9 +135,9 @@ export interface IMeasureResult {
    * Value of the used measure type (e.g. z-value,t-value)
    */
   scoreValue: number;
-  
+
   /**
-   * p-value of the used measure type 
+   * p-value of the used measure type
    */
   pValue: number
 }

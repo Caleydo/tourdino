@@ -18,7 +18,7 @@ export function MeasureDecorator() {
 
 
 export abstract class ASimilarityMeasure implements ISimilarityMeasure {
-  
+
   public id: string;
   public label: string;
   public description: string;
@@ -26,18 +26,18 @@ export abstract class ASimilarityMeasure implements ISimilarityMeasure {
 
   public type: Comparison;
   public scope: SCOPE;
-  
+
   protected readonly options: IMeasureOptions;
-  
+
   constructor(options = defaultMeasureOptions()) {
     this.options = options;
-  }  
+  }
 
   public abstract calc(setA: Array<any>, setB: Array<any>): Promise<IMeasureResult>;
 }
 
 /**
- * Also known as the Tanimoto distance metric. 
+ * Also known as the Tanimoto distance metric.
  */
 @MeasureDecorator()
 export class JaccardSimilarity extends ASimilarityMeasure {
@@ -65,31 +65,31 @@ export class JaccardSimilarity extends ASimilarityMeasure {
     const p = this.calcP(filteredsetA.length + filteredsetB.length + intersect.length, intersect.length)
     return measureResultObj(score, p);
   }
-  
-  
+
+
   calcP(unionSize: number, intersectionSize: number): number {
     const two = new Big(2);
     const three = new Big(3);
 
     // given the curve of the p value, there might be some sophisticated p guessing based on union & intersection size:
     // https://www.wolframalpha.com/input/?i=sum+(57+binom+x)(2%5E(57-x))%2F3%5E57,+x%3D0+to+50
-    
+
    // console.time('calcP');
-    
+
     let sum = new Big(0);
     for (let i = 0; i<= intersectionSize; i++) {
       const step = binom(unionSize, i).times(two.pow((unionSize-i)));
       sum = sum.add(step);
 
-      if(i/intersectionSize > 0.4 && i % getModulo(intersectionSize, 10) === 0) { 
+      if(i/intersectionSize > 0.4 && i % getModulo(intersectionSize, 10) === 0) {
         // Check to exit early
         if (sum.div(three.pow(unionSize)).toFixed(2) === '1.00') {
           break; // exit early, more precision is not needed
         }
       }
     }
-    
-    
+
+
     //console.timeEnd('calcP');
     const p = sum.div(three.pow(unionSize)).toString();
 
@@ -157,7 +157,7 @@ export class StudentTTest extends ASimilarityMeasure {
     const muCategory = d3.mean(setBValid);
     const varCategory = d3.variance(setBValid);
 
-    // console.log('Input: ',{set : {setA,setB}, 
+    // console.log('Input: ',{set : {setA,setB},
     //                        ValidSet : {setAValid,setBValid}});
 
     let scoreP1 = Math.sqrt((nSelection * nCategory * (nSelection + nCategory - 2)) / (nSelection + nCategory));
@@ -230,25 +230,25 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
   public async calc(setA: Array<any>, setB: Array<any>) {
     await sleep(0);
     let setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
-    let selectionRankObj = setAValid.map((a) => { 
+    let selectionRankObj = setAValid.map((a) => {
         let returnObj = {
           set: 'selection',
           value: a
         };
-        return returnObj; 
+        return returnObj;
       });
 
     let setBValid = setB.filter((value) => {return (value !== null && value !== undefined);});
-    let categoryRankObj = setBValid.map((b) => { 
+    let categoryRankObj = setBValid.map((b) => {
         let returnObj = {
           set: 'category',
           value: b
         };
-        return returnObj; 
+        return returnObj;
       });
 
-    // console.log('Input: ',{set : {setA,setB}, 
-    //                        ValidSet : {setAValid,setBValid}, 
+    // console.log('Input: ',{set : {setA,setB},
+    //                        ValidSet : {setAValid,setBValid},
     //                        RankObj: {selectionRankObj,categoryRankObj}});
 
     //create array with all values and their affiliation
@@ -256,21 +256,21 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
     //sort the set from low to high
     collectiveRankSet.sort((a,b) => { return a.value - b.value;});
 
-    // assing rank 
+    // assing rank
     // array for the idecies of the redion with the same values
     let regionRange = [];
     // flag to indicate a two or more values are equal
     let region = false;
     for(let i=0;i< collectiveRankSet.length; i++)
     {
-      // check if previous and current values are equal  
+      // check if previous and current values are equal
       if(i>=1 && collectiveRankSet[i-1].value === collectiveRankSet[i].value)
       {
         // if previous === current
         // set region flag = ture and save indicies in regionRange array
         region = true;
-        regionRange.push(i-1); 
-        regionRange.push(i); 
+        regionRange.push(i-1);
+        regionRange.push(i);
       }
 
       // check if a region exists (flag = true) and the previous != current values
@@ -293,7 +293,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
 
       // set rank = index + 1
       collectiveRankSet[i]['rank'] = i+1;
-      
+
     }
 
     // check if the last values where in a region
@@ -313,7 +313,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
       regionRange = [];
       region = false;
     }
-    
+
     // console.log('collectiveRankSet: ',collectiveRankSet);
 
     // split the rankSet into the two categories and get only the rank property
@@ -328,18 +328,18 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
     // calculate rank sum for each category
     let nSelection = selectionRanks.length;
     let selectionRankSum = selectionRanks.reduce((a, b) => a + b, 0);
-    
-    let nCategroy = categoryRanks.length;
-    let categoryRankSum = categoryRanks.reduce((a, b) => a + b, 0);    
 
-  
-    
+    let nCategroy = categoryRanks.length;
+    let categoryRankSum = categoryRanks.reduce((a, b) => a + b, 0);
+
+
+
     // calculate the test statistic U
     let selectionU = nSelection * nCategroy + ( nSelection*(nSelection+1)/2) - selectionRankSum;
     let categoryU = nSelection * nCategroy + ( nCategroy*(nCategroy+1)/2) - categoryRankSum;
 
     let minU = Math.min(selectionU,categoryU);
-    
+
     // calculate z-value -> for big sample sizes each more than 10 use normal distribution (z-value)
     let zValue = (minU - (nSelection * nCategroy)/2) / Math.sqrt((nSelection * nCategroy * (nSelection + nCategroy +1))/12);
     // console.log('minU: ',minU);
@@ -357,7 +357,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
     {
       zValue = 0.000001;
     }
-    
+
     let pValue = jStat.jStat.ztest(zValue, 2);
 
     score = score || 0;
@@ -384,7 +384,7 @@ export class MannWhitneyUTest extends WilcoxonRankSumTest {
 
 
 /**
- * Also known as the Tanimoto distance metric. 
+ * Also known as the Tanimoto distance metric.
  */
 @MeasureDecorator()
 export class AdjustedRandIndex extends ASimilarityMeasure {
@@ -405,15 +405,15 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
 
   public async calc(arr1: Array<any>, arr2: Array<any>) {
     await sleep(0);
-    
+
     if (arr1.length != arr2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
-    
+
     // deduce catgeories from strings, e.g.: ['Cat1', 'Cat3', 'Cat2', 'Cat2', 'Cat1', 'Cat3']
     const A = [...new Set(arr1)]; // The set removes duplicates, and the conversion to array gives the content an order
     const B = [...new Set(arr2)];
-    
+
     // and build a contingency table:
     //        A.1   A.2   A.3
     //  B.1   n11   n12   n13
@@ -425,7 +425,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     for (let i of arr1.keys()) { // iterate over indices
       const Ai = A.indexOf(arr1[i]);
       const Bi = B.indexOf(arr2[i]);
-      table[Bi][Ai] += 1; // count the co-occurences 
+      table[Bi][Ai] += 1; // count the co-occurences
     }
 
     // https://web.archive.org/web/20171205003116/https://davetang.org/muse/2017/09/21/adjusted-rand-index/
@@ -436,7 +436,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     const cellBinomSum = table.reduce((sum, row) => sum + row.reduce((colsum, col) => colsum += binom2(col), 0), 0); // set accumulator to zero!
 
     //use 0 as initial value, otherwise reduce takes the first element as initial value and the binom coefficient is nt calculated for it!
-    const rowBinomSum = rowsSums.reduce((sum, curr) => sum += binom2(curr), 0); 
+    const rowBinomSum = rowsSums.reduce((sum, curr) => sum += binom2(curr), 0);
     const colBinomSum = colSums.reduce((sum, curr) => sum += binom2(curr), 0);
 
     const index = cellBinomSum;
@@ -444,7 +444,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     const maxIndex = 0.5 * (rowBinomSum + colBinomSum);
 
     // await sleep(5000); //test asynchronous behaviour
-    // calc 
+    // calc
 
     if (0 === (maxIndex - expectedIndex)) {
       // division by zero --> adj_index = NaN
@@ -475,14 +475,14 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
 
   public async calc(set1: Array<any>, set2: Array<any>) {
     await sleep(0);
-    
+
     if (set1.length != set2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
 
     // calculation: https://www.statisticshowto.datasciencecentral.com/spearman-rank-correlation-definition-calculate/
     const n = set1.length;
-    
+
     // set1
     const rankSet1 = jStat.jStat.rank(set1);
     const rankMeanSet1 = d3.mean(rankSet1);
@@ -508,7 +508,7 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
 
     // calc p-value
     const df = n-2;
-    let tValue = (spearmanCorr * Math.sqrt(n-2)) / Math.sqrt(1 - spearmanCorr * spearmanCorr); 
+    let tValue = (spearmanCorr * Math.sqrt(n-2)) / Math.sqrt(1 - spearmanCorr * spearmanCorr);
 
     if(tValue === 0) {
       tValue = 0.000001;
@@ -541,13 +541,13 @@ export class PearsonCorrelation extends ASimilarityMeasure {
 
   public async calc(set1: Array<any>, set2: Array<any>) {
     await sleep(0);
-    
+
     if (set1.length != set2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
 
     const n = set1.length;
-    
+
     // set1
     const meanSet1 = d3.mean(set1);
     const varSet1 = d3.variance(set1);
@@ -563,11 +563,11 @@ export class PearsonCorrelation extends ASimilarityMeasure {
       setMulti.push(set1[i]*set2[i]);
     }
 
-    const pearsonCorr = (d3.sum(setMulti) - n * meanSet1 * meanSet2) / ((n-1) * stdDevSet1 * stdDevSet2); 
+    const pearsonCorr = (d3.sum(setMulti) - n * meanSet1 * meanSet2) / ((n-1) * stdDevSet1 * stdDevSet2);
 
     // calc p-value
     const df = n-2;
-    let tValue = (pearsonCorr * Math.sqrt(n-2)) / Math.sqrt(1 - pearsonCorr * pearsonCorr); 
+    let tValue = (pearsonCorr * Math.sqrt(n-2)) / Math.sqrt(1 - pearsonCorr * pearsonCorr);
 
     if(tValue === 0){
       tValue = 0.000001;
