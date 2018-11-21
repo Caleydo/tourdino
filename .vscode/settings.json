@@ -1,8 +1,10 @@
 {
   "files.exclude": {
-    "/src/**/*.d.ts": true,
-    "/tests/**/*.d.ts": true,
+    "src/**/*.d.ts": true,
     "src/**/*.js": true,
-    "tests/**/*.js": true
+    "src/**/*.js.map": true,
+    "tests/**/*.d.ts": true,
+    "tests/**/*.js": true,
+    "tests/**/*.js.map": true
   }
 }
