@@ -121,18 +121,16 @@ export class ScatterPlot implements IMeasureVisualization{
     svgFigureGroup.selectAll('.dot')
     .data(formatData.dataPoints)
     .enter().append('circle')
-      .attr('class', 'dot')
+      .attr('class', 'datapoint')
       .attr('r', 3.5)
       .attr('cx', xMap)
       .attr('cy', yMap)
-      .style('opacity', 0.2)
-      .style('fill', '#808080') 
       .on('mouseover', function(d) {
                         let m = d3.mouse(d3.select('body').node());
                         tooltipScatterPlot.transition()
                                           .duration(500)
                                           .style('opacity', .9);
-                        tooltipScatterPlot.html('(xValue, yValue)')
+                        tooltipScatterPlot.html(`(${formatData.xLabel}: ${d.x}, ${formatData.yLabel}: ${d.y})`)
                                           .style('left', (m[0] + 5) + 'px')
                                           .style('top', (m[1]- 28) + 'px');
                       })
