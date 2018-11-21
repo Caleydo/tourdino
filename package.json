@@ -73,6 +73,8 @@
     "@types/jquery": "2.0.33",
     "big.js": "^5.2.2",
     "d3": "3.5.17",
+    "d3.parsets": "git+https://github.com/jasondavies/d3-parsets.git#v1.2.4",
+    "d3-grubert-boxplot": "gist:366430a0ac8e6e55ce09b040b5b493a6",
     "jStat": "1.7.1",
     "jquery": "3.1.1"
   },
@@ -83,7 +85,7 @@
   "author": {
     "name": "Klaus Eckelt",
     "email": "Klaus.Eckelt@jku.at",
-    "url": ""
+    "url": "https://www.jku.at/en/institute-of-computer-graphics/about-us/team/klaus-eckelt/"
   },
   "license": "BSD-3-Clause",
   "bugs": {
