@@ -1,5 +1,6 @@
 {
   "main": "build/touring.js",
+  "types": "src/index.d.ts",
   "files": [
     "src",
     "index.js",
