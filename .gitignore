@@ -4,7 +4,9 @@
 /dist/
 node_modules/
 /src/**/*.js
+/src/**/*.d.ts
 /tests/**/*.js
+/tests/**/*.d.ts
 *.map
 *.css
 *.log
