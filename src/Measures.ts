@@ -7,7 +7,21 @@ import {intersection, binom2, measureResultObj, sleep, binom, getModulo} from '.
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
 
+export class Workers {
+  private static workers = new Array<Worker>();
 
+  public static register(worker: Worker) {
+    Workers.workers.push(worker);
+  }
+
+  public static terminateAll() {
+    for (const worker of Workers.workers) {
+      worker.terminate();
+    }
+
+    Workers.workers = new Array<Worker>();
+  }
+}
 export const registeredClasses = new Array<ASimilarityMeasure>();
 export function MeasureDecorator() {
   return function (target: {new(): ASimilarityMeasure}) { // only instantiable subtypes of ASimilarityClass can be passed.
@@ -67,6 +81,7 @@ export class JaccardSimilarity extends ASimilarityMeasure {
   async calcP_Randomize(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<number> {
     const p: Promise<number> = new Promise((resolve, reject) => { 
       const myWorker: Worker = new (<any>require('worker-loader?name=JaccardRandom.js!./Workers/JaccardRandom'));
+      Workers.register(myWorker);
       myWorker.onmessage = event => Number.isNaN(event.data) ? reject() : resolve(event.data);
       myWorker.postMessage({setA: setA, setB: setB, allData: allData});
     });
