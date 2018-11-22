@@ -32,7 +32,7 @@ export abstract class ASimilarityMeasure implements ISimilarityMeasure {
     this.options = options;
   }
 
-  public abstract calc(setA: Array<any>, setB: Array<any>): Promise<IMeasureResult>;
+  public abstract calc(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<IMeasureResult>;
 }
 
 /**
@@ -55,19 +55,35 @@ export class JaccardSimilarity extends ASimilarityMeasure {
   }
 
 
-  public async calc(setA: Array<any>, setB: Array<any>) {
+  public async calc(setA: Array<any>, setB: Array<any>, allData: Array<any>) {
     const {intersection: intersect, arr1: filteredsetA, arr2: filteredsetB} = intersection(setA, setB);
     let score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
     score = score || 0;
 
-    const p = await this.calcP(filteredsetA.length + filteredsetB.length + intersect.length, intersect.length);
+    const p = await this.calcP_Randomize(setA, setB, allData);
     return measureResultObj(score, p);
   }
 
-
-  async calcP(unionSize: number, intersectionSize: number): Promise<number> {
+  async calcP_Randomize(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<number> {
     const p: Promise<number> = new Promise((resolve, reject) => { 
-      const myWorker: Worker = new (<any>require("worker-loader?name=JaccardPermutator.js!./Workers/JaccardPermutator"));
+      const myWorker: Worker = new (<any>require('worker-loader?name=JaccardPermutator.js!./Workers/JaccardRandom'));
+      myWorker.onmessage = event => Number.isNaN(event.data) ? reject() : resolve(event.data);
+      myWorker.postMessage({setA: setA, setB: setB, allData: allData});
+    });
+
+    return p;
+  }
+
+
+  /**
+   * As described by Real & Vargas in "The probabilistic basis of Jaccard's index of similarity" 
+   * @param unionSize 
+   * @param intersectionSize 
+   */
+  //e.g. const p = await this.calcP_RealVargas(filteredsetA.length + filteredsetB.length + intersect.length, intersect.length);
+  async calcP_RealVargas(unionSize: number, intersectionSize: number): Promise<number> {
+    const p: Promise<number> = new Promise((resolve, reject) => { 
+      const myWorker: Worker = new (<any>require('worker-loader?name=JaccardPermutator.js!./Workers/JaccardProbabilistic'));
       myWorker.onmessage = event => Number.isNaN(event.data) ? reject() : resolve(event.data);
       myWorker.postMessage({union: unionSize, intersection: intersectionSize});
     });
