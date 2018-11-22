@@ -68,8 +68,7 @@
     "url-loader": "0.5.8",
     "webpack": "2.3.3",
     "webpack-dev-server": "2.4.2",
-    "worker-loader": "^2.0.0",
-    "workerize-loader": "^1.0.4"
+    "worker-loader": "^2.0.0"
   },
   "dependencies": {
     "@types/d3": "3.5.36",
