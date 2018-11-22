@@ -66,7 +66,7 @@ export class JaccardSimilarity extends ASimilarityMeasure {
 
   async calcP_Randomize(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<number> {
     const p: Promise<number> = new Promise((resolve, reject) => { 
-      const myWorker: Worker = new (<any>require('worker-loader?name=JaccardPermutator.js!./Workers/JaccardRandom'));
+      const myWorker: Worker = new (<any>require('worker-loader?name=JaccardRandom.js!./Workers/JaccardRandom'));
       myWorker.onmessage = event => Number.isNaN(event.data) ? reject() : resolve(event.data);
       myWorker.postMessage({setA: setA, setB: setB, allData: allData});
     });

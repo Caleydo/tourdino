@@ -79,3 +79,42 @@ export function measureResultObj(scoreVal: number, pVal: number): IMeasureResult
 export function sleep(millis: number) {
   return new Promise((resolve) => setTimeout(resolve, millis));
 }
+
+
+/**
+ * Returns a random integer between min (inclusive) and max (inclusive).
+ * The value is no lower than min (or the next integer greater than min
+ * if min isn't an integer) and no greater than max (or the next integer
+ * lower than max if max isn't an integer).
+ * Using Math.round() will give you a non-uniform distribution!
+ * See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+ * See: https://stackoverflow.com/a/1527820/2549748
+ */
+export function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+/**
+ * Returns n unqiue integers between 0 and max
+ * @param n number of integers
+ * @param max maimum integer
+ */
+export function getRandomUniqueIntegers(n, max) {
+  if (n > max+1) {
+    throw new Error(`You requested more unique numbers than can fit between 0 and ${max}. n=${n}`);
+  } else if (n === max+1) {
+    return [...Array(n)].map((_,i) => i); // every integer between 0 and max is needed, so scrap that random stuff
+  }
+
+  const integers = [];
+  while (integers.length < n) {
+    const integer = getRandomInt(0, max);
+    if (integers.indexOf(integer) === -1) {
+      integers.push(integer);
+    }
+  }
+  return integers;
+}
