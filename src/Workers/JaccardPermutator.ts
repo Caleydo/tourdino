@@ -5,12 +5,13 @@ import {binom, getModulo} from '../util';
 const ctx: Worker = self as any;
 
 ctx.onmessage = (event) => {
+  try {
     const intersection = event.data.intersection;
     const union = event.data.union;
     
     const two = new Big(2);
     const three = new Big(3);
-  
+
     // given the curve of the p value, there might be some sophisticated p guessing based on union & intersection size:
     // https://www.wolframalpha.com/input/?i=sum+(57+binom+x)(2%5E(57-x))%2F3%5E57,+x%3D0+to+50
   
@@ -33,4 +34,8 @@ ctx.onmessage = (event) => {
     console.log(`p = 1 - ${p} = ${pNum}`)
 
     ctx.postMessage(pNum);
+  } catch(error) {
+    console.error(`Cannot calculate Jaccard p-value.\tError Type: ${error.name}\tMessage: ${error.message}\nStackTrace: ${error.stack}`);
+    return ctx.postMessage(Number.NaN);
+  }
 }

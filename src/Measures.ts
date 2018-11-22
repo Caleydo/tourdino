@@ -68,7 +68,7 @@ export class JaccardSimilarity extends ASimilarityMeasure {
   async calcP(unionSize: number, intersectionSize: number): Promise<number> {
     const p: Promise<number> = new Promise((resolve, reject) => { 
       const myWorker: Worker = new (<any>require("worker-loader?name=JaccardPermutator.js!./Workers/JaccardPermutator"));
-      myWorker.onmessage = event => resolve(event.data);
+      myWorker.onmessage = event => Number.isNaN(event.data) ? reject() : resolve(event.data);
       myWorker.postMessage({union: unionSize, intersection: intersectionSize});
     });
 
