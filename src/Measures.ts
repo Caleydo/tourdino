@@ -6,7 +6,6 @@ import {ScatterPlot} from './measure_visualization/ScatterPlot';
 import {intersection, binom2, measureResultObj, sleep, binom, getModulo} from './util';
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
-import {Big} from 'big.js'; // to calc binomial coefficient
 
 
 export const registeredClasses = new Array<ASimilarityMeasure>();
@@ -57,43 +56,23 @@ export class JaccardSimilarity extends ASimilarityMeasure {
 
 
   public async calc(setA: Array<any>, setB: Array<any>) {
-    await sleep(0);
     const {intersection: intersect, arr1: filteredsetA, arr2: filteredsetB} = intersection(setA, setB);
     let score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
     score = score || 0;
 
-    const p = this.calcP(filteredsetA.length + filteredsetB.length + intersect.length, intersect.length);
+    const p = await this.calcP(filteredsetA.length + filteredsetB.length + intersect.length, intersect.length);
     return measureResultObj(score, p);
   }
 
 
-  calcP(unionSize: number, intersectionSize: number): number {
-    const two = new Big(2);
-    const three = new Big(3);
+  async calcP(unionSize: number, intersectionSize: number): Promise<number> {
+    const p: Promise<number> = new Promise((resolve, reject) => { 
+      const myWorker: Worker = new (<any>require("worker-loader?name=JaccardPermutator.js!./Workers/JaccardPermutator"));
+      myWorker.onmessage = event => resolve(event.data);
+      myWorker.postMessage({union: unionSize, intersection: intersectionSize});
+    });
 
-    // given the curve of the p value, there might be some sophisticated p guessing based on union & intersection size:
-    // https://www.wolframalpha.com/input/?i=sum+(57+binom+x)(2%5E(57-x))%2F3%5E57,+x%3D0+to+50
-
-   // console.time('calcP');
-
-    let sum = new Big(0);
-    for (let i = 0; i<= intersectionSize; i++) {
-      const step = binom(unionSize, i).times(two.pow((unionSize-i)));
-      sum = sum.add(step);
-
-      if(i/intersectionSize > 0.4 && i % getModulo(intersectionSize, 10) === 0) {
-        // Check to exit early
-        if (sum.div(three.pow(unionSize)).toFixed(2) === '1.00') {
-          break; // exit early, more precision is not needed
-        }
-      }
-    }
-
-
-    //console.timeEnd('calcP');
-    const p = sum.div(three.pow(unionSize)).toString();
-
-    return 1-Number(p); // convert back to Javascript Number (should be in the range of [0,1])
+    return p;
   }
 }
 
