@@ -1,10 +1,12 @@
 import {IAttributeDesc, Type, Comparison, SCOPE, MeasureMap, ISimilarityMeasure} from './interfaces';
-import {registeredClasses} from './Measures'
+import {registeredClasses} from './Measures';
 
 
 export class MethodManager {
 
-  constructor() {} //only work with the static functions
+  constructor() {
+    throw new Error('This class is just a container for the static methods.');
+  } //only work with the static functions
 
   static getSetMethods(a: IAttributeDesc[], b: IAttributeDesc[], type?: Comparison): MeasureMap {
     return MethodManager.getMeasuresbyData(a,b, SCOPE.SETS);
@@ -15,8 +17,9 @@ export class MethodManager {
   }
 
   private static getMeasuresbyData(a: IAttributeDesc[], b: IAttributeDesc[], scope: SCOPE) {
-    if (!a || !b)
-      throw new Error("Attribute arrays a & b must be defined.");
+    if (!a || !b) {
+      throw new Error('Attribute arrays a & b must be defined.');
+    }
 
     const measures = new Map<Comparison, ISimilarityMeasure[]>() as MeasureMap;
 
@@ -24,14 +27,14 @@ export class MethodManager {
     const aTypes = new Set(a.map((measure) => measure.type as Type));
     const bTypes = new Set(b.map((measure) => measure.type as Type));
 
-    for (let aType of aTypes) {
-      for (let bType of bTypes) {
+    for (const aType of aTypes) {
+      for (const bType of bTypes) {
         const type = Comparison.get(a, b);
         const typeMeasures = this.getMeasuresByType(aType, bType, scope);
         if (!measures.has(type)) {
-          measures.set(type, typeMeasures) //init nested set
+          measures.set(type, typeMeasures); //init nested set
         } else {
-          measures.get(type).concat(typeMeasures)
+          measures.get(type).concat(typeMeasures);
         }
       }
     }
@@ -41,9 +44,9 @@ export class MethodManager {
 
   public static getMeasuresByType(a: Type, b: Type, scope: SCOPE) {
     const measures = new Array<ISimilarityMeasure>();
-    for (let measure of registeredClasses) {
+    for (const measure of registeredClasses) {
       if (measure.scope === scope && measure.type.equals(Comparison.get(a, b))) {
-        measures.push(measure); // TODO: consider weights 
+        measures.push(measure); // TODO: consider weights
       }
     }
 
@@ -52,4 +55,3 @@ export class MethodManager {
 }
 
 
-     

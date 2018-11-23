@@ -1,7 +1,6 @@
 import {IMeasureOptions} from './interfaces';
 
 
-
 export function defaultMeasureOptions(): IMeasureOptions {
   return {
     weight: 0,

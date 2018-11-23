@@ -1,15 +1,28 @@
 import {IAttributeDesc, Comparison, SCOPE, ISimilarityMeasure, IMeasureOptions, Type, IMeasureResult, IMeasureVisualization} from './interfaces';
 import {defaultMeasureOptions} from './config';
-import {ParallelSets} from './measure_visualization/ParallelSets'
-import {BoxPlot} from './measure_visualization/BoxPlot'
-import {ScatterPlot} from './measure_visualization/ScatterPlot'
-import {intersection, binom2, measureResultObj, sleep, binom, getModulo} from './util'
+import {ParallelSets} from './measure_visualization/ParallelSets';
+import {BoxPlot} from './measure_visualization/BoxPlot';
+import {ScatterPlot} from './measure_visualization/ScatterPlot';
+import {intersection, binom2, measureResultObj, sleep, binom, getModulo} from './util';
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
-import {Big} from 'big.js'; // to calc binomial coefficient
 import { LineChart } from './measure_visualization/LineChart';
 
+export class Workers {
+  private static workers = new Array<Worker>();
 
+  public static register(worker: Worker) {
+    Workers.workers.push(worker);
+  }
+
+  public static terminateAll() {
+    for (const worker of Workers.workers) {
+      worker.terminate();
+    }
+
+    Workers.workers = new Array<Worker>();
+  }
+}
 export const registeredClasses = new Array<ASimilarityMeasure>();
 export function MeasureDecorator() {
   return function (target: {new(): ASimilarityMeasure}) { // only instantiable subtypes of ASimilarityClass can be passed.
@@ -19,7 +32,7 @@ export function MeasureDecorator() {
 
 
 export abstract class ASimilarityMeasure implements ISimilarityMeasure {
-  
+
   public id: string;
   public label: string;
   public description: string;
@@ -27,18 +40,18 @@ export abstract class ASimilarityMeasure implements ISimilarityMeasure {
 
   public type: Comparison;
   public scope: SCOPE;
-  
+
   protected readonly options: IMeasureOptions;
-  
+
   constructor(options = defaultMeasureOptions()) {
     this.options = options;
-  }  
+  }
 
-  public abstract calc(setA: Array<any>, setB: Array<any>): Promise<IMeasureResult>;
+  public abstract calc(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<IMeasureResult>;
 }
 
 /**
- * Also known as the Tanimoto distance metric. 
+ * Also known as the Tanimoto distance metric.
  */
 @MeasureDecorator()
 export class JaccardSimilarity extends ASimilarityMeasure {
@@ -47,9 +60,9 @@ export class JaccardSimilarity extends ASimilarityMeasure {
     super(options);
 
     // TODO improve the measure description somehow:
-    this.id = "jaccard"
-    this.label = "Jaccard Index"
-    this.description = "The size of the intersection divided by the size of the union of the sample sets."
+    this.id = 'jaccard';
+    this.label = 'Jaccard Index';
+    this.description = 'The size of the intersection divided by the size of the union of the sample sets.';
     this.visualization = new ParallelSets();
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
@@ -57,44 +70,41 @@ export class JaccardSimilarity extends ASimilarityMeasure {
   }
 
 
-  public async calc(setA: Array<any>, setB: Array<any>) {
-    await sleep(0);
+  public async calc(setA: Array<any>, setB: Array<any>, allData: Array<any>) {
     const {intersection: intersect, arr1: filteredsetA, arr2: filteredsetB} = intersection(setA, setB);
     let score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
     score = score || 0;
 
-    const p = this.calcP(filteredsetA.length + filteredsetB.length + intersect.length, intersect.length)
+    const p = await this.calcP_Randomize(setA, setB, allData);
     return measureResultObj(score, p);
   }
-  
-  
-  calcP(unionSize: number, intersectionSize: number): number {
-    const two = new Big(2);
-    const three = new Big(3);
 
-    // given the curve of the p value, there might be some sophisticated p guessing based on union & intersection size:
-    // https://www.wolframalpha.com/input/?i=sum+(57+binom+x)(2%5E(57-x))%2F3%5E57,+x%3D0+to+50
-    
-   // console.time('calcP');
-    
-    let sum = new Big(0);
-    for (let i = 0; i<= intersectionSize; i++) {
-      const step = binom(unionSize, i).times(two.pow((unionSize-i)));
-      sum = sum.add(step);
+  async calcP_Randomize(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<number> {
+    const p: Promise<number> = new Promise((resolve, reject) => { 
+      const myWorker: Worker = new (<any>require('worker-loader?name=JaccardRandom.js!./Workers/JaccardRandom'));
+      Workers.register(myWorker);
+      myWorker.onmessage = event => Number.isNaN(event.data) ? reject() : resolve(event.data);
+      myWorker.postMessage({setA: setA, setB: setB, allData: allData});
+    });
 
-      if(i/intersectionSize > 0.4 && i % getModulo(intersectionSize, 10) === 0) { 
-        // Check to exit early
-        if (sum.div(three.pow(unionSize)).toFixed(2) === '1.00') {
-          break; // exit early, more precision is not needed
-        }
-      }
-    }
-    
-    
-    //console.timeEnd('calcP');
-    const p = sum.div(three.pow(unionSize)).toString();
+    return p;
+  }
 
-    return 1-Number(p); // convert back to Javascript Number (should be in the range of [0,1])
+
+  /**
+   * As described by Real & Vargas in "The probabilistic basis of Jaccard's index of similarity" 
+   * @param unionSize 
+   * @param intersectionSize 
+   */
+  //e.g. const p = await this.calcP_RealVargas(filteredsetA.length + filteredsetB.length + intersect.length, intersect.length);
+  async calcP_RealVargas(unionSize: number, intersectionSize: number): Promise<number> {
+    const p: Promise<number> = new Promise((resolve, reject) => { 
+      const myWorker: Worker = new (<any>require('worker-loader?name=JaccardPermutator.js!./Workers/JaccardProbabilistic'));
+      myWorker.onmessage = event => Number.isNaN(event.data) ? reject() : resolve(event.data);
+      myWorker.postMessage({union: unionSize, intersection: intersectionSize});
+    });
+
+    return p;
   }
 }
 
@@ -106,9 +116,9 @@ export class OverlapSimilarity extends ASimilarityMeasure {
     super(options);
 
     // TODO improve the measure description somehow:
-    this.id = "overlap"
-    this.label = "Overlap Coefficient" //Szymkiewicz-Simpson
-    this.description = "The size of the intersection divided by the size of the smaller set."
+    this.id = 'overlap';
+    this.label = 'Overlap Coefficient'; //Szymkiewicz-Simpson
+    this.description = 'The size of the intersection divided by the size of the smaller set.';
     this.visualization = new ParallelSets();
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
@@ -136,8 +146,8 @@ export class StudentTTest extends ASimilarityMeasure {
 
     // TODO improve the measure description somehow:
     this.id = 'student_test';
-    this.label = "Student's t-Test";
-    this.description = "Compares the means of two samples (assuimg equal variances in their respective normal distributions).";
+    this.label = 'Student\'s t-Test';
+    this.description = 'Compares the means of two samples (assuimg equal variances in their respective normal distributions).';
     this.visualization = new BoxPlot();
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
@@ -158,17 +168,16 @@ export class StudentTTest extends ASimilarityMeasure {
     const muCategory = d3.mean(setBValid);
     const varCategory = d3.variance(setBValid);
 
-    // console.log('Input: ',{set : {setA,setB}, 
+    // console.log('Input: ',{set : {setA,setB},
     //                        ValidSet : {setAValid,setBValid}});
 
-    let scoreP1 = Math.sqrt((nSelection * nCategory * (nSelection + nCategory - 2)) / (nSelection + nCategory));
-    let scoreP2 = (muSelection - muCategory) / Math.sqrt((nSelection - 1) * varSelection + (nCategory - 1) * varCategory);
+    const scoreP1 = Math.sqrt((nSelection * nCategory * (nSelection + nCategory - 2)) / (nSelection + nCategory));
+    const scoreP2 = (muSelection - muCategory) / Math.sqrt((nSelection - 1) * varSelection + (nCategory - 1) * varCategory);
     let score = scoreP1 * scoreP2;
     let scoreForPCalc = score;
 
-    let intersect = intersection(setAValid,setBValid);
-    if((intersect.intersection.length === setAValid.length) && (setAValid.length === setBValid.length))
-    {
+    const intersect = intersection(setAValid,setBValid);
+    if((intersect.intersection.length === setAValid.length) && (setAValid.length === setBValid.length)) {
       scoreForPCalc = 0.000001;
     }
 
@@ -198,8 +207,8 @@ export class StudentTTest extends ASimilarityMeasure {
 
 //     // TODO improve the measure description somehow:
 //     this.id = 'welch_test';
-//     this.label = "Welch's t-test";
-//     this.description = "Compares the means of two samples (normal distributed).";
+//     this.label = 'Welch\'s t-test';
+//     this.description = 'Compares the means of two samples (normal distributed).';
 
 //     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
 //     this.scope = SCOPE.SETS;
@@ -211,6 +220,12 @@ export class StudentTTest extends ASimilarityMeasure {
 //   }
 // }
 
+interface IRankObJ {
+ set: string;
+ value: any;
+ rank?: number;
+}
+
 @MeasureDecorator()
 export class WilcoxonRankSumTest extends ASimilarityMeasure {
 
@@ -219,8 +234,8 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
 
     // TODO improve the measure description somehow:
     this.id = 'wilcoxon-rank-sum_test';
-    this.label = "Wilcoxon Rank-Sum Test";
-    this.description = "Compares two samples of homogenity (non-parametric test).";
+    this.label = 'Wilcoxon Rank-Sum Test';
+    this.description = 'Compares two samples of homogenity (non-parametric test).';
     this.visualization = new BoxPlot();
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
@@ -228,119 +243,112 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
   }
 
 
+
   public async calc(setA: Array<any>, setB: Array<any>) {
     await sleep(0);
-    let setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
-    let selectionRankObj = setAValid.map((a) => { 
-        let returnObj = {
+    const setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
+    const selectionRankObj: IRankObJ[] = setAValid.map((a) => {
+        return {
           set: 'selection',
           value: a
         };
-        return returnObj; 
       });
 
-    let setBValid = setB.filter((value) => {return (value !== null && value !== undefined);});
-    let categoryRankObj = setBValid.map((b) => { 
-        let returnObj = {
+      const setBValid: IRankObJ[] = setB.filter((value) => {return (value !== null && value !== undefined);});
+      const categoryRankObj = setBValid.map((b) => {
+        return {
           set: 'category',
           value: b
         };
-        return returnObj; 
       });
 
-    // console.log('Input: ',{set : {setA,setB}, 
-    //                        ValidSet : {setAValid,setBValid}, 
+    // console.log('Input: ',{set : {setA,setB},
+    //                        ValidSet : {setAValid,setBValid},
     //                        RankObj: {selectionRankObj,categoryRankObj}});
 
     //create array with all values and their affiliation
-    let collectiveRankSet = selectionRankObj.concat(categoryRankObj);
+    const collectiveRankSet = selectionRankObj.concat(categoryRankObj);
     //sort the set from low to high
     collectiveRankSet.sort((a,b) => { return a.value - b.value;});
 
-    // assing rank 
+    // assing rank
     // array for the idecies of the redion with the same values
     let regionRange = [];
     // flag to indicate a two or more values are equal
     let region = false;
-    for(let i=0;i< collectiveRankSet.length; i++)
-    {
-      // check if previous and current values are equal  
-      if(i>=1 && collectiveRankSet[i-1].value === collectiveRankSet[i].value)
-      {
+    for(let i=0;i< collectiveRankSet.length; i++) {
+      // check if previous and current values are equal
+      if(i>=1 && collectiveRankSet[i-1].value === collectiveRankSet[i].value) {
         // if previous === current
         // set region flag = ture and save indicies in regionRange array
         region = true;
-        regionRange.push(i-1); 
-        regionRange.push(i); 
+        regionRange.push(i-1);
+        regionRange.push(i);
       }
 
       // check if a region exists (flag = true) and the previous != current values
-      if(region && collectiveRankSet[i-1].value !== collectiveRankSet[i].value && regionRange.length > 1)
-      {
+      if(region && collectiveRankSet[i-1].value !== collectiveRankSet[i].value && regionRange.length > 1) {
         // region = true and previous != current -> region over
         // remove duplicate idex values
-        let uniqueRegionRange = regionRange.filter((v,i) => {return regionRange.indexOf(v) === i;});
+        const uniqueRegionRange = regionRange.filter((v,i) => {return regionRange.indexOf(v) === i;});
         // calculate rank for the region
-        let regionRank = (uniqueRegionRange.reduce((a, b) => a + b, 0) + uniqueRegionRange.length) / uniqueRegionRange.length;
+        const regionRank = (uniqueRegionRange.reduce((a, b) => a + b, 0) + uniqueRegionRange.length) / uniqueRegionRange.length;
 
         //cahnge the ranks in the privous items
-        for(let r=0;r<uniqueRegionRange.length; r++)
-        {
-          collectiveRankSet[uniqueRegionRange[r]]['rank'] = regionRank;
+        for (const regionRange of uniqueRegionRange) {
+          collectiveRankSet[regionRange].rank = regionRank;
         }
         regionRange = [];
         region = false;
       }
 
       // set rank = index + 1
-      collectiveRankSet[i]['rank'] = i+1;
-      
+      collectiveRankSet[i].rank = i+1;
+
     }
 
     // check if the last values where in a region
-    if(region && regionRange.length > 1)
-    {
+    if(region && regionRange.length > 1) {
       // region = true and previous != current -> region over
       // remove duplicate idex values
-      let uniqueRegionRange = regionRange.filter((v,i) => {return regionRange.indexOf(v) === i;});
+      const uniqueRegionRange = regionRange.filter((v,i) => {return regionRange.indexOf(v) === i;});
       // calculate rank for the region
-      let regionRank = (uniqueRegionRange.reduce((a, b) => a + b, 0) + uniqueRegionRange.length) / uniqueRegionRange.length;
+      const regionRank = (uniqueRegionRange.reduce((a, b) => a + b, 0) + uniqueRegionRange.length) / uniqueRegionRange.length;
 
       //cahnge the ranks in the privous items
-      for(let r=0;r<uniqueRegionRange.length; r++)
-      {
-        collectiveRankSet[uniqueRegionRange[r]]['rank'] = regionRank;
+      for (const regionRange of uniqueRegionRange) {
+        collectiveRankSet[regionRange].rank = regionRank;
       }
       regionRange = [];
       region = false;
     }
-    
+
     // console.log('collectiveRankSet: ',collectiveRankSet);
 
     // split the rankSet into the two categories and get only the rank property
-    let selectionRanks = collectiveRankSet
+    const selectionRanks = collectiveRankSet
       .filter((item) => (item.set === 'selection'))
-      .map((a) => {return (a as any).rank;});
+      .map((a) => {return a.rank;});
 
-    let categoryRanks = collectiveRankSet
+      const categoryRanks = collectiveRankSet
       .filter((item) => (item.set === 'category'))
-      .map((a) => {return (a as any).rank;});
+      .map((a) => {return a.rank;});
 
     // calculate rank sum for each category
-    let nSelection = selectionRanks.length;
-    let selectionRankSum = selectionRanks.reduce((a, b) => a + b, 0);
-    
-    let nCategroy = categoryRanks.length;
-    let categoryRankSum = categoryRanks.reduce((a, b) => a + b, 0);    
+    const nSelection = selectionRanks.length;
+    const selectionRankSum = selectionRanks.reduce((a, b) => a + b, 0);
 
-  
-    
+    const nCategroy = categoryRanks.length;
+    const categoryRankSum = categoryRanks.reduce((a, b) => a + b, 0);
+
+
+
     // calculate the test statistic U
-    let selectionU = nSelection * nCategroy + ( nSelection*(nSelection+1)/2) - selectionRankSum;
-    let categoryU = nSelection * nCategroy + ( nCategroy*(nCategroy+1)/2) - categoryRankSum;
+    const selectionU = nSelection * nCategroy + ( nSelection*(nSelection+1)/2) - selectionRankSum;
+    const categoryU = nSelection * nCategroy + ( nCategroy*(nCategroy+1)/2) - categoryRankSum;
 
-    let minU = Math.min(selectionU,categoryU);
-    
+    const minU = Math.min(selectionU,categoryU);
+
     // calculate z-value -> for big sample sizes each more than 10 use normal distribution (z-value)
     let zValue = (minU - (nSelection * nCategroy)/2) / Math.sqrt((nSelection * nCategroy * (nSelection + nCategroy +1))/12);
     // console.log('minU: ',minU);
@@ -354,11 +362,10 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
     // console.log('-------');
     let score = zValue;
 
-    if(zValue === 0)
-    {
+    if(zValue === 0) {
       zValue = 0.000001;
     }
-    
+
     let pValue = jStat.jStat.ztest(zValue, 2);
 
     score = score || 0;
@@ -379,13 +386,13 @@ export class MannWhitneyUTest extends WilcoxonRankSumTest {
     super(options);
 
     this.id = 'mwu_test';
-    this.label = "Mann-Whitney U Test";
+    this.label = 'Mann-Whitney U Test';
   }
 }
 
 
 /**
- * Also known as the Tanimoto distance metric. 
+ * Also known as the Tanimoto distance metric.
  */
 @MeasureDecorator()
 export class AdjustedRandIndex extends ASimilarityMeasure {
@@ -394,9 +401,9 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     super(options);
 
     // TODO improve the measure description somehow:
-    this.id = "adjrand"
-    this.label = "Adjusted Rand Index"
-    this.description = "Is a measure for the similarity between two data sets."
+    this.id = 'adjrand';
+    this.label = 'Adjusted Rand Index';
+    this.description = 'Is a measure for the similarity between two data sets.';
     this.visualization = new ParallelSets();
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
@@ -406,27 +413,27 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
 
   public async calc(arr1: Array<any>, arr2: Array<any>) {
     await sleep(0);
-    
-    if (arr1.length != arr2.length) {
+
+    if (arr1.length !== arr2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
-    
+
     // deduce catgeories from strings, e.g.: ['Cat1', 'Cat3', 'Cat2', 'Cat2', 'Cat1', 'Cat3']
     const A = [...new Set(arr1)]; // The set removes duplicates, and the conversion to array gives the content an order
     const B = [...new Set(arr2)];
-    
+
     // and build a contingency table:
     //        A.1   A.2   A.3
     //  B.1   n11   n12   n13
     //  B.2   n21   n22   n23
     //  B.3   n31   n32   n33
     const table = new Array(B.length).fill([]); // rows
-    table.forEach((row, i) => table[i] = new Array(A.length).fill(0)) // columns
+    table.forEach((row, i) => table[i] = new Array(A.length).fill(0)); // columns
 
-    for (let i of arr1.keys()) { // iterate over indices
-      const Ai = A.indexOf(arr1[i]);
-      const Bi = B.indexOf(arr2[i]);
-      table[Bi][Ai] += 1; // count the co-occurences 
+    for (const i of arr1.keys()) { // iterate over indices
+      const ai = A.indexOf(arr1[i]);
+      const bi = B.indexOf(arr2[i]);
+      table[bi][ai] += 1; // count the co-occurences
     }
 
     // https://web.archive.org/web/20171205003116/https://davetang.org/muse/2017/09/21/adjusted-rand-index/
@@ -437,7 +444,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     const cellBinomSum = table.reduce((sum, row) => sum + row.reduce((colsum, col) => colsum += binom2(col), 0), 0); // set accumulator to zero!
 
     //use 0 as initial value, otherwise reduce takes the first element as initial value and the binom coefficient is nt calculated for it!
-    const rowBinomSum = rowsSums.reduce((sum, curr) => sum += binom2(curr), 0); 
+    const rowBinomSum = rowsSums.reduce((sum, curr) => sum += binom2(curr), 0);
     const colBinomSum = colSums.reduce((sum, curr) => sum += binom2(curr), 0);
 
     const index = cellBinomSum;
@@ -445,14 +452,14 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     const maxIndex = 0.5 * (rowBinomSum + colBinomSum);
 
     // await sleep(5000); //test asynchronous behaviour
-    // calc 
+    // calc
 
     if (0 === (maxIndex - expectedIndex)) {
       // division by zero --> adj_index = NaN
       return measureResultObj(1, Number.NaN);
     }
-    const adj_index = (index - expectedIndex) / (maxIndex - expectedIndex);
-    return measureResultObj(adj_index, Number.NaN); // async function --> returns promise
+    const adjIndex = (index - expectedIndex) / (maxIndex - expectedIndex);
+    return measureResultObj(adjIndex, Number.NaN); // async function --> returns promise
   }
 }
 
@@ -463,10 +470,10 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
     super(options);
 
     // TODO improve the measure description somehow:
-    this.id = "spearmanCor"
-    this.label = "Spearman's Rank Correlation Coefficient"
-    this.description = "The Spearman's rank correlation coefficient is a nonparametic measure for statistical dependence between rankings of two sets. "+
-    "The p-value describes the probability that the Spearmann correlation between the two sets happend by chance, for the null hypothesis of a Spearmann correlation of 0 (no correlation).";
+    this.id = 'spearmanCor';
+    this.label = 'Spearman\'s Rank Correlation Coefficient';
+    this.description = 'The Spearman\'s rank correlation coefficient is a nonparametic measure for statistical dependence between rankings of two sets. '+
+    'The p-value describes the probability that the Spearmann correlation between the two sets happend by chance, for the null hypothesis of a Spearmann correlation of 0 (no correlation).';
     this.visualization = new ScatterPlot();
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
@@ -476,14 +483,14 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
 
   public async calc(set1: Array<any>, set2: Array<any>) {
     await sleep(0);
-    
-    if (set1.length != set2.length) {
+
+    if (set1.length !== set2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
 
     // calculation: https://www.statisticshowto.datasciencecentral.com/spearman-rank-correlation-definition-calculate/
     const n = set1.length;
-    
+
     // set1
     const rankSet1 = jStat.jStat.rank(set1);
     const rankMeanSet1 = d3.mean(rankSet1);
@@ -496,20 +503,18 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
     const rankVarSet2 = d3.variance(rankSet2);
     const rankStdDevSet2 = Math.sqrt(rankVarSet2);
 
-    let rankDeviation = [];
-    for(let i=0; i<n; i++){
-      let set1Dev = set1[i]-rankMeanSet1;
-      let set2Dev = set2[i]-rankMeanSet2;
+    const rankDeviation = [];
+    for(let i=0; i<n; i++) {
+      const set1Dev = set1[i]-rankMeanSet1;
+      const set2Dev = set2[i]-rankMeanSet2;
       rankDeviation.push(set1Dev*set2Dev);
-
     }
-
 
     const spearmanCorr = ((1/n)*d3.sum(rankDeviation)) / (rankSstdDevSet1 * rankStdDevSet2);
 
     // calc p-value
     const df = n-2;
-    let tValue = (spearmanCorr * Math.sqrt(n-2)) / Math.sqrt(1 - spearmanCorr * spearmanCorr); 
+    let tValue = (spearmanCorr * Math.sqrt(n-2)) / Math.sqrt(1 - spearmanCorr * spearmanCorr);
 
     if(tValue === 0) {
       tValue = 0.000001;
@@ -529,10 +534,10 @@ export class PearsonCorrelation extends ASimilarityMeasure {
     super(options);
 
     // TODO improve the measure description somehow:
-    this.id = "pearsonCor"
-    this.label = "Pearson Correlation Coefficient"
-    this.description = "The Pearson correlation coefficient is a measure for the linear correlation between two data sets. "+
-    "The p-value describes the probability that the Pearson correlation between the two sets happend by chance, for the null hypothesis of a Pearson correlation of 0 (no correlation).";
+    this.id = 'pearsonCor';
+    this.label = 'Pearson Correlation Coefficient';
+    this.description = 'The Pearson correlation coefficient is a measure for the linear correlation between two data sets. '+
+    'The p-value describes the probability that the Pearson correlation between the two sets happend by chance, for the null hypothesis of a Pearson correlation of 0 (no correlation).';
     this.visualization = new ScatterPlot();
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
@@ -542,13 +547,13 @@ export class PearsonCorrelation extends ASimilarityMeasure {
 
   public async calc(set1: Array<any>, set2: Array<any>) {
     await sleep(0);
-    
-    if (set1.length != set2.length) {
+
+    if (set1.length !== set2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
 
     const n = set1.length;
-    
+
     // set1
     const meanSet1 = d3.mean(set1);
     const varSet1 = d3.variance(set1);
@@ -559,18 +564,18 @@ export class PearsonCorrelation extends ASimilarityMeasure {
     const varSet2 = d3.variance(set2);
     const stdDevSet2 = Math.sqrt(varSet2);
 
-    let setMulti = [];
-    for(let i=0; i<n; i++){
+    const setMulti = [];
+    for(let i=0; i<n; i++) {
       setMulti.push(set1[i]*set2[i]);
     }
 
-    const pearsonCorr = (d3.sum(setMulti) - n * meanSet1 * meanSet2) / ((n-1) * stdDevSet1 * stdDevSet2); 
+    const pearsonCorr = (d3.sum(setMulti) - n * meanSet1 * meanSet2) / ((n-1) * stdDevSet1 * stdDevSet2);
 
     // calc p-value
     const df = n-2;
-    let tValue = (pearsonCorr * Math.sqrt(n-2)) / Math.sqrt(1 - pearsonCorr * pearsonCorr); 
+    let tValue = (pearsonCorr * Math.sqrt(n-2)) / Math.sqrt(1 - pearsonCorr * pearsonCorr);
 
-    if(tValue === 0){
+    if(tValue === 0) {
       tValue = 0.000001;
     }
 

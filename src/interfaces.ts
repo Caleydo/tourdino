@@ -10,8 +10,18 @@ export class Type {
     return this.value;
   }
 
-  static NUMERICAL = new Type("number");
-  static CATEGORICAL = new Type("categorical");
+  static NUMERICAL = new Type('number');
+  static CATEGORICAL = new Type('categorical');
+
+  public static get(type: string): Type {
+    if(type === Type.NUMERICAL.toString()) {
+      return Type.NUMERICAL;
+    } else if (type === Type.CATEGORICAL.toString()) {
+      return Type.CATEGORICAL;
+    } else {
+      throw new Error(`Given type '${type}' does not exist.`);
+    }
+  }
 }
 
 /**
@@ -54,7 +64,7 @@ export class Comparison {
 
   static get(typeA, typeB) {
     const helper = new Comparison(typeA, typeB);
-    const stored = this.comparisons.get(helper.toString())
+    const stored = this.comparisons.get(helper.toString());
     if (stored) {
       return stored;
     } else {
@@ -111,7 +121,7 @@ export interface ISimilarityMeasure {
  * A function to compare two arrays of values
  */
 export interface ISimilarityFunc {
-  (setA: Array<any>, setB: Array<any>): Promise<IMeasureResult>;
+  (setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<IMeasureResult>;
 }
 
 
@@ -135,11 +145,11 @@ export interface IMeasureResult {
    * Value of the used measure type (e.g. z-value,t-value)
    */
   scoreValue: number;
-  
+
   /**
-   * p-value of the used measure type 
+   * p-value of the used measure type
    */
-  pValue: number
+  pValue: number;
 }
 
 export interface IMeasureVisualization {
@@ -151,14 +161,14 @@ export interface IFormatDataFunc {
 }
 
 export interface IGenerateVisualizationFunc {
-  (miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, data: any);
+  (miniVisualisation: d3.Selection<any>, setParameters: ISetParameters);
 }
 
 export interface ISetParameters {
-    setA: Array<any>,
-    setADesc: any,
-    setACategory?: any,
-    setB: Array<any>,
-    setBDesc: any,
-    setBCategory?: any
+    setA: Array<any>;
+    setADesc: any;
+    setACategory?: any;
+    setB: Array<any>;
+    setBDesc: any;
+    setBCategory?: any;
 }

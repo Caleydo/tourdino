@@ -1,5 +1,6 @@
 {
   "main": "build/touring.js",
+  "types": "src/index.d.ts",
   "files": [
     "src",
     "index.js",
@@ -36,12 +37,12 @@
     "awesome-typescript-loader": "3.1.2",
     "cache-loader": "1.2.0",
     "css-loader": "0.28.0",
-    "extract-text-webpack-plugin": "2.1.0",
     "extract-loader": "0.1.0",
-    "ifdef-loader": "2.0.0",
+    "extract-text-webpack-plugin": "2.1.0",
     "file-loader": "0.11.1",
     "fork-ts-checker-webpack-plugin": "0.4.1",
     "html-loader": "0.4.5",
+    "ifdef-loader": "2.0.0",
     "imports-loader": "0.7.1",
     "jasmine": "2.5.3",
     "json-loader": "0.5.4",
@@ -66,13 +67,16 @@
     "typescript": "2.7.2",
     "url-loader": "0.5.8",
     "webpack": "2.3.3",
-    "webpack-dev-server": "2.4.2"
+    "webpack-dev-server": "2.4.2",
+    "worker-loader": "^2.0.0"
   },
   "dependencies": {
     "@types/d3": "3.5.36",
     "@types/jquery": "2.0.33",
     "big.js": "^5.2.2",
     "d3": "3.5.17",
+    "d3.parsets": "git+https://github.com/jasondavies/d3-parsets.git#v1.2.4",
+    "d3-grubert-boxplot": "gist:366430a0ac8e6e55ce09b040b5b493a6",
     "jStat": "1.7.1",
     "jquery": "3.1.1"
   },
@@ -83,7 +87,7 @@
   "author": {
     "name": "Klaus Eckelt",
     "email": "Klaus.Eckelt@jku.at",
-    "url": ""
+    "url": "https://www.jku.at/en/institute-of-computer-graphics/about-us/team/klaus-eckelt/"
   },
   "license": "BSD-3-Clause",
   "bugs": {
