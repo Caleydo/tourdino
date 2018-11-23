@@ -14,16 +14,9 @@ export class ScatterPlot implements IMeasureVisualization{
     }
 
     // domains
-    let domainSpace = 0.01; //add sapce to domain so that the data points are not on the axis
-    // let xDomain = setParameters.setADesc.domain;
-    // let yDomain = setParameters.setBDesc.domain;
-
-    // if(!xDomain) {
-      let xDomain = [Math.min(...setParameters.setA),Math.max(...setParameters.setA)];
-    // }
-    // if(!yDomain) {
-      let yDomain = [Math.min(...setParameters.setB),Math.max(...setParameters.setB)];
-    // }
+    let domainSpace = 0.01; //add space to domain so that the data points are not on the axis
+    let xDomain = [Math.min(...setParameters.setA),Math.max(...setParameters.setA)];
+    let yDomain = [Math.min(...setParameters.setB),Math.max(...setParameters.setB)];
 
     // add space to x-domain
     xDomain[0] = xDomain[0]-Math.abs(xDomain[1]*(domainSpace/2));
@@ -40,9 +33,6 @@ export class ScatterPlot implements IMeasureVisualization{
       yDomain: yDomain
     }
 
-    
-
-
     return scatterPlot;
   }
 
@@ -52,13 +42,13 @@ export class ScatterPlot implements IMeasureVisualization{
     console.log('Scatter Plot - generateVisualization', setParameters);
 
     // remove old tooltip
-    d3.select('body').selectAll('div.boxplot.scatterplot').remove();
+    d3.select('body').selectAll('div.measure.tooltip').remove();
 
     // new tooltip
     let tooltipScatterPlot = d3.select('body').append('div')
-                                              // .style('display', 'none')
+                                              .style('display', 'none')
                                               .style('opacity', 0)
-                                              .attr('class', 'tooltip scatterplot');
+                                              .attr('class', 'tooltip measure');
     
 
     // get size of space and calculate scatter plot size
@@ -118,7 +108,7 @@ export class ScatterPlot implements IMeasureVisualization{
                     .text(formatData.yLabel);
 
     // add dots to canvas
-    svgFigureGroup.selectAll('.dot')
+    svgFigureGroup.selectAll('.datapoint')
     .data(formatData.dataPoints)
     .enter().append('circle')
       .attr('class', 'datapoint')
@@ -129,6 +119,7 @@ export class ScatterPlot implements IMeasureVisualization{
                         let m = d3.mouse(d3.select('body').node());
                         tooltipScatterPlot.transition()
                                           .duration(500)
+                                          .style('display','block')
                                           .style('opacity', .9);
                         tooltipScatterPlot.html(`(${formatData.xLabel}: ${d.x}, ${formatData.yLabel}: ${d.y})`)
                                           .style('left', (m[0] + 5) + 'px')
@@ -137,6 +128,7 @@ export class ScatterPlot implements IMeasureVisualization{
       .on('mouseout', function(d) {
                         tooltipScatterPlot.transition()
                                           .duration(500)
+                                          .style('display','none')
                                           .style('opacity', 0);
                       });
 

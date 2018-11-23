@@ -122,6 +122,9 @@ export class ParallelSets implements IMeasureVisualization{
     // draw parallel sets
     svgFigureGroup.datum(parSetData).call(chart);
 
+    // add class to tooltip
+    d3.select("body").selectAll("div.parsets.tooltip").classed('measure',true);
+
     //rotation um 90 von den SVG parallel sets
     //svgFigureGroup.attr('transform','rotate(-90) translate(-'+width+',0)');
 

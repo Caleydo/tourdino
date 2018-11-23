@@ -72,12 +72,12 @@ export class BoxPlot implements IMeasureVisualization{
     // console.log('Box Plot - generateVisualization');
 
     //remove old tooltip
-    d3.select("body").selectAll("div.boxplot.tooltip").remove();
+    d3.select("body").selectAll("div.measure.tooltip").remove();
 
     let tooltipBoxplot = d3.select("body").append("div")
-                                          // .style("display", "none")
+                                          .style("display", "none")
                                           .style('opacity', 0)
-                                          .attr("class", "tooltip boxplot");
+                                          .attr("class", "tooltip measure");
     
 
     let data = formatData.data;                                            
@@ -208,6 +208,7 @@ export class BoxPlot implements IMeasureVisualization{
                   let m = d3.mouse(d3.select("body").node());
                   tooltipBoxplot.transition()		
                       .duration(500)		
+                      .style('display','block')
                       .style("opacity", .9);
                   let min = (d[1][0]).toFixed(2);
                   let q1 = (d[1].quartiles[0]).toFixed(2);
@@ -221,6 +222,7 @@ export class BoxPlot implements IMeasureVisualization{
                 .on("mouseout", function(d) {		
                   tooltipBoxplot.transition()		
                         .duration(500)
+                        .style('display','none')
                         .style("opacity", 0);	
                 });
 
