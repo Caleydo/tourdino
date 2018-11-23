@@ -7,6 +7,7 @@ import {intersection, binom2, measureResultObj, sleep, binom, getModulo} from '.
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
 import {Big} from 'big.js'; // to calc binomial coefficient
+import { LineChart } from './measure_visualization/LineChart';
 
 
 export const registeredClasses = new Array<ASimilarityMeasure>();
@@ -465,7 +466,7 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
     this.id = "spearmanCor"
     this.label = "Spearman's Rank Correlation Coefficient"
     this.description = "The Spearman's rank correlation coefficient is a nonparametic measure for statistical dependence between rankings of two sets. "+
-    "The p-value describes the probability that the Spearmann correlation between the two sets happend by chance, for the null hypothesis of a Spearmann correlation of 0 (no correlation)."
+    "The p-value describes the probability that the Spearmann correlation between the two sets happend by chance, for the null hypothesis of a Spearmann correlation of 0 (no correlation).";
     this.visualization = new ScatterPlot();
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
@@ -531,7 +532,7 @@ export class PearsonCorrelation extends ASimilarityMeasure {
     this.id = "pearsonCor"
     this.label = "Pearson Correlation Coefficient"
     this.description = "The Pearson correlation coefficient is a measure for the linear correlation between two data sets. "+
-    "The p-value describes the probability that the Pearson correlation between the two sets happend by chance, for the null hypothesis of a Pearson correlation of 0 (no correlation)."
+    "The p-value describes the probability that the Pearson correlation between the two sets happend by chance, for the null hypothesis of a Pearson correlation of 0 (no correlation).";
     this.visualization = new ScatterPlot();
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
@@ -577,6 +578,151 @@ export class PearsonCorrelation extends ASimilarityMeasure {
     pValue = pValue || 0;
 
     return measureResultObj(pearsonCorr,pValue); // async function --> returns promise
+  }
+}
+
+@MeasureDecorator()
+export class EnrichmentScore extends ASimilarityMeasure {
+
+  constructor(options?: IMeasureOptions) {
+    super(options);
+
+    // TODO improve the measure description somehow:
+    this.id = "enrichment"
+    this.label = "Enrichment Score"
+    this.description = "The enrichment score determines if a set is differentially expressed in different categories."
+    this.visualization = new LineChart();
+
+    this.type = Comparison.get(Type.NUMERICAL, Type.CATEGORICAL);
+    this.scope = SCOPE.ATTRIBUTES;
+  }
+
+
+  public async calc(set1: Array<any>, set2: Array<any>) {
+    await sleep(0);
+    
+    if (set1.length != set2.length) {
+      throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
+    }
+
+    let numericSet;
+    let categorySet;
+    let categories;
+    // get destinct values
+    const uniqueSet1 = set1.filter((item, index, self) => self.indexOf(item) === index);
+    const uniqueSet2 = set2.filter((item, index, self) => self.indexOf(item) === index);    
+    
+    // define number and category sets
+    if(uniqueSet1.length < uniqueSet2.length)
+    {
+      if(isNaN(Number(set1[0])))
+      { // first element of set 1 is NOT a number 
+        categorySet = set1;
+        categories = uniqueSet1;
+        numericSet = set2;    
+      }else
+      { // first element of set 1 is a number 
+        categorySet = set2;
+        categories = uniqueSet2;
+        numericSet = set1;
+      }
+    }else {
+      if(isNaN(Number(set2[0])))
+      { // first element of set 2 is NOT a number 
+        categorySet = set2;
+        categories = uniqueSet2;
+        numericSet = set1;
+      }else
+      { // first element of set 2 is a number 
+        categorySet = set1;
+        categories = uniqueSet1;
+        numericSet = set2;
+      }
+    }
+
+    // combine both sets
+    let combinedSet = [];
+    for(let i=0; i<set1.length; i++){
+      combinedSet.push({
+        category: categorySet[i],
+        value: numericSet[i]
+      });
+    }
+
+    // sort the combined set
+    combinedSet.sort((a,b) => { return b.value - a.value;});
+    let amountItems = combinedSet.length;
+
+    //define category sets
+    let categoriesDef = [];
+    for(let c=0; c<categories.length; c++)
+    {
+      const currCategory = categories[c];
+      let numCategory = combinedSet.filter((item) => { return item.category === currCategory; }).length;
+      categoriesDef.push({
+        name: currCategory,
+        amount: numCategory
+      })
+    }
+
+    let sumCategories = [];
+    // go through all items
+    for(let i=0; i<combinedSet.length; i++)
+    {
+      //go through all categories
+      for(let c=0; c<categoriesDef.length; c++)
+      {
+        const currCategory = categoriesDef[c].name;
+        const amountCategory = categoriesDef[c].amount;
+        const termPlus = Math.sqrt((amountItems-amountCategory)/amountCategory);
+        const termMinus = Math.sqrt(amountCategory/(amountItems-amountCategory));
+        let currValue;
+
+        // for the first time in the category
+        if(i==0){
+          let temp = {category: currCategory,
+                      values: []};
+          if(combinedSet[i].category === currCategory)
+          {
+            currValue = termPlus;
+          }else {
+            currValue = 0 - termMinus;
+          }
+
+          temp.values.push(currValue)
+          sumCategories.push(temp);
+          
+        }else{
+          const lastValue = sumCategories[c].values[sumCategories[c].values.length-1];
+          if(combinedSet[i].category === currCategory){
+            currValue = lastValue + termPlus;
+            
+          }else {
+            currValue = lastValue - termMinus;
+            
+          }
+
+          sumCategories[c].values.push(currValue);
+        }
+      }
+    }
+    
+    // console.log('sumCategories: ', sumCategories);
+
+    let overallScore = -Infinity;
+
+    for(let i=0; i<sumCategories.length; i++)
+    {
+      const min = Math.min(...sumCategories[i].values);
+      const max = Math.max(...sumCategories[i].values);
+
+      const score = Math.abs(max) > Math.abs(min) ? max : min;
+      sumCategories[i]['enrichmentScore'] = score;
+
+      overallScore = Math.max(score,overallScore);
+    }
+
+    return measureResultObj(overallScore,Number.NaN); // async function --> returns promise
   }
 }
 
