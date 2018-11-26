@@ -66,6 +66,10 @@ export class LineChart implements IMeasureVisualization{
           }else {
             currValue = 0 - termMinus;
           }
+          // extra value so that the line starts and ends with the value 0
+          temp.values.push({y: 0,
+                            x: combinedSet[i].value});
+          //calculated value
           temp.values.push({y: currValue,
                             x: combinedSet[i].value});
           dataLines.push(temp);
@@ -126,7 +130,6 @@ export class LineChart implements IMeasureVisualization{
 
     
     let lineChart = {
-      xValues: combinedSet.map((a) => (a.value)),
       xLabel: xLabel,
       xDomain: xDomain,
       dataLines: dataLines,
@@ -165,7 +168,7 @@ export class LineChart implements IMeasureVisualization{
     // create baseline values
     let baseline = formatData.xDomain.map((item) => { return {x: Number(item),
                                                               y: 0};}) as any;
-    console.log('baseline: ',baseline);
+    
     // x: scales + axis + map function for the data points
     let xScale = d3.scale.linear().range([0, width]);
     let xAxis = d3.svg.axis().scale(xScale).orient('bottom');
@@ -180,7 +183,7 @@ export class LineChart implements IMeasureVisualization{
     let line = d3.svg.line()
                         .x(d => xMap(d))
                         .y(d => yMap(d))
-                        .interpolate("monotone");
+                        .interpolate("basis");
 
     // svg canvas
     let svgCanvas = miniVisualisation.append('svg')
@@ -236,6 +239,7 @@ export class LineChart implements IMeasureVisualization{
                       .attr('class','dataline')
                       .attr('d',d => line(d.values))
                       .style('stroke',(d) => d !== null  ? d.color : null)
+                      .style('fill',(d) => d !== null  ? d.color : null)
                       .on('mouseover', function(d) {
                         let m = d3.mouse(d3.select('body').node());
                         tooltipLineChart.transition()
