@@ -97,7 +97,7 @@ export class BoxPlot implements IMeasureVisualization{
     let calcWidth = Math.max(containerWidth,data.length * 50 + 30);
 
     let maxHeight = 220;
-    let margin = {top: 10, right: 0, bottom: 50, left: 100};
+    let margin = {top: 10, right: 0, bottom: 50, left: 55};
     let  width = calcWidth - margin.left - margin.right;
     let height = maxHeight - margin.top - margin.bottom;
 
@@ -142,6 +142,12 @@ export class BoxPlot implements IMeasureVisualization{
     let yAxis = d3.svg.axis()
       .scale(y)
       .orient("left");
+
+    yAxis.tickFormat((d) => {
+        if(Math.abs(d)<1000){
+          return d;
+        }
+        return d3.format('0.1e')(d); });  
 
     // draw the boxplots	
     svgFigureGroup.selectAll(".boxplot")
