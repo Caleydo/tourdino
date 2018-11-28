@@ -70,6 +70,11 @@ export function getModulo(n: number, hits: number): number {
   return Math.floor(n/hits); // this will happen hits times
 }
 
+/**
+ * Returns a defined object for a measure
+ * @param scoreVal score value for the current measure
+ * @param pVal p-value calculated for the current measure
+ */
 export function measureResultObj(scoreVal: number, pVal: number): IMeasureResult {
   return {scoreValue: scoreVal,
           pValue: pVal};
