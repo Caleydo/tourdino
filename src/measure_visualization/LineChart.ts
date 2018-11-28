@@ -133,7 +133,7 @@ export class LineChart implements IMeasureVisualization{
       xLabel: xLabel,
       xDomain: xDomain,
       dataLines: dataLines,
-      yLabel: 'Enrichment score',
+      yLabel: 'Enrichment Score',
       yDomain: yDomain
     }
 
@@ -161,7 +161,7 @@ export class LineChart implements IMeasureVisualization{
     let containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
 
     let maxHeight = 220;
-    let margin = {top: 10, right: 20, bottom: 20, left: 100};
+    let margin = {top: 10, right: 20, bottom: 20, left: 55};
     let width = containerWidth - margin.left - margin.right;
     let height = maxHeight - margin.top - margin.bottom;
 
@@ -172,11 +172,21 @@ export class LineChart implements IMeasureVisualization{
     // x: scales + axis + map function for the data points
     let xScale = d3.scale.linear().range([0, width]);
     let xAxis = d3.svg.axis().scale(xScale).orient('bottom');
+    xAxis.tickFormat((d) => {
+      if(Math.abs(d)<1000){
+        return d;
+      }
+      return d3.format('0.1e')(d); });
     let xMap = function(d) { return xScale(d.x);};
     
     // y: scale + axis + map function for the data points
     let yScale = d3.scale.linear().range([height, 0]);
     let yAxis = d3.svg.axis().scale(yScale).orient('left');
+    yAxis.tickFormat((d) => {
+      if(Math.abs(d)<1000){
+        return d;
+      }
+      return d3.format('0.1e')(d); });
     let yMap = function(d) { return yScale(d.y);};
 
     // line function
