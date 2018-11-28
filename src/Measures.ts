@@ -610,6 +610,11 @@ export class EnrichmentScore extends ASimilarityMeasure {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
 
+    // const now = new Date();
+    // const id = `${now.getMinutes()}${now.getSeconds()}${now.getMilliseconds()}`;
+    // console.groupCollapsed('enrichment-'+id);
+    // console.time('enrichment-'+id+'-time');
+
     let numericSet;
     let categorySet;
     let categories;
@@ -701,10 +706,10 @@ export class EnrichmentScore extends ASimilarityMeasure {
           const lastValue = sumCategories[c].values[sumCategories[c].values.length-1];
           if(combinedSet[i].category === currCategory){
             currValue = lastValue + termPlus;
-            
+
           }else {
             currValue = lastValue - termMinus;
-            
+
           }
 
           sumCategories[c].values.push(currValue);
@@ -712,9 +717,8 @@ export class EnrichmentScore extends ASimilarityMeasure {
       }
     }
     
-    // console.log('sumCategories: ', sumCategories);
-
-    let overallScore = -Infinity;
+    
+    let overallScore = 0;
 
     for(let i=0; i<sumCategories.length; i++)
     {
@@ -724,10 +728,27 @@ export class EnrichmentScore extends ASimilarityMeasure {
       const score = Math.abs(max) > Math.abs(min) ? max : min;
       sumCategories[i]['enrichmentScore'] = score;
 
-      overallScore = Math.max(score,overallScore);
+      overallScore = Math.abs(score) > Math.abs(overallScore) ? score : overallScore;
     }
+    
+    // console.log('sumCategories: ', sumCategories);
+    // console.timeEnd('enrichment-'+id+'-time');
+    console.groupEnd();
 
-    return measureResultObj(overallScore,Number.NaN); // async function --> returns promise
+    const p = await this.calcP_Permutation(numericSet, categorySet);
+    return measureResultObj(overallScore,p); // async function --> returns promise
+  }
+
+
+  async calcP_Permutation(numericSet: Array<any>, categorySet: Array<any>): Promise<number> {
+    const p: Promise<number> = new Promise((resolve, reject) => { 
+      const myWorker: Worker = new (<any>require('worker-loader?name=EnrichmentScorePermutation.js!./Workers/EnrichmentScorePermutation'));
+      Workers.register(myWorker);
+      myWorker.onmessage = event => Number.isNaN(event.data) ? reject() : resolve(event.data);
+      myWorker.postMessage({setNumber: numericSet, setCategory: categorySet});
+    });
+    // console.log('result: ',p);
+    return p;
   }
 }
 
