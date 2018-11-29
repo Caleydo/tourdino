@@ -482,35 +482,17 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
 
 
   public async calc(set1: Array<any>, set2: Array<any>) {
+    // calculation: https://www.statisticshowto.datasciencecentral.com/spearman-rank-correlation-definition-calculate/
     await sleep(0);
 
     if (set1.length !== set2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
 
-    // calculation: https://www.statisticshowto.datasciencecentral.com/spearman-rank-correlation-definition-calculate/
     const n = set1.length;
 
-    // set1
-    const rankSet1 = jStat.jStat.rank(set1);
-    const rankMeanSet1 = d3.mean(rankSet1);
-    const rankVarSet1 = d3.variance(rankSet1);
-    const rankSstdDevSet1 = Math.sqrt(rankVarSet1);
-
-    // set2
-    const rankSet2 = jStat.jStat.rank(set2);
-    const rankMeanSet2 = d3.mean(rankSet2);
-    const rankVarSet2 = d3.variance(rankSet2);
-    const rankStdDevSet2 = Math.sqrt(rankVarSet2);
-
-    const rankDeviation = [];
-    for(let i=0; i<n; i++) {
-      const set1Dev = set1[i]-rankMeanSet1;
-      const set2Dev = set2[i]-rankMeanSet2;
-      rankDeviation.push(set1Dev*set2Dev);
-    }
-
-    const spearmanCorr = ((1/n)*d3.sum(rankDeviation)) / (rankSstdDevSet1 * rankStdDevSet2);
+    const spearmanCorr = jStat.jStat.spearmancoeff(set1, set2);
+    console.log('spearman rho', spearmanCorr)
 
     // calc p-value
     const df = n-2;
@@ -520,8 +502,10 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
       tValue = 0.000001;
     }
 
+    console.log(tValue, n)
     let pValue = jStat.jStat.ttest(tValue, n, 2);
-    pValue = pValue || 0;
+    console.log('spear p val', pValue)
+    pValue = pValue >= 0 && pValue <= 0 ? pValue : -6;
 
     return measureResultObj(spearmanCorr,pValue); // async function --> returns promise
   }
