@@ -122,7 +122,7 @@ export class ScatterPlot implements IMeasureVisualization{
     .data(formatData.dataPoints)
     .enter().append('circle')
       .attr('class', 'datapoint')
-      .attr('r', 3.5)
+      .attr('r', 2)
       .attr('cx', xMap)
       .attr('cy', yMap)
       .on('mouseover', function(d) {
