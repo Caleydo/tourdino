@@ -17,8 +17,7 @@ ctx.onmessage = (event) => {
 
     const actualScore = calc(setA, setB);
 
-    if (actualScore === 1) 
-    {
+    if (actualScore === 1) {
       ctx.postMessage(0.0); // Jaccard score is maximum, the other random sets can't get a higher score
     } else if (actualScore === 0) {
       ctx.postMessage(1.0); // Jaccard score is minimum, the other random sets can't get a lower score
@@ -32,8 +31,11 @@ ctx.onmessage = (event) => {
         const rndSet = rndIndices.map((index) => allData[index]); //get elments with the random indices
         rndScores[scoreIndex] = calc(rndSet, setB);
       }
+
+      console.log(rndScores)
   
       const p = rndScores.filter((rndScore) => rndScore > actualScore).length/1000.0; //  filter the array so only higher jaccard scores remain, then divide by number of computations. .0 to force floating point division
+      console.log('p', p)
       ctx.postMessage(p);
     }
   } catch(error) {
