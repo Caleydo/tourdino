@@ -1,7 +1,7 @@
 
  import {jStat} from 'jStat';
  import {getRandomInt} from '../util';
- import {Workers} from '../Measures'
+ //import {Workers} from '../Measures'
 
  async function calc(setNumber: Array<any>, setCategory: Array<any>) {
   const categories = setCategory.filter((item, index, self) => self.indexOf(item) === index);
@@ -131,7 +131,7 @@
 async function calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: string, amountCategory: number): Promise<number> {
   const esCategory: Promise<number> = new Promise((resolve, reject) => { 
     const myWorker: Worker = new (<any>require('worker-loader?name=EnrichmentScoreCategory.js!./EnrichmentScoreCategory'));
-    Workers.register(myWorker);
+    //Workers.register(myWorker);
     myWorker.onmessage = event => event.data === null ? reject() : resolve(event.data);
     myWorker.postMessage({setCombined: setCombined, currCategory: currCategory, amountCategory: amountCategory});
   });
