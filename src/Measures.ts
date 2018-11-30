@@ -510,7 +510,6 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
     console.log('spearman rho', spearmanCorr)
 
     // calc p-value
-    const df = n-2;
     let tValue = (spearmanCorr * Math.sqrt(n-2)) / Math.sqrt(1 - spearmanCorr * spearmanCorr);
 
     if(tValue === 0) {
@@ -520,9 +519,9 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
     console.log(tValue, n)
     let pValue = jStat.jStat.ttest(tValue, n, 2);
     console.log('spear p val', pValue)
-    pValue = pValue >= 0 && pValue <= 0 ? pValue : -6;
+    pValue = pValue >= 0 && pValue <= 1 ? pValue : Number.NaN;
 
-    return measureResultObj(spearmanCorr,pValue); // async function --> returns promise
+    return measureResultObj(spearmanCorr, pValue); // async function --> returns promise
   }
 }
 
