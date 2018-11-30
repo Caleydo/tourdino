@@ -1,9 +1,9 @@
 
  import {jStat} from 'jStat';
  import {getRandomInt} from '../util';
- import {Workers} from '../Measures'
 
- async function calc(setNumber: Array<any>, setCategory: Array<any>) {
+// function to calculate enrichment score for one attribute
+function calc(setNumber: Array<any>, setCategory: Array<any>) {
   const categories = setCategory.filter((item, index, self) => self.indexOf(item) === index);
 
   // combine both sets
@@ -19,10 +19,6 @@
   // sort the combined set
   validCombinedSet.sort((a,b) => { return b.value - a.value;});
 
-  let amountItems = validCombinedSet.length;
-
-  // console.log('combinedSet: ',combinedSet);
-  // console.log('validCombinedSet: ',validCombinedSet);
   //define category sets
   let propertyCategories = [];
   for(let c=0; c<categories.length; c++)
@@ -42,101 +38,53 @@
   {
     const currCategory = propertyCategories[i].name;
     const amountCategory = propertyCategories[i].amount;
-    calcEnrichmentScoreCategory(validCombinedSet, currCategory, amountCategory).then((result) => {
-      enrichmentScoreCategories.push(result);
-    });
 
+    enrichmentScoreCategories.push(calcEnrichmentScoreCategory(validCombinedSet, currCategory, amountCategory));
   }
 
-  await Promise.all(enrichmentScoreCategories); //rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
-
-
-  for(let i=0; i<enrichmentScoreCategories.length; i++)
-  {
-    enrichmentScoreCategories[i].values = null;
-  }
-
-  // console.log('enrichmentScoreCategories: ',enrichmentScoreCategories);
-
-
-  // let amountItems = validCombinedSet.length;
-  
-  // //define category sets
-  // let propertyCategories = [];
-  // for(let c=0; c<categories.length; c++)
-  // {
-  //   const currCategory = categories[c];
-  //   let numCategory = validCombinedSet.filter((item) => { return item.category === currCategory; }).length;
-  //   propertyCategories.push({
-  //     name: currCategory,
-  //     amount: numCategory
-  //   })
-  // }
-
-  // let sumCategories = [];
-  // // go through all items
-  // for(let i=0; i<validCombinedSet.length; i++)
-  // {
-  //   //go through all categories
-  //   for(let c=0; c<propertyCategories.length; c++)
-  //   {
-  //     const currCategory = propertyCategories[c].name;
-  //     const amountCategory = propertyCategories[c].amount;
-  //     const termPlus = Math.sqrt((amountItems-amountCategory)/amountCategory);
-  //     const termMinus = Math.sqrt(amountCategory/(amountItems-amountCategory));
-  //     let currValue;
-
-  //     // for the first time in the category
-  //     if(i==0){
-  //       let temp = {category: currCategory,
-  //                   currentValue: 0,
-  //                   min: 0,
-  //                   max: 0};
-  //       if(validCombinedSet[i].category === currCategory)
-  //       {
-  //         currValue = termPlus;
-  //       }else {
-  //         currValue = 0 - termMinus;
-  //       }
-  //       temp.currentValue = currValue;
-  //       temp.min = Math.min(temp.currentValue,temp.min);
-  //       temp.max = Math.max(temp.currentValue,temp.max);
-  //       sumCategories.push(temp);
-        
-  //     }else{
-  //       let currentValue = sumCategories[c].currentValue;
-  //       if(validCombinedSet[i].category === currCategory){
-  //         currentValue = currentValue + termPlus;
-  //       }else {
-  //         currentValue = currentValue - termMinus;
-  //       }
-  //       sumCategories[c].currentValue = currentValue;
-  //       sumCategories[c].min = Math.min(sumCategories[c].currentValue,sumCategories[c].min);
-  //       sumCategories[c].max = Math.max(sumCategories[c].currentValue,sumCategories[c].max);
-  //     }
-  //   }
-  // }
-  
-  // for(let i=0; i<sumCategories.length; i++)
-  // {
-  //   const newScore = Math.abs(sumCategories[i].max) > Math.abs(sumCategories[i].min) ? sumCategories[i].max : sumCategories[i].min;
-  //   sumCategories[i]['enrichmentScore'] = newScore;
-  // }
-
-  // return sumCategories; // async function --> returns promise
   return enrichmentScoreCategories;
 }
 
+// function to calculate enrichment score for one category
+function calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: string, amountCategory: number): {
+  category: string,
+  enrichmentScore: number} {
+  
+  let propertiesCategory = {
+    category: currCategory,
+    values: [],
+    enrichmentScore: 0};
 
-async function calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: string, amountCategory: number): Promise<number> {
-  const esCategory: Promise<number> = new Promise((resolve, reject) => { 
-    const myWorker: Worker = new (<any>require('worker-loader?name=EnrichmentScoreCategory.js!./EnrichmentScoreCategory'));
-    Workers.register(myWorker);
-    myWorker.onmessage = event => event.data === null ? reject() : resolve(event.data);
-    myWorker.postMessage({setCombined: setCombined, currCategory: currCategory, amountCategory: amountCategory});
-  });
-  return esCategory;
+  const amountItems = setCombined.length;
+  const termPlus = Math.sqrt((amountItems-amountCategory)/amountCategory);
+  const termMinus = Math.sqrt(amountCategory/(amountItems-amountCategory));
+  let currValue = 0;
+
+  // go through all items
+  for(let i=0; i<setCombined.length; i++)
+  {
+    if(setCombined[i].category === currCategory)
+    {
+      currValue = currValue + termPlus;
+    }else {
+      currValue = currValue - termMinus;
+    }
+
+    propertiesCategory.values.push(currValue);     
+  }
+  
+
+  const min = Math.min(...propertiesCategory.values);
+  const max = Math.max(...propertiesCategory.values);
+
+  const score = Math.abs(max) > Math.abs(min) ? max : min;
+  propertiesCategory.enrichmentScore = score;
+  delete propertiesCategory.values;
+
+  return propertiesCategory;
 }
+
+
 
 const ctx: Worker = self as any;
 
@@ -147,11 +95,10 @@ ctx.onmessage = function (event) {
     const actualScores: Array<any> = event.data.actualScores
 
     const n = setCategory.length;
-    // const actualScores = calc(setNumber, setCategory);
     const categories = setCategory.filter((item, index, self) => self.indexOf(item) === index);
 
+    // calculate enrichment scores for each category of all the permutations
     const permutations = 1000;
-    // const rndScores = new Array(1000); // array with 1000 entries
     let rndScores = [];
     for (let idx=0; idx<permutations; idx++) {
       // permutate the category set
@@ -162,42 +109,41 @@ ctx.onmessage = function (event) {
         setCategory[i] = setCategory[k]; 
         setCategory[k] = tmp;
       }
-      let tmp = calc(setNumber, setCategory);
-      rndScores.push(tmp);
-      // calc(setNumber, setCategory).then((result) => {
-      //   rndScores.push(result);
-      // });
-    }
+      rndScores.push(calc(setNumber, setCategory));
 
-    // await Promise.all(rndScores);
+    }
     
     let properties = []
     
+    // calculate the p-value for each category
     for(let i=0; i<categories.length; i++)
     {
+      // current category
       let currCategory = categories[i];
+      // get all enrichment score of the current category for all permutations
       let permScoresCategory = rndScores.map((arrItem) => {
         return arrItem.filter((catItem) => (catItem.category === currCategory)).map((item) => (item.enrichmentScore));
       })
+      // get actual enrichment score for current category
       let actualScore = actualScores.filter((item) => (item.category === currCategory)).map((item) => (item.enrichmentScore))[0];
-      let pvalue = permScoresCategory.filter((score) => score > actualScore).length/1000.0;
+      let pvalue = permScoresCategory.filter((score) => Math.abs(score) > Math.abs(actualScore)).length/1000.0;
       let tmp = {
         category: currCategory,
-        permScoresCategory: permScoresCategory,
-        actualScore: actualScore,
+        // permScoresCategory: permScoresCategory,
+        // actualScore: actualScore,
         pvalue: pvalue
       };
 
       properties.push(tmp)
     }
 
-    // console.log('Enrichment Score - Permutation: ', {actualScores,pValues});      
-    const p = Math.max(...properties.map((item) => (item.pvalue)));
-    // ctx.postMessage({properties: properties, rndScores: rndScores})
-    ctx.postMessage(p)
+    // console.log('Enrichment Score - Permutation: ', {actualScores,properties});      
+    // const p = Math.max(...properties.map((item) => (item.pvalue)));
+
+    ctx.postMessage(properties)
   } catch(error) {
     console.error(`Cannot calculate Enrichment Score p-value.\tError Type: ${error.name}\tMessage: ${error.message}\nStackTrace: ${error.stack}`);
-    return ctx.postMessage(Number.NaN);
+    return ctx.postMessage(null);
   }
 
   self.close(); //Close worker as I only use it once
