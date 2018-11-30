@@ -31,23 +31,27 @@ export class LineChart implements IMeasureVisualization{
         value: numericSet[i]
       });
     }
-    let amountItems = combinedSet.length;
+
+    let validCombinedSet = combinedSet.filter((item) => { return (item.value !== undefined) && (item.value !== null) && (!Number.isNaN(item.value)); });
+    // sort the combined set
+    validCombinedSet.sort((a,b) => { return b.value - a.value;});
+    let amountItems = validCombinedSet.length;
 
     //define category sets
     for(let c=0; c<categories.length; c++)
     {
       const currCategory = categories[c].name;
-      let numCategory = combinedSet.filter((item) => { return item.category === currCategory; }).length;
+      let numCategory = validCombinedSet.filter((item) => { return item.category === currCategory; }).length;
       categories[c]['amount'] = numCategory;
     }
 
     // sort the combined set
-    combinedSet.sort((a,b) => { return b.value - a.value;});
-    // console.log('combineSet: ', combinedSet);
+    validCombinedSet.sort((a,b) => { return b.value - a.value;});
+    // console.log('combineSet: ', validCombinedSet);
 
     let dataLines = [];
     //
-    for(let i=0; i<combinedSet.length; i++)
+    for(let i=0; i<validCombinedSet.length; i++)
     {
       for(let c=0; c<categories.length; c++)
       {
@@ -61,30 +65,30 @@ export class LineChart implements IMeasureVisualization{
                       color: categories[c].color,
                       values: []};
           let currValue;
-          if(combinedSet[i].category === currCategory){
+          if(validCombinedSet[i].category === currCategory){
             currValue = termPlus;
           }else {
             currValue = 0 - termMinus;
           }
           // extra value so that the line starts and ends with the value 0
           temp.values.push({y: 0,
-                            x: combinedSet[i].value});
+                            x: validCombinedSet[i].value});
           //calculated value
           temp.values.push({y: currValue,
-                            x: combinedSet[i].value});
+                            x: validCombinedSet[i].value});
           dataLines.push(temp);
           
         }else{
           const lastValue = dataLines[c].values[dataLines[c].values.length-1].y;
           let currValue;
-          if(combinedSet[i].category === currCategory){
+          if(validCombinedSet[i].category === currCategory){
             currValue = lastValue + termPlus;
           }else {
             currValue = lastValue - termMinus;
           }
 
           dataLines[c].values.push({y: currValue,
-                                    x: combinedSet[i].value});
+                                    x: validCombinedSet[i].value});
         }
       }
     }

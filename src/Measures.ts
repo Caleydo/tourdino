@@ -491,9 +491,30 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
 
-    const n = set1.length;
+    let points = [];
+    for(let i=0; i<set1.length; i++) {
+      points.push({x: set1[i],
+                   y: set2[i]})
+    }
 
-    const spearmanCorr = jStat.jStat.spearmancoeff(set1, set2);
+    let validPoints = points.filter((item) => { 
+      let valid = true;
+      // x
+      if((item.x === undefined) || (item.x === null) || (Number.isNaN(item.x))){
+        valid = false;
+      }
+
+      // y
+      if((item.y === undefined) || (item.y === null) || (Number.isNaN(item.y))){
+        valid = false;
+      }
+      return valid; 
+    });
+
+    const n = validPoints.length;
+
+    // http://jstat.github.io/all.html#corrcoeff
+    const spearmanCorr = jStat.jStat.spearmancoeff(validPoints.map(item => item.x), validPoints.map(item => item.y));
     console.log('spearman rho', spearmanCorr)
 
     // calc p-value
@@ -536,28 +557,36 @@ export class PearsonCorrelation extends ASimilarityMeasure {
     if (set1.length !== set2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
-
-    const n = set1.length;
-
-    // set1
-    const meanSet1 = d3.mean(set1);
-    const varSet1 = d3.variance(set1);
-    const stdDevSet1 = Math.sqrt(varSet1);
-
-    // set2
-    const meanSet2 = d3.mean(set2);
-    const varSet2 = d3.variance(set2);
-    const stdDevSet2 = Math.sqrt(varSet2);
-
-    const setMulti = [];
-    for(let i=0; i<n; i++) {
-      setMulti.push(set1[i]*set2[i]);
+    let points = [];
+    for(let i=0; i<set1.length; i++) {
+      points.push({x: set1[i],
+                   y: set2[i]})
     }
 
-    const pearsonCorr = (d3.sum(setMulti) - n * meanSet1 * meanSet2) / ((n-1) * stdDevSet1 * stdDevSet2);
+    let validPoints = points.filter((item) => { 
+      let valid = true;
+      // x
+      if((item.x === undefined) || (item.x === null) || (Number.isNaN(item.x))){
+        valid = false;
+      }
+
+      // y
+      if((item.y === undefined) || (item.y === null) || (Number.isNaN(item.y))){
+        valid = false;
+      }
+      return valid; 
+    });
+
+    const n = validPoints.length;
+
+    // http://jstat.github.io/all.html#corrcoeff
+    let seqX = jStat.jStat.seq(validPoints.map(item => item.x));
+    let seqY = jStat.jStat.seq(validPoints.map(item => item.y));
+
+    const pearsonCorr = jStat.jStat.corrcoeff(seqX,seqY);
+
 
     // calc p-value
-    const df = n-2;
     let tValue = (pearsonCorr * Math.sqrt(n-2)) / Math.sqrt(1 - pearsonCorr * pearsonCorr);
 
     if(tValue === 0) {
@@ -595,8 +624,8 @@ export class EnrichmentScore extends ASimilarityMeasure {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
 
-    const now = new Date();
-    const id = `${now.getMinutes()}${now.getSeconds()}${now.getMilliseconds()}`;
+    // const now = new Date();
+    // const id = `${now.getMinutes()}${now.getSeconds()}${now.getMilliseconds()}`;
     // console.groupCollapsed('enrichment-'+id);
     // console.time('enrichment-'+id+'-time');
 
@@ -647,7 +676,6 @@ export class EnrichmentScore extends ASimilarityMeasure {
     let validCombinedSet = combinedSet.filter((item) => { return (item.value !== undefined) && (item.value !== null) && (!Number.isNaN(item.value)); });
     // sort the combined set
     validCombinedSet.sort((a,b) => { return b.value - a.value;});
-    let amountItems = validCombinedSet.length;
 
     // console.log('combinedSet: ',combinedSet);
     // console.log('validCombinedSet: ',validCombinedSet);
@@ -684,62 +712,6 @@ export class EnrichmentScore extends ASimilarityMeasure {
 
     console.log('enrichmentScoreCategories: ',enrichmentScoreCategories);
     console.log('overallScore: ',overallScore);
-
-    // let sumCategories = [];
-    // go through all items
-    // for(let i=0; i<combinedSet.length; i++)
-    // {
-    //   //go through all categories
-    //   for(let c=0; c<categoriesDef.length; c++)
-    //   {
-    //     const currCategory = categoriesDef[c].name;
-    //     const amountCategory = categoriesDef[c].amount;
-    //     const termPlus = Math.sqrt((amountItems-amountCategory)/amountCategory);
-    //     const termMinus = Math.sqrt(amountCategory/(amountItems-amountCategory));
-    //     let currValue;
-
-    //     // for the first time in the category
-    //     if(i==0){
-    //       let temp = {category: currCategory,
-    //                   values: []};
-    //       if(combinedSet[i].category === currCategory)
-    //       {
-    //         currValue = termPlus;
-    //       }else {
-    //         currValue = 0 - termMinus;
-    //       }
-
-    //       temp.values.push(currValue)
-    //       sumCategories.push(temp);
-          
-    //     }else{
-    //       const lastValue = sumCategories[c].values[sumCategories[c].values.length-1];
-    //       if(combinedSet[i].category === currCategory){
-    //         currValue = lastValue + termPlus;
-
-    //       }else {
-    //         currValue = lastValue - termMinus;
-
-    //       }
-
-    //       sumCategories[c].values.push(currValue);
-    //     }
-    //   }
-    // }
-    
-    
-    // let overallScore = 0;
-
-    // for(let i=0; i<sumCategories.length; i++)
-    // {
-    //   const min = Math.min(...sumCategories[i].values);
-    //   const max = Math.max(...sumCategories[i].values);
-
-    //   const score = Math.abs(max) > Math.abs(min) ? max : min;
-    //   sumCategories[i]['enrichmentScore'] = score;
-
-    //   overallScore = Math.abs(score) > Math.abs(overallScore) ? score : overallScore;
-    // }
     
     // console.log('sumCategories: ', sumCategories);
     // console.timeEnd('enrichment-'+id+'-time');
