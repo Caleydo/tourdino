@@ -7,22 +7,9 @@ import {intersection, binom2, measureResultObj, sleep, binom, getModulo} from '.
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
 import { LineChart } from './measure_visualization/LineChart';
+import {WorkerManager} from './Workers/WorkerManager';
 
-export class Workers {
-  private static workers = new Array<Worker>();
 
-  public static register(worker: Worker) {
-    Workers.workers.push(worker);
-  }
-
-  public static terminateAll() {
-    for (const worker of Workers.workers) {
-      worker.terminate();
-    }
-
-    Workers.workers = new Array<Worker>();
-  }
-}
 export const registeredClasses = new Array<ASimilarityMeasure>();
 export function MeasureDecorator() {
   return function (target: {new(): ASimilarityMeasure}) { // only instantiable subtypes of ASimilarityClass can be passed.
@@ -82,7 +69,7 @@ export class JaccardSimilarity extends ASimilarityMeasure {
   async calcP_Randomize(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<number> {
     const p: Promise<number> = new Promise((resolve, reject) => { 
       const myWorker: Worker = new (<any>require('worker-loader?name=JaccardRandom.js!./Workers/JaccardRandom'));
-      Workers.register(myWorker);
+      WorkerManager.register(myWorker);
       myWorker.onmessage = event => Number.isNaN(event.data) ? reject() : resolve(event.data);
       myWorker.postMessage({setA: setA, setB: setB, allData: allData});
     });
@@ -467,7 +454,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
   async calcP_Randomize(arr1: any[], arr2: any[]): Promise<number> {
     const p: Promise<number> = new Promise((resolve, reject) => { 
       const myWorker: Worker = new (<any>require('worker-loader?name=AdjRandRandom.js!./Workers/AdjRandRandom'));
-      Workers.register(myWorker);
+      WorkerManager.register(myWorker);
       myWorker.onmessage = event => Number.isNaN(event.data) ? reject() : resolve(event.data);
       myWorker.postMessage({setA: arr1, setB: arr2});
     });
@@ -610,8 +597,8 @@ export class EnrichmentScore extends ASimilarityMeasure {
 
     const now = new Date();
     const id = `${now.getMinutes()}${now.getSeconds()}${now.getMilliseconds()}`;
-    console.groupCollapsed('enrichment-'+id);
-    console.time('enrichment-'+id+'-time');
+    // console.groupCollapsed('enrichment-'+id);
+    // console.time('enrichment-'+id+'-time');
 
     let numericSet;
     let categorySet;
@@ -678,20 +665,14 @@ export class EnrichmentScore extends ASimilarityMeasure {
 
     
     let enrichmentScoreCategories = [];
-    let enrichmentScoreCategoriesPromises = [];
 
     for(let i=0; i<propertyCategories.length; i++)
     {
       const currCategory = propertyCategories[i].name;
       const amountCategory = propertyCategories[i].amount;
-      enrichmentScoreCategoriesPromises.push(this.calcEnrichmentScoreCategory(validCombinedSet, currCategory, amountCategory).then((result) => {
-        enrichmentScoreCategories.push(result);
-      }));
-
+      enrichmentScoreCategories.push(this.calcEnrichmentScoreCategory(validCombinedSet, currCategory, amountCategory));
     }
 
-    await Promise.all(enrichmentScoreCategoriesPromises); //rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
-    
     let overallScore = 0;
     console.log('enrichmentScoreCategories.length: ',enrichmentScoreCategories.length);
     for(let i=0; i<enrichmentScoreCategories.length; i++)
@@ -761,8 +742,8 @@ export class EnrichmentScore extends ASimilarityMeasure {
     // }
     
     // console.log('sumCategories: ', sumCategories);
-    console.timeEnd('enrichment-'+id+'-time');
-    console.groupEnd();
+    // console.timeEnd('enrichment-'+id+'-time');
+    // console.groupEnd();
 
     const properties = await this.calcPValuePermutation(numericSet, categorySet,enrichmentScoreCategories);
     const p = Math.min(...properties.map((item) => (item.pvalue)));
@@ -773,21 +754,50 @@ export class EnrichmentScore extends ASimilarityMeasure {
   async calcPValuePermutation(numericSet: Array<any>, categorySet: Array<any>, actualScores: Array<any>): Promise<Array<{category: string,pvalue: number}>> {
     const properties: Promise<Array<{category: string,pvalue: number}>> = new Promise((resolve, reject) => { 
       const myWorker: Worker = new (<any>require('worker-loader?name=EnrichmentScorePermutation.js!./Workers/EnrichmentScorePermutation'));
-      Workers.register(myWorker);
+      WorkerManager.register(myWorker);
       myWorker.onmessage = function (event) { return event.data === null ? reject() : resolve(event.data);};
       myWorker.postMessage({setNumber: numericSet, setCategory: categorySet, actualScores: actualScores});
     });
     return properties;
   }
 
-  async calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: string, amountCategory: number): Promise<any> {
-    const esCategory: Promise<number> = new Promise((resolve, reject) => { 
-      const myWorker: Worker = new (<any>require('worker-loader?name=EnrichmentScoreCategory.js!./Workers/EnrichmentScoreCategory'));
-      Workers.register(myWorker);
-      myWorker.onmessage = event => event.data === null ? reject() : resolve(event.data);
-      myWorker.postMessage({setCombined: setCombined, currCategory: currCategory, amountCategory: amountCategory});
-    });
-    return esCategory;
+  // function to calculate enrichment score for one category
+  calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: string, amountCategory: number): {
+    category: string,
+    enrichmentScore: number} {
+    
+    let propertiesCategory = {
+      category: currCategory,
+      values: [],
+      enrichmentScore: 0};
+
+    const amountItems = setCombined.length;
+    const termPlus = Math.sqrt((amountItems-amountCategory)/amountCategory);
+    const termMinus = Math.sqrt(amountCategory/(amountItems-amountCategory));
+    let currValue = 0;
+
+    // go through all items
+    for(let i=0; i<setCombined.length; i++)
+    {
+      if(setCombined[i].category === currCategory)
+      {
+        currValue = currValue + termPlus;
+      }else {
+        currValue = currValue - termMinus;
+      }
+
+      propertiesCategory.values.push(currValue);     
+    }
+    
+
+    const min = Math.min(...propertiesCategory.values);
+    const max = Math.max(...propertiesCategory.values);
+
+    const score = Math.abs(max) > Math.abs(min) ? max : min;
+    propertiesCategory.enrichmentScore = score;
+    delete propertiesCategory.values;
+
+    return propertiesCategory;
   }
 }
 
