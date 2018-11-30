@@ -459,8 +459,23 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
       return measureResultObj(1, Number.NaN);
     }
     const adjIndex = (index - expectedIndex) / (maxIndex - expectedIndex);
-    return measureResultObj(adjIndex, Number.NaN); // async function --> returns promise
+
+    const p = await this.calcP_Randomize(arr1, arr2);
+    return measureResultObj(adjIndex, p); // async function --> returns promise
   }
+  
+  async calcP_Randomize(arr1: any[], arr2: any[]): Promise<number> {
+    const p: Promise<number> = new Promise((resolve, reject) => { 
+      const myWorker: Worker = new (<any>require('worker-loader?name=AdjRandRandom.js!./Workers/AdjRandRandom'));
+      Workers.register(myWorker);
+      myWorker.onmessage = event => Number.isNaN(event.data) ? reject() : resolve(event.data);
+      myWorker.postMessage({setA: arr1, setB: arr2});
+    });
+
+    return p;
+  }
+
+  
 }
 
 @MeasureDecorator()

@@ -123,3 +123,18 @@ export function getRandomUniqueIntegers(n, max) {
   }
   return integers;
 }
+
+/**
+ * Shuffles array in place. From: https://stackoverflow.com/a/6274381/2549748
+ * @param {Array} arr An array containing the items.
+ */
+export function shuffle(arr: Array<any>): Array<any> {
+  let index, rndIndex, helper;
+  for (index = arr.length - 1; index > 0; index--) {
+      rndIndex = Math.floor(Math.random() * (index + 1));
+      helper = arr[index];
+      arr[index] = arr[rndIndex];
+      arr[rndIndex] = helper;
+  }
+  return arr;
+}

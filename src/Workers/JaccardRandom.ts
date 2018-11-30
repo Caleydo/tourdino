@@ -32,10 +32,7 @@ ctx.onmessage = (event) => {
         rndScores[scoreIndex] = calc(rndSet, setB);
       }
 
-      console.log(rndScores)
-  
       const p = rndScores.filter((rndScore) => rndScore > actualScore).length/1000.0; //  filter the array so only higher jaccard scores remain, then divide by number of computations. .0 to force floating point division
-      console.log('p', p)
       ctx.postMessage(p);
     }
   } catch(error) {
