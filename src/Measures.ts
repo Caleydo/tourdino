@@ -7,8 +7,30 @@ import {intersection, binom2, measureResultObj, sleep, binom, getModulo} from '.
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
 import { LineChart } from './measure_visualization/LineChart';
-import {WorkerManager} from './Workers/WorkerManager';
 
+
+
+export class Workers {
+  private static workers = new Array<Worker>();
+
+  public static register(worker: Worker) {
+    console.log('register worker #'+ (1 + Workers.workers.length), worker)
+    Workers.workers.push(worker);
+  }
+
+  public static deregister(worker: Worker) {
+    console.log('de-register worker', worker)
+    console.log('is in array?', Workers.workers.includes(worker));
+  }
+
+  public static terminateAll() {
+    for (const worker of Workers.workers) {
+      worker.terminate();
+    }
+
+    Workers.workers = new Array<Worker>();
+  }
+}
 
 export const registeredClasses = new Array<ASimilarityMeasure>();
 export function MeasureDecorator() {
@@ -69,7 +91,7 @@ export class JaccardSimilarity extends ASimilarityMeasure {
   async calcP_Randomize(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<number> {
     const p: Promise<number> = new Promise((resolve, reject) => { 
       const myWorker: Worker = new (<any>require('worker-loader?name=JaccardRandom.js!./Workers/JaccardRandom'));
-      WorkerManager.register(myWorker);
+      Workers.register(myWorker);
       myWorker.onmessage = event => Number.isNaN(event.data) ? reject() : resolve(event.data);
       myWorker.postMessage({setA: setA, setB: setB, allData: allData});
     });
@@ -454,7 +476,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
   async calcP_Randomize(arr1: any[], arr2: any[]): Promise<number> {
     const p: Promise<number> = new Promise((resolve, reject) => { 
       const myWorker: Worker = new (<any>require('worker-loader?name=AdjRandRandom.js!./Workers/AdjRandRandom'));
-      WorkerManager.register(myWorker);
+      Workers.register(myWorker);
       myWorker.onmessage = event => Number.isNaN(event.data) ? reject() : resolve(event.data);
       myWorker.postMessage({setA: arr1, setB: arr2});
     });
@@ -726,7 +748,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
   async calcPValuePermutation(numericSet: Array<any>, categorySet: Array<any>, actualScores: Array<any>): Promise<Array<{category: string,pvalue: number}>> {
     const properties: Promise<Array<{category: string,pvalue: number}>> = new Promise((resolve, reject) => { 
       const myWorker: Worker = new (<any>require('worker-loader?name=EnrichmentScorePermutation.js!./Workers/EnrichmentScorePermutation'));
-      WorkerManager.register(myWorker);
+      Workers.register(myWorker);
       myWorker.onmessage = function (event) { return event.data === null ? reject() : resolve(event.data);};
       myWorker.postMessage({setNumber: numericSet, setCategory: categorySet, actualScores: actualScores});
     });
