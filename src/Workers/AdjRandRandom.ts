@@ -49,13 +49,10 @@ function calcAdjRand(arr1: Array<any>, arr2: Array<any>) : number {
 
 ctx.onmessage = (event) => {
   try {
-
-    console.log('hello worker');
     let setA: Array<any> = event.data.setA; 
     let setB: Array<any> = event.data.setB;
 
     const actualScore = calcAdjRand(setA, setB);
-
     const rndScores = new Array<number>(1000); // array with 1000 entries
 
     for (const scoreIndex of rndScores.keys()) {
@@ -65,7 +62,6 @@ ctx.onmessage = (event) => {
     }
 
     const p = rndScores.filter((rndScore) => rndScore > actualScore).length/1000.0; //  filter the array so only higher scores remain, then divide by number of computations. .0 to force floating point division
-    console.log('adj rand p', p)
     ctx.postMessage(p);
   } catch(error) {
     console.error(`Cannot calculate p-value.\tError Type: ${error.name}\tMessage: ${error.message}\nStackTrace: ${error.stack}`);
