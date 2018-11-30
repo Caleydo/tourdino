@@ -13,20 +13,34 @@ export class ScatterPlot implements IMeasureVisualization{
                       y: setParameters.setB[i]})
     }
 
+    let validDataPoints = dataPoints.filter((item) => { 
+      let valid = true;
+      // x
+      if((item.x === undefined) || (item.x === null) || (Number.isNaN(item.x))){
+        valid = false;
+      }
+
+      // y
+      if((item.y === undefined) || (item.y === null) || (Number.isNaN(item.y))){
+        valid = false;
+      }
+      return valid; 
+    });
+
     // domains
     let domainSpace = 0.01; //add space to domain so that the data points are not on the axis
     let xDomain = [Math.min(...setParameters.setA),Math.max(...setParameters.setA)];
     let yDomain = [Math.min(...setParameters.setB),Math.max(...setParameters.setB)];
 
     // add space to x-domain
-    xDomain[0] = 0;
+    xDomain[0] = Math.min(xDomain[0]-Math.abs(xDomain[1]*(domainSpace/2)),0);
     xDomain[1] = xDomain[1]+Math.abs(xDomain[1]*(domainSpace/2));
     // add space to y-domain
-    yDomain[0] = 0;
+    yDomain[0] = Math.min(yDomain[0]-Math.abs(yDomain[1]*(domainSpace/2)),0);
     yDomain[1] = yDomain[1]+Math.abs(yDomain[1]*domainSpace);
 
     let scatterPlot = {
-      dataPoints: dataPoints,
+      dataPoints: validDataPoints,
       xLabel: setParameters.setADesc.label,
       xDomain: xDomain,
       yLabel: setParameters.setBDesc.label,
