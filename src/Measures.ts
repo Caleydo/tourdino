@@ -679,28 +679,31 @@ export class EnrichmentScore extends ASimilarityMeasure {
 
     
     let enrichmentScoreCategories = [];
+    let enrichmentScoreCategoriesPromises = [];
 
     for(let i=0; i<propertyCategories.length; i++)
     {
       const currCategory = propertyCategories[i].name;
       const amountCategory = propertyCategories[i].amount;
-      this.calcEnrichmentScoreCategory(validCombinedSet, currCategory, amountCategory).then((result) => {
+      enrichmentScoreCategoriesPromises.push(this.calcEnrichmentScoreCategory(validCombinedSet, currCategory, amountCategory).then((result) => {
         enrichmentScoreCategories.push(result);
-      });
+      }));
 
     }
 
-    await Promise.all(enrichmentScoreCategories); //rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
+    await Promise.all(enrichmentScoreCategoriesPromises); //rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
     
     let overallScore = 0;
-
+    console.log('enrichmentScoreCategories.length: ',enrichmentScoreCategories.length);
     for(let i=0; i<enrichmentScoreCategories.length; i++)
     {
       const score = enrichmentScoreCategories[i].enrichmentScore;
       overallScore = Math.abs(score) > Math.abs(overallScore) ? score : overallScore;
+      console.log('overallScore-loop: ',{score,overallScore});
     }
 
     console.log('enrichmentScoreCategories: ',enrichmentScoreCategories);
+    console.log('overallScore: ',overallScore);
 
     // let sumCategories = [];
     // go through all items
@@ -762,22 +765,23 @@ export class EnrichmentScore extends ASimilarityMeasure {
     console.timeEnd('enrichment-'+id+'-time');
     console.groupEnd();
 
-    // const p = await this.calcPValuePermutation(numericSet, categorySet,enrichmentScoreCategories);
-    const p = overallScore;
+    const properties = await this.calcPValuePermutation(numericSet, categorySet,enrichmentScoreCategories);
+    const p = Math.min(...properties.map((item) => (item.pvalue)));
+    
     return measureResultObj(overallScore,p); // async function --> returns promise
   }
 
-  async calcPValuePermutation(numericSet: Array<any>, categorySet: Array<any>, actualScores: Array<any>): Promise<number> {
-    const p: Promise<number> = new Promise((resolve, reject) => { 
+  async calcPValuePermutation(numericSet: Array<any>, categorySet: Array<any>, actualScores: Array<any>): Promise<Array<{category: string,pvalue: number}>> {
+    const properties: Promise<Array<{category: string,pvalue: number}>> = new Promise((resolve, reject) => { 
       const myWorker: Worker = new (<any>require('worker-loader?name=EnrichmentScorePermutation.js!./Workers/EnrichmentScorePermutation'));
       Workers.register(myWorker);
-      myWorker.onmessage = function (event) { return Number.isNaN(event.data) ? reject() : resolve(event.data);};
+      myWorker.onmessage = function (event) { return event.data === null ? reject() : resolve(event.data);};
       myWorker.postMessage({setNumber: numericSet, setCategory: categorySet, actualScores: actualScores});
     });
-    return p;
+    return properties;
   }
 
-  async calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: string, amountCategory: number): Promise<number> {
+  async calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: string, amountCategory: number): Promise<any> {
     const esCategory: Promise<number> = new Promise((resolve, reject) => { 
       const myWorker: Worker = new (<any>require('worker-loader?name=EnrichmentScoreCategory.js!./Workers/EnrichmentScoreCategory'));
       Workers.register(myWorker);
