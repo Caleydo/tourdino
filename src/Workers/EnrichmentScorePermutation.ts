@@ -1,6 +1,4 @@
-
- import {jStat} from 'jStat';
- import {getRandomInt} from '../util';
+import {getRandomInt} from '../util';
 
 // function to calculate enrichment score for one attribute
 function calc(setNumber: Array<any>, setCategory: Array<any>) {

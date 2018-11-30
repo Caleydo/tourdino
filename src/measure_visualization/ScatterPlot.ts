@@ -19,10 +19,10 @@ export class ScatterPlot implements IMeasureVisualization{
     let yDomain = [Math.min(...setParameters.setB),Math.max(...setParameters.setB)];
 
     // add space to x-domain
-    xDomain[0] = xDomain[0]-Math.abs(xDomain[1]*(domainSpace/2));
+    xDomain[0] = 0;
     xDomain[1] = xDomain[1]+Math.abs(xDomain[1]*(domainSpace/2));
     // add space to y-domain
-    yDomain[0] = yDomain[0]-Math.abs(yDomain[1]*domainSpace);
+    yDomain[0] = 0;
     yDomain[1] = yDomain[1]+Math.abs(yDomain[1]*domainSpace);
 
     let scatterPlot = {
@@ -122,7 +122,7 @@ export class ScatterPlot implements IMeasureVisualization{
     .data(formatData.dataPoints)
     .enter().append('circle')
       .attr('class', 'datapoint')
-      .attr('r', 3.5)
+      .attr('r', 2)
       .attr('cx', xMap)
       .attr('cy', yMap)
       .on('mouseover', function(d) {
