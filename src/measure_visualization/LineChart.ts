@@ -1,5 +1,6 @@
 import {IMeasureVisualization, ISetParameters} from '../';
 import * as d3 from 'd3';
+import { getMaxListeners } from 'cluster';
 
 export class LineChart implements IMeasureVisualization{
 
@@ -107,6 +108,7 @@ export class LineChart implements IMeasureVisualization{
 
       const score = Math.abs(max) > Math.abs(min) ? max : min;
       dataLines[i]['enrichmentScore'] = score;
+      dataLines[i]['scorePos'] = dataLines[i].values.filter((item) => (item.y === score)).map((item) => (item.x));
     }
 
 
@@ -238,14 +240,14 @@ export class LineChart implements IMeasureVisualization{
                     .text(formatData.yLabel);
 
     // add baseline at 0
-    svgFigureGroup.append("g")
+    svgFigureGroup.append('g')
                   .attr('class', 'baseline')
                   .append('path')
                       .attr('d',line(baseline))
                       .style('stroke','black');
     
     // data lines
-    svgFigureGroup.append("g")
+    svgFigureGroup.append('g')
                   .attr('class', 'all-datalines')
                   .selectAll("path")
                     .data(formatData.dataLines)
@@ -270,6 +272,22 @@ export class LineChart implements IMeasureVisualization{
                                           .style('display','none')
                                           .style('opacity', 0);
                       });
+
+    let svgScorePoints = svgFigureGroup.append('g')
+                                       .attr('class', 'score-datapoints');
+                                                  
+    const lines = formatData.dataLines.length;
+    
+    for(let i=0; i<lines; i++)
+    {
+      if(formatData.dataLines[i].scorePos && formatData.dataLines[i].scorePos.length > 0){
+        // data point for enrichment score (onyl the first one will be drawn)
+        svgScorePoints.append('circle')
+                      .attr('r', 3)
+                      .attr('cx', xScale(formatData.dataLines[i].scorePos[0]))
+                      .attr('cy', yScale(formatData.dataLines[i].enrichmentScore));
+      }
+    }
 
   }
 
