@@ -1,4 +1,4 @@
-import {IMeasureVisualization, ISetParameters} from '../';
+import {IMeasureVisualization, ISetParameters, IMeasureResult} from '../';
 import * as d3 from 'd3';
 
 
@@ -50,7 +50,7 @@ export class ScatterPlot implements IMeasureVisualization{
     return scatterPlot;
   }
 
-  public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters)
+  public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, score: IMeasureResult)
   {
     let formatData = this.formatData(setParameters);
     console.log('Scatter Plot - generateVisualization', setParameters);

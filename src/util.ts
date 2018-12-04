@@ -75,9 +75,17 @@ export function getModulo(n: number, hits: number): number {
  * @param scoreVal score value for the current measure
  * @param pVal p-value calculated for the current measure
  */
-export function measureResultObj(scoreVal: number, pVal: number): IMeasureResult {
-  return {scoreValue: scoreVal,
-          pValue: pVal};
+export function measureResultObj(scoreVal: number, pVal: number, addData?: any): IMeasureResult {
+  if(addData){
+    return {scoreValue: scoreVal,
+            pValue: pVal,
+            additionalData: addData};
+  }else{
+    return {scoreValue: scoreVal,
+            pValue: pVal};
+  }
+
+  
 }
 
 /** Helper for async tests */

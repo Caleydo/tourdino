@@ -537,7 +537,7 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
 
     // http://jstat.github.io/all.html#corrcoeff
     const spearmanCorr = jStat.jStat.spearmancoeff(validPoints.map(item => item.x), validPoints.map(item => item.y));
-    console.log('spearman rho', spearmanCorr)
+    // console.log('spearman rho', spearmanCorr)
 
     // calc p-value
     let tValue = (spearmanCorr * Math.sqrt(n-2)) / Math.sqrt(1 - spearmanCorr * spearmanCorr);
@@ -546,9 +546,9 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
       tValue = 0.000001;
     }
 
-    console.log(tValue, n)
+    // console.log(tValue, n)
     let pValue = jStat.jStat.ttest(tValue, n, 2);
-    console.log('spear p val', pValue)
+    // console.log('spear p val', pValue)
     pValue = pValue >= 0 && pValue <= 1 ? pValue : Number.NaN;
 
     return measureResultObj(spearmanCorr, pValue); // async function --> returns promise
@@ -724,16 +724,16 @@ export class EnrichmentScore extends ASimilarityMeasure {
     }
 
     let overallScore = 0;
-    console.log('enrichmentScoreCategories.length: ',enrichmentScoreCategories.length);
+    // console.log('enrichmentScoreCategories.length: ',enrichmentScoreCategories.length);
     for(let i=0; i<enrichmentScoreCategories.length; i++)
     {
       const score = enrichmentScoreCategories[i].enrichmentScore;
       overallScore = Math.abs(score) > Math.abs(overallScore) ? score : overallScore;
-      console.log('overallScore-loop: ',{score,overallScore});
+      // console.log('overallScore-loop: ',{score,overallScore});
     }
 
-    console.log('enrichmentScoreCategories: ',enrichmentScoreCategories);
-    console.log('overallScore: ',overallScore);
+    // console.log('enrichmentScoreCategories: ',enrichmentScoreCategories);
+    // console.log('overallScore: ',overallScore);
     
     // console.log('sumCategories: ', sumCategories);
     // console.timeEnd('enrichment-'+id+'-time');
@@ -742,7 +742,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
     const properties = await this.calcPValuePermutation(numericSet, categorySet,enrichmentScoreCategories);
     const p = Math.min(...properties.map((item) => (item.pvalue)));
     
-    return measureResultObj(overallScore,p); // async function --> returns promise
+    return measureResultObj(overallScore,p,properties); // async function --> returns promise
   }
 
   async calcPValuePermutation(numericSet: Array<any>, categorySet: Array<any>, actualScores: Array<any>): Promise<Array<{category: string,pvalue: number}>> {

@@ -1,10 +1,9 @@
-import {IMeasureVisualization, ISetParameters} from '../';
+import {IMeasureVisualization, ISetParameters, IMeasureResult} from '../';
 import * as d3 from 'd3';
-import { getMaxListeners } from 'cluster';
 
 export class LineChart implements IMeasureVisualization{
 
-  private formatData(setParameters: ISetParameters)
+  private formatData(setParameters: ISetParameters, score: IMeasureResult)
   {
     let numericSet;
     let categorySet;
@@ -44,6 +43,13 @@ export class LineChart implements IMeasureVisualization{
       const currCategory = categories[c].name;
       let numCategory = validCombinedSet.filter((item) => { return item.category === currCategory; }).length;
       categories[c]['amount'] = numCategory;
+      
+      let pValueCategory;
+      if(score.additionalData){
+        pValueCategory = score.additionalData.filter((item) => (item.category === currCategory)).map((item) => (item.pvalue))[0];
+        pValueCategory = (Number.isNaN(pValueCategory) || pValueCategory===undefined || pValueCategory === null) ? null : pValueCategory;
+      }
+      categories[c]['pvalue'] = pValueCategory;
     }
 
     // sort the combined set
@@ -64,6 +70,7 @@ export class LineChart implements IMeasureVisualization{
         if(i==0){
           let temp = {category: currCategory,
                       color: categories[c].color,
+                      pvalue: categories[c].pvalue,
                       values: []};
           let currValue;
           if(validCombinedSet[i].category === currCategory){
@@ -146,11 +153,11 @@ export class LineChart implements IMeasureVisualization{
     return lineChart;
   }
 
-  public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters)
+  public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, score: IMeasureResult)
   {
-    let formatData = this.formatData(setParameters);
-    console.log('Line Chart - generateVisualization', setParameters);
-    console.log('formatData: ', formatData);
+    let formatData = this.formatData(setParameters,score);
+    console.log('Line Chart - generateVisualization', {setParameters, formatData});
+    // console.log('formatData: ', formatData);
 
 
     // remove old tooltip
@@ -262,7 +269,9 @@ export class LineChart implements IMeasureVisualization{
                                           .duration(500)
                                           .style('display','block')
                                           .style('opacity', .9);
-                        tooltipLineChart.html(`Category: ${d.category}</br>Enrichment Score: ${d.enrichmentScore.toFixed(3)}`)
+                        let tooltipText = `Category: ${d.category}</br>Enrichment Score: ${d.enrichmentScore.toFixed(3)}`;
+                        let textPValue = d.pvalue === null ? '' : `</br>p-Value: ${d.pvalue.toFixed(3)}`;
+                        tooltipLineChart.html(tooltipText+textPValue)
                                           .style('left', (m[0] + 5) + 'px')
                                           .style('top', (m[1]- 28) + 'px');
                       })

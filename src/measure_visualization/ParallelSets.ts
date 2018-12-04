@@ -1,4 +1,4 @@
-import {IMeasureVisualization, intersection, ISetParameters} from '../';
+import {IMeasureVisualization, intersection, ISetParameters, IMeasureResult} from '../';
 import * as d3 from 'd3';
 import 'd3.parsets';
 
@@ -49,7 +49,7 @@ export class ParallelSets implements IMeasureVisualization{
     return currCategoryParts;
   }
 
-  public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters)
+  public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, score: IMeasureResult)
   {
     let formatData = this.formatData(setParameters) as any;
     // console.log('Parallel Sets - generateVisualization');

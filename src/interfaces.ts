@@ -150,18 +150,19 @@ export interface IMeasureResult {
    * p-value of the used measure type
    */
   pValue: number;
+
+  /**
+   * additional data of the measure
+   */
+  additionalData?: any;
 }
 
 export interface IMeasureVisualization {
   generateVisualization: IGenerateVisualizationFunc;
 }
 
-export interface IFormatDataFunc {
-  (setParameters: ISetParameters);
-}
-
 export interface IGenerateVisualizationFunc {
-  (miniVisualisation: d3.Selection<any>, setParameters: ISetParameters);
+  (miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, score: IMeasureResult);
 }
 
 export interface ISetParameters {
