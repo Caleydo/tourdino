@@ -29,15 +29,17 @@ export class ScatterPlot implements IMeasureVisualization{
 
     // domains
     let domainSpace = 0.01; //add space to domain so that the data points are not on the axis
-    let xDomain = [Math.min(...setParameters.setA),Math.max(...setParameters.setA)];
-    let yDomain = [Math.min(...setParameters.setB),Math.max(...setParameters.setB)];
+    const xValue = validDataPoints.map((item => (item.x)));
+    const yValue = validDataPoints.map((item => (item.y)));
+    let xDomain = [Math.min(...xValue),Math.max(...xValue)];
+    let yDomain = [Math.min(...yValue),Math.max(...yValue)];
 
     // add space to x-domain
-    xDomain[0] = Math.min(xDomain[0]-Math.abs(xDomain[1]*(domainSpace/2)),0);
-    xDomain[1] = xDomain[1]+Math.abs(xDomain[1]*(domainSpace/2));
+    xDomain[0] = Math.min(xDomain[0],0);
+    xDomain[1] = xDomain[1];
     // add space to y-domain
-    yDomain[0] = Math.min(yDomain[0]-Math.abs(yDomain[1]*(domainSpace/2)),0);
-    yDomain[1] = yDomain[1]+Math.abs(yDomain[1]*domainSpace);
+    yDomain[0] = Math.min(yDomain[0],0);
+    yDomain[1] = yDomain[1];
 
     let scatterPlot = {
       dataPoints: validDataPoints,
@@ -53,7 +55,7 @@ export class ScatterPlot implements IMeasureVisualization{
   public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, score: IMeasureResult)
   {
     let formatData = this.formatData(setParameters);
-    console.log('Scatter Plot - generateVisualization', setParameters);
+    console.log('Scatter Plot - generateVisualization', {setParameters, formatData});
 
     // remove old tooltip
     d3.select('body').selectAll('div.measure.tooltip').remove();
@@ -68,8 +70,10 @@ export class ScatterPlot implements IMeasureVisualization{
     // get size of space and calculate scatter plot size
     let containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
 
+    let labelOffsetAxisX = 35;
+    let labelOffsetAxisY = 15;
     let maxHeight = 220;
-    let margin = {top: 10, right: 20, bottom: 20, left: 55};
+    let margin = {top: 10, right: 20, bottom: 20+labelOffsetAxisX, left: 55+labelOffsetAxisY};
     let width = containerWidth - margin.left - margin.right;
     let height = maxHeight - margin.top - margin.bottom;
 
@@ -103,8 +107,8 @@ export class ScatterPlot implements IMeasureVisualization{
                                   .attr('class','scatterplot');
 
     // set scale.domain
-    xScale.domain(formatData.xDomain);
-    yScale.domain(formatData.yDomain);
+    xScale.domain(formatData.xDomain).nice();
+    yScale.domain(formatData.yDomain).nice();
 
     // add axis to the canvas
     // x-axis
@@ -114,9 +118,9 @@ export class ScatterPlot implements IMeasureVisualization{
                   .call(xAxis)
                   .append('text')
                     .attr('class', 'label')
-                    .attr('x', width)
-                    .attr('y', -6)
-                    .style('text-anchor', 'end')
+                    .attr('x', width/2)
+                    .attr('y', 35)
+                    .style('text-anchor', 'middle')
                     .text(formatData.xLabel);
 
     // y-axis
@@ -126,9 +130,9 @@ export class ScatterPlot implements IMeasureVisualization{
                   .append('text')
                     .attr('class', 'label')
                     .attr('transform', 'rotate(-90)')
-                    .attr('y', 6)
-                    .attr('dy', '.71em')
-                    .style('text-anchor', 'end')
+                    .attr('y', -margin.left+labelOffsetAxisY)
+                    .attr('x', -(maxHeight-margin.bottom)/2)
+                    .style('text-anchor', 'middle')
                     .text(formatData.yLabel);
 
     // add dots to canvas
