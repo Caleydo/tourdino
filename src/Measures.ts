@@ -156,7 +156,7 @@ export class StudentTTest extends ASimilarityMeasure {
     // TODO improve the measure description somehow:
     this.id = 'student_test';
     this.label = 'Student\'s t-Test';
-    this.description = 'Compares the means of two samples (assuimg equal variances in their respective normal distributions).';
+    this.description = 'Compares the means of two groups (assuimg equal variances in their respective normal distributions).';
     this.visualization = new BoxPlot();
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
