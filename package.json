@@ -4,8 +4,6 @@
   "files": [
     "src",
     "index.js",
-    "phovea.js",
-    "phovea_registry.js",
     "build"
   ],
   "engines": {
