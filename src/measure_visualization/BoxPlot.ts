@@ -87,6 +87,9 @@ export class BoxPlot implements IMeasureVisualization{
     // check if the min and may are not infinte
     min = isFinite(min) ? min : formatData.domainMin;
     max = isFinite(max) ? max : formatData.domainMax;
+    // start min with 0 or highest negatice value 
+    min = Math.min(min,0);
+
     // remove all empty sets
     data = data.filter((item) => {return (item[1].length !== 0)});
     // console.log('BoxPlot: ',{data,min,max});
@@ -136,7 +139,7 @@ export class BoxPlot implements IMeasureVisualization{
 
     // the y-axis
     let y = d3.scale.linear()
-      .domain([min, max])
+      .domain([min, max]).nice()
       .range([height + margin.top, 0 + margin.top]);
 
     let yAxis = d3.svg.axis()

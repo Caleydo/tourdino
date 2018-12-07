@@ -173,8 +173,10 @@ export class LineChart implements IMeasureVisualization{
     // get size of space and calculate scatter plot size
     let containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
 
+    let labelOffsetAxisX = 35;
+    let labelOffsetAxisY = 15;
     let maxHeight = 220;
-    let margin = {top: 10, right: 20, bottom: 20, left: 55};
+    let margin = {top: 10, right: 20, bottom: 20+labelOffsetAxisX, left: 55+labelOffsetAxisY};
     let width = containerWidth - margin.left - margin.right;
     let height = maxHeight - margin.top - margin.bottom;
 
@@ -218,8 +220,8 @@ export class LineChart implements IMeasureVisualization{
                                   .attr('class','linechart');
 
     // set scale.domain
-    xScale.domain(formatData.xDomain);
-    yScale.domain(formatData.yDomain);
+    xScale.domain(formatData.xDomain).nice();
+    yScale.domain(formatData.yDomain).nice();
 
     // add axis to the canvas
     // x-axis
@@ -229,9 +231,9 @@ export class LineChart implements IMeasureVisualization{
                   .call(xAxis)
                   .append('text')
                     .attr('class', 'label')
-                    .attr('x', width)
-                    .attr('y', -6)
-                    .style('text-anchor', 'end')
+                    .attr('x', width/2)
+                    .attr('y', 35)
+                    .style('text-anchor', 'middle')
                     .text(formatData.xLabel);
 
     // y-axis
@@ -241,9 +243,9 @@ export class LineChart implements IMeasureVisualization{
                   .append('text')
                     .attr('class', 'label')
                     .attr('transform', 'rotate(-90)')
-                    .attr('y', 6)
-                    .attr('dy', '.71em')
-                    .style('text-anchor', 'end')
+                    .attr('y', -margin.left+labelOffsetAxisY)
+                    .attr('x', -(maxHeight-margin.bottom)/2)
+                    .style('text-anchor', 'middle')
                     .text(formatData.yLabel);
 
     // add baseline at 0
