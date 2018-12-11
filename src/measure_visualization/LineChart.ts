@@ -249,7 +249,6 @@ export class LineChart implements IMeasureVisualization{
                     .style('text-anchor', 'middle')
                     .text(formatData.yLabel);
 
-
     
     // data lines
     svgFigureGroup.append('g')

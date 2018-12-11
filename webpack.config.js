@@ -66,12 +66,6 @@ const webpackloaders = [
   {test: /\.scss$/, use: 'style-loader!css-loader!sass-loader'},
   {test: /\.css$/, use: 'style-loader!css-loader'},
   {test: /\.tsx?$/, use: tsLoader},
-  {
-    test: /phovea(_registry)?\.js$/, use: [{
-      loader: 'ifdef-loader',
-      options: Object.assign({include: includeFeature}, preCompilerFlags)
-    }]
-  },
   {test: /\.json$/, use: 'json-loader'},
   {
     test: /\.(png|jpg)$/,
@@ -100,51 +94,12 @@ const webpackloaders = [
 ];
 
 /**
- * tests whether the given phovea module name is matching the requested file and if so convert it to an external lookup
- * depending on the loading type
- */
-function testPhoveaModule(moduleName, request) {
-  if (!(new RegExp('^' + moduleName + '/src.*')).test(request)) {
-    return false;
-  }
-  const subModule = request.match(/.*\/src\/?(.*)/)[1];
-  // skip empty modules = root
-  const path = subModule === '' ? [moduleName] : [moduleName, subModule];
-  // phovea_<name> ... phovea.name
-  const rootPath = /phovea_.*/.test(moduleName) ? ['phovea', moduleName.slice(7)].concat(path.slice(1)) : path;
-  return {
-    root: rootPath,
-    commonjs2: path,
-    commonjs: path,
-    amd: request + (subModule === '' ? '/main' : '')
-  };
-}
-
-function testPhoveaModules(modules) {
-  return (context, request, callback) => {
-    for (let i = 0; i < modules.length; ++i) {
-      const r = testPhoveaModule(modules[i], request);
-      if (r) {
-        return callback(null, r);
-      }
-    }
-    callback();
-  };
-}
-
-// use workspace registry file if available
-const isWorkspaceContext = fs.existsSync(resolve(__dirname, '..', 'phovea_registry.js'));
-const registryFile = isWorkspaceContext ? '../phovea_registry.js' : './phovea_registry.js';
-const actMetaData = `file-loader?name=phoveaMetaData.json!${buildInfo.metaDataTmpFile(pkg)}`;
-const actBuildInfoFile = `file-loader?name=buildInfo.json!${buildInfo.tmpFile()}`;
-
-/**
  * inject the registry to be included
  * @param entry
  * @returns {*}
  */
 function injectRegistry(entry) {
-  const extraFiles = [registryFile, actBuildInfoFile, actMetaData];
+  const extraFiles = [`file-loader?name=buildInfo.json!${buildInfo.tmpFile()}`];
   // build also the registry
   if (typeof entry === 'string') {
     return extraFiles.concat(entry);
@@ -174,10 +129,7 @@ function generateWebpack(options) {
       alias: Object.assign({}, options.libs || {}),
       symlinks: false,
       // fallback to the directory above if they are siblings just in the workspace context
-      modules: isWorkspaceContext ? [
-        resolve(__dirname, '../'),
-        'node_modules'
-      ] : ['node_modules']
+      modules: ['node_modules']
     },
     plugins: [
       // define magic constants that are replaced
@@ -260,21 +212,9 @@ function generateWebpack(options) {
     // if we don't bundle don't include external libraries and other phovea modules
     base.externals.push(...(options.externals || Object.keys(options.libs || {})));
 
-    // ignore all phovea modules
-    if (options.modules) {
-      base.externals.push(testPhoveaModules(options.modules));
-    }
-
     // ignore extra modules
     (options.ignore || []).forEach(function (d) {
       base.module.loaders.push({test: new RegExp(d), loader: 'null-loader'}); // use null loader
-    });
-    // ingore phovea module registry calls
-    (options.modules || []).forEach(function (m) {
-      base.module.loaders.push({
-        test: new RegExp('.*[\\\\/]' + m + '[\\\\/]phovea_registry.js'),
-        loader: 'null-loader'
-      }); // use null loader
     });
   }
   if (!options.bundle || options.isApp) {
