@@ -6,4 +6,4 @@ export * from './measure_visualization/ParallelSets';
 export * from './measure_visualization/BoxPlot';
 export * from './measure_visualization/ScatterPlot';
 export * from './measure_visualization/LineChart';
-export * from './Workers/WorkerManager'
+export * from './Workers/WorkerManager';
