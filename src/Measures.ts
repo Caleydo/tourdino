@@ -207,28 +207,6 @@ export class StudentTTest extends ASimilarityMeasure {
   }
 }
 
-
-// @MeasureDecorator()
-// export class WelchTTest extends ASimilarityMeasure {
-
-//   constructor(options?: IMeasureOptions) {
-//     super(options);
-
-//     // TODO improve the measure description somehow:
-//     this.id = 'welch_test';
-//     this.label = 'Welch\'s t-test';
-//     this.description = 'Compares the means of two samples (normal distributed).';
-
-//     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
-//     this.scope = SCOPE.SETS;
-//   }
-
-
-//   public async calc(setA: Array<any>, setB: Array<any>) {
-//     return measureResultObj(1 - Math.random(),0); // ]0,1]
-//   }
-// }
-
 interface IRankObJ {
  set: string;
  value: any;
