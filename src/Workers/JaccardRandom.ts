@@ -25,8 +25,8 @@ ctx.onmessage = (event) => {
       // The score is neither maximum nor minimum, so we compare it to random scores:
       const rndScores = new Array(1000); // array with 1000 entries
       const drawSize = setA.length;
-  
-      for (let scoreIndex of rndScores.keys()) {
+
+      for (const scoreIndex of rndScores.keys()) {
         const rndIndices = getRandomUniqueIntegers(drawSize, allData.length-1);
         const rndSet = rndIndices.map((index) => allData[index]); //get elments with the random indices
         rndScores[scoreIndex] = calc(rndSet, setB);
@@ -41,4 +41,4 @@ ctx.onmessage = (event) => {
   }
 
   self.close(); //Close worker as I only use it once
-}
+};

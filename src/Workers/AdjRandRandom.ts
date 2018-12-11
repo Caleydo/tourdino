@@ -49,8 +49,8 @@ function calcAdjRand(arr1: Array<any>, arr2: Array<any>) : number {
 
 ctx.onmessage = (event) => {
   try {
-    let setA: Array<any> = event.data.setA; 
-    let setB: Array<any> = event.data.setB;
+    const setA: Array<any> = event.data.setA;
+    const setB: Array<any> = event.data.setB;
 
     const actualScore = calcAdjRand(setA, setB);
     const rndScores = new Array<number>(1000); // array with 1000 entries
@@ -67,4 +67,6 @@ ctx.onmessage = (event) => {
     console.error(`Cannot calculate p-value.\tError Type: ${error.name}\tMessage: ${error.message}\nStackTrace: ${error.stack}`);
     return ctx.postMessage(Number.NaN);
   }
-}
+
+  self.close();
+};
