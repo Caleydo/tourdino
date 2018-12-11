@@ -66,7 +66,7 @@ export class JaccardSimilarity extends ASimilarityMeasure {
   }
 
   async calcP_Randomize(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<number> {
-    const p: Promise<number> = new Promise((resolve, reject) => { 
+    const p: Promise<number> = new Promise((resolve, reject) => {
       const myWorker: Worker = new (<any>require('worker-loader?name=JaccardRandom.js!./Workers/JaccardRandom'))();
       WorkerManager.register(myWorker);
       myWorker.onmessage = (event) => Number.isNaN(event.data) ? reject() : resolve(event.data);
@@ -78,13 +78,13 @@ export class JaccardSimilarity extends ASimilarityMeasure {
 
 
   /**
-   * As described by Real & Vargas in "The probabilistic basis of Jaccard's index of similarity" 
-   * @param unionSize 
-   * @param intersectionSize 
+   * As described by Real & Vargas in "The probabilistic basis of Jaccard's index of similarity"
+   * @param unionSize
+   * @param intersectionSize
    */
   //e.g. const p = await this.calcP_RealVargas(filteredsetA.length + filteredsetB.length + intersect.length, intersect.length);
   async calcP_RealVargas(unionSize: number, intersectionSize: number): Promise<number> {
-    const p: Promise<number> = new Promise((resolve, reject) => { 
+    const p: Promise<number> = new Promise((resolve, reject) => {
       const myWorker: Worker = new (<any>require('worker-loader?name=JaccardPermutator.js!./Workers/JaccardProbabilistic'))();
       myWorker.onmessage = (event) => Number.isNaN(event.data) ? reject() : resolve(event.data);
       myWorker.postMessage({union: unionSize, intersection: intersectionSize});
@@ -427,9 +427,9 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     const p = await this.calcP_Randomize(arr1, arr2);
     return measureResultObj(adjIndex, p); // async function --> returns promise
   }
-  
+
   async calcP_Randomize(arr1: any[], arr2: any[]): Promise<number> {
-    const p: Promise<number> = new Promise((resolve, reject) => { 
+    const p: Promise<number> = new Promise((resolve, reject) => {
       const myWorker: Worker = new (<any>require('worker-loader?name=AdjRandRandom.js!./Workers/AdjRandRandom'))();
       WorkerManager.register(myWorker);
       myWorker.onmessage = (event) => Number.isNaN(event.data) ? reject() : resolve(event.data);
@@ -439,7 +439,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     return p;
   }
 
-  
+
 }
 
 @MeasureDecorator()
@@ -474,7 +474,7 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
                    y: set2[i]});
     }
 
-    const validPoints = points.filter((item) => { 
+    const validPoints = points.filter((item) => {
       let valid = true;
       // x
       if ((item.x === undefined) || (item.x === null) || (Number.isNaN(item.x))) {
@@ -485,7 +485,7 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
       if ((item.y === undefined) || (item.y === null) || (Number.isNaN(item.y))) {
         valid = false;
       }
-      return valid; 
+      return valid;
     });
 
     const n = validPoints.length;
@@ -540,7 +540,7 @@ export class PearsonCorrelation extends ASimilarityMeasure {
                    y: set2[i]});
     }
 
-    const validPoints = points.filter((item) => { 
+    const validPoints = points.filter((item) => {
       let valid = true;
       // x
       if ((item.x === undefined) || (item.x === null) || (Number.isNaN(item.x))) {
@@ -551,7 +551,7 @@ export class PearsonCorrelation extends ASimilarityMeasure {
       if ((item.y === undefined) || (item.y === null) || (Number.isNaN(item.y))) {
         valid = false;
       }
-      return valid; 
+      return valid;
     });
 
     const n = validPoints.length;
@@ -596,7 +596,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
 
   public async calc(set1: Array<any>, set2: Array<any>) {
     await sleep(0);
-    
+
     if (set1.length !== set2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
@@ -611,10 +611,10 @@ export class EnrichmentScore extends ASimilarityMeasure {
     let categories;
     // get destinct values
     const uniqueSet1 = set1.filter((item, index, self) => self.indexOf(item) === index);
-    const uniqueSet2 = set2.filter((item, index, self) => self.indexOf(item) === index);    
-    
+    const uniqueSet2 = set2.filter((item, index, self) => self.indexOf(item) === index);
+
     // define number and category sets
-    
+
     if((typeof set1[0] === 'number') && (typeof set2[0] === 'string')){
       numericSet = set1;
       categorySet = set2;
@@ -622,25 +622,25 @@ export class EnrichmentScore extends ASimilarityMeasure {
     }else if((typeof set1[0] === 'string') && (typeof set2[0] === 'number')){
       categorySet = set1;
       categories = uniqueSet1;
-      numericSet = set2;    
+      numericSet = set2;
     }else if(uniqueSet1.length < uniqueSet2.length)
     {
       if(isNaN(Number(set1[0])))
-      { // first element of set 1 is NOT a number 
+      { // first element of set 1 is NOT a number
         categorySet = set1;
         categories = uniqueSet1;
-        numericSet = set2;    
-      } else { // first element of set 1 is a number 
+        numericSet = set2;
+      } else { // first element of set 1 is a number
         categorySet = set2;
         categories = uniqueSet2;
         numericSet = set1;
       }
     } else {
-      if (isNaN(Number(set2[0]))) { // first element of set 2 is NOT a number 
+      if (isNaN(Number(set2[0]))) { // first element of set 2 is NOT a number
         categorySet = set2;
         categories = uniqueSet2;
         numericSet = set1;
-      } else { // first element of set 2 is a number 
+      } else { // first element of set 2 is a number
         categorySet = set1;
         categories = uniqueSet1;
         numericSet = set2;
@@ -672,7 +672,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
       });
     }
 
-    
+
     const enrichmentScoreCategories = [];
     for (const propertyCategory of propertyCategories) {
       const currCategory = propertyCategory.name;
@@ -690,19 +690,19 @@ export class EnrichmentScore extends ASimilarityMeasure {
 
     // console.log('enrichmentScoreCategories: ',enrichmentScoreCategories);
     // console.log('overallScore: ',overallScore);
-    
+
     // console.log('sumCategories: ', sumCategories);
     // console.timeEnd('enrichment-'+id+'-time');
     // console.groupEnd();
 
     const properties = await this.calcPValuePermutation(numericSet, categorySet,enrichmentScoreCategories);
     const p = Math.min(...properties.map((item) => (item.pvalue)));
-    
+
     return measureResultObj(overallScore,p,properties); // async function --> returns promise
   }
 
   async calcPValuePermutation(numericSet: Array<any>, categorySet: Array<any>, actualScores: Array<any>): Promise<Array<{category: string,pvalue: number}>> {
-    const properties: Promise<Array<{category: string,pvalue: number}>> = new Promise((resolve, reject) => { 
+    const properties: Promise<Array<{category: string,pvalue: number}>> = new Promise((resolve, reject) => {
       const myWorker: Worker = new (<any>require('worker-loader?name=EnrichmentScorePermutation.js!./Workers/EnrichmentScorePermutation'))();
       WorkerManager.register(myWorker);
       myWorker.onmessage = function (event) { return event.data === null ? reject() : resolve(event.data);};
@@ -715,7 +715,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
   calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: string, amountCategory: number): {
     category: string,
     enrichmentScore: number} {
-    
+
     const propertiesCategory = {
       category: currCategory,
       values: [],
@@ -734,9 +734,9 @@ export class EnrichmentScore extends ASimilarityMeasure {
         currValue = currValue - termMinus;
       }
 
-      propertiesCategory.values.push(currValue);     
+      propertiesCategory.values.push(currValue);
     }
-    
+
 
     const min = Math.min(...propertiesCategory.values);
     const max = Math.max(...propertiesCategory.values);
