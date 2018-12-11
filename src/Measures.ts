@@ -659,7 +659,16 @@ export class EnrichmentScore extends ASimilarityMeasure {
     const uniqueSet2 = set2.filter((item, index, self) => self.indexOf(item) === index);    
     
     // define number and category sets
-    if(uniqueSet1.length < uniqueSet2.length)
+    
+    if((typeof set1[0] === 'number') && (typeof set2[0] === 'string')){
+      numericSet = set1;
+      categorySet = set2;
+      categories = uniqueSet2;
+    }else if((typeof set1[0] === 'string') && (typeof set2[0] === 'number')){
+      categorySet = set1;
+      categories = uniqueSet1;
+      numericSet = set2;    
+    }else if(uniqueSet1.length < uniqueSet2.length)
     {
       if(isNaN(Number(set1[0])))
       { // first element of set 1 is NOT a number 
@@ -740,6 +749,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
     // console.groupEnd();
 
     const properties = await this.calcPValuePermutation(numericSet, categorySet,enrichmentScoreCategories);
+    console.log('enrichmentScore - pvalue - properties',properties);
     const p = Math.min(...properties.map((item) => (item.pvalue)));
     
     return measureResultObj(overallScore,p,properties); // async function --> returns promise

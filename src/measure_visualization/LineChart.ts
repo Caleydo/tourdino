@@ -63,12 +63,13 @@ export class LineChart implements IMeasureVisualization{
       for(let c=0; c<categories.length; c++)
       {
         const currCategory = categories[c].name;
+        const currCategoryLabel = categories[c].label;
         const amountCategory = categories[c].amount;
         const termPlus = Math.sqrt((amountItems-amountCategory)/amountCategory);
         const termMinus = Math.sqrt(amountCategory/(amountItems-amountCategory));
 
         if(i==0){
-          let temp = {category: currCategory,
+          let temp = {category: currCategoryLabel,
                       color: categories[c].color,
                       pvalue: categories[c].pvalue,
                       values: []};
@@ -120,7 +121,8 @@ export class LineChart implements IMeasureVisualization{
 
 
     let domainSpace = 0.01; //add space to domain so that the data points are not on the axis
-    let xDomain = [Math.min(...numericSet),Math.max(...numericSet)];
+    const xValue = validCombinedSet.map((item => (item.value)));
+    let xDomain = [Math.min(...xValue),Math.max(...xValue)];
     let yDomain = [Math.min(...minMaxValues),Math.max(...minMaxValues)];
 
     if(yDomain[0] === yDomain[1])
@@ -207,8 +209,7 @@ export class LineChart implements IMeasureVisualization{
     // line function
     let line = d3.svg.line()
                         .x(d => xMap(d))
-                        .y(d => yMap(d))
-                        .interpolate("basis");
+                        .y(d => yMap(d));
 
     // svg canvas
     let svgCanvas = miniVisualisation.append('svg')
@@ -248,12 +249,7 @@ export class LineChart implements IMeasureVisualization{
                     .style('text-anchor', 'middle')
                     .text(formatData.yLabel);
 
-    // add baseline at 0
-    svgFigureGroup.append('g')
-                  .attr('class', 'baseline')
-                  .append('path')
-                      .attr('d',line(baseline))
-                      .style('stroke','black');
+
     
     // data lines
     svgFigureGroup.append('g')
@@ -283,6 +279,14 @@ export class LineChart implements IMeasureVisualization{
                                           .style('display','none')
                                           .style('opacity', 0);
                       });
+
+
+    // add baseline at 0
+    svgFigureGroup.append('g')
+                  .attr('class', 'baseline')
+                  .append('path')
+                    .attr('d',line(baseline))
+                    .style('stroke','black');                  
 
     let svgScorePoints = svgFigureGroup.append('g')
                                        .attr('class', 'score-datapoints');
