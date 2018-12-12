@@ -470,7 +470,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     const adjIndex = (index - expectedIndex) / (maxIndex - expectedIndex);
 
     const p = await this.calcP_Randomize(arr1, arr2);
-    return measureResultObj(adjIndex, p); // async function --> returns promise
+    return measureResultObj(adjIndex, p, this.id); // async function --> returns promise
   }
   
   async calcP_Randomize(arr1: any[], arr2: any[]): Promise<number> {

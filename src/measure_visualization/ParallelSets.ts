@@ -3,68 +3,189 @@ import * as d3 from 'd3';
 import 'd3.parsets';
 
 
+interface IFormatedDataParallelSet {
+  dimension1: string,
+  dimension2: string,
+  data: Array<any>
+}
+
 export class ParallelSets implements IMeasureVisualization{
 
-  private formatData(setParameters: ISetParameters)
+  private formatData(setParameters: ISetParameters, IsAdjRand: boolean): IFormatedDataParallelSet
   {
     // console.log('Parallel Sets - formatData');
-      const num = setParameters.setB.length;
+    if(IsAdjRand) {
 
-      let label = ''
-      if(setParameters.setBCategory) {
-        label = setParameters.setBCategory;
+      const dimension1 = setParameters.setBDesc.label;
+      const dimension2 = setParameters.setADesc.label;
+
+      const data = this.formatDataAdjRand(setParameters, dimension1, dimension2);
+
+      return {'dimension1': dimension1, 'dimension2': dimension2, 'data':data};
+    }else {
+
+      const dimension1 = setParameters.setBDesc.label+'\uFEFF'; //append ZERO WIDTH NO-BREAK SPACE --> so that both dimension can be Selection
+      const dimension2 = (setParameters.setACategory === 'Selected' || setParameters.setACategory === 'Unselected') ? 'Selection' : 'Stratification Groups';
+      const data = this.formatDataSelectionAgainstCatOrGroup(setParameters, dimension1, dimension2);
+
+      return {'dimension1': dimension1, 'dimension2': dimension2, 'data':data};
+    }
+  }
+
+  private formatDataSelectionAgainstCatOrGroup(setParameters: ISetParameters, dimension1: string, dimension2: string): any
+  {
+    // console.log('Parallel Sets - formatDataSelectionAgainstCatOrGroup');
+    const num = setParameters.setB.length;
+
+    let label = ''
+    if(setParameters.setBCategory) {
+      label = setParameters.setBCategory;
+    }
+    if(setParameters.setBCategory && setParameters.setBCategory.label){
+      label = setParameters.setBCategory.label;
+    }
+
+    let diffLable = '';
+    if (setParameters.setBDesc && setParameters.setBDesc.categories){
+      const category = setParameters.setBDesc.categories.filter((item) => (item.name === label))[0];
+      diffLable = (category === undefined || category === null) ? '' : category.label;
+    }
+
+
+    let currCategoryParts : any = {
+      attributeLabel: setParameters.setBDesc.label,
+      categoryLabel: diffLable === '' ? label : diffLable,
+      categoryAmount: num,
+      parts: {}
+    };
+
+    const currHeaderNum = setParameters.setA.length;
+
+    const {intersection: intersect} = intersection(setParameters.setA,setParameters.setB);
+    const numHeader = intersect.length;
+    
+    label = '';
+    if(setParameters.setACategory) {
+      label = setParameters.setACategory;
+    }
+    if(setParameters.setACategory && setParameters.setACategory.label){
+      label = setParameters.setACategory.label;
+    }
+
+    diffLable = '';
+    if (setParameters.setADesc && setParameters.setADesc.categories){
+      const category = setParameters.setADesc.categories.filter((item) => (item.name === label))[0];
+      diffLable = (category === undefined || category === null) ? '' : category.label;
+    }
+
+    const currCatForHead = {
+      label: diffLable === '' ? label : diffLable,
+      intersectionAmount: numHeader,
+      currHeaderAmount: currHeaderNum
+    };
+
+    currCategoryParts.parts = currCatForHead;
+
+    // create data
+    let data = [];
+
+    let pSDIntersection = {};
+    pSDIntersection['value'] = currCategoryParts.parts.intersectionAmount;
+    pSDIntersection[dimension1] = currCategoryParts.categoryLabel;
+    pSDIntersection[dimension2] = currCategoryParts.parts.label;
+    if((pSDIntersection as any).value > 0){
+      data.push(pSDIntersection);
+    }
+
+    let pSDCategoryOther = {};
+    pSDCategoryOther['value'] = currCategoryParts.categoryAmount - currCategoryParts.parts.intersectionAmount;
+    pSDCategoryOther[dimension1] = currCategoryParts.categoryLabel;
+    pSDCategoryOther[dimension2] = 'Others';
+    if((pSDCategoryOther as any).value > 0){
+      data.push(pSDCategoryOther);
+    }
+
+    let pSDOtherCategory = {};
+    pSDOtherCategory['value'] = currCategoryParts.parts.currHeaderAmount - currCategoryParts.parts.intersectionAmount;
+    pSDOtherCategory[dimension1] = 'Others';
+    pSDOtherCategory[dimension2] = currCategoryParts.parts.label;
+    if((pSDOtherCategory as any).value > 0){
+      data.push(pSDOtherCategory);
+    }
+
+
+    return data;
+  }
+
+  private formatDataAdjRand(setParameters: ISetParameters, dimension1: string, dimension2: string): any
+  {
+    console.log('Parallel Sets - formatDataAdjRand');
+    const len = setParameters.setA.length;
+    let setA = [];
+    let setB = [];
+    for(let i=0; i<len; i++) {
+      setA.push({id: i, value: setParameters.setA[i]});
+      setB.push({id: i, value: setParameters.setB[i]});
+    }
+
+    const dim1 = setParameters.setADesc.label;
+    let setACategories = setParameters.setA.filter((item, index, self) => self.indexOf(item) === index);
+    const dim2 = setParameters.setBDesc.label;
+    let setBCategories = setParameters.setB.filter((item, index, self) => self.indexOf(item) === index);
+
+    let parts = [];
+    for (const categoryA of setACategories) {
+      const currCatAIds = setA.filter((item) => (item.value === categoryA)).map((item) => (item.id));
+      const categoryALabel = setParameters.setADesc.categories.filter((item) => (item.name === categoryA))[0].label;
+
+      for (const categoryB of setBCategories) {
+        const currCatBIds = setB.filter((item) => (item.value === categoryB)).map((item) => (item.id));
+        const categoryBLabel = setParameters.setBDesc.categories.filter((item) => (item.name === categoryB))[0].label;
+        
+        const intersect = intersection(currCatAIds,currCatBIds);
+        const amounts = {
+          intersectAmount: intersect.intersection.length,
+          setARestAmount: intersect.arr1.length,
+          setBRestAmount: intersect.arr2.length};
+
+        if(amounts.intersectAmount > 0) {
+          parts.push({
+            dim1: dim1,
+            cat1: categoryALabel,
+            amountCat1: currCatAIds.length,
+            dim2: dim2,
+            cat2: categoryBLabel,
+            amountCat2: currCatBIds.length, 
+            intersection: amounts
+          });
+        }
       }
-      if(setParameters.setBCategory && setParameters.setBCategory.label){
-        label = setParameters.setBCategory.label;
-      }
 
-      let diffLable = '';
-      if (setParameters.setBDesc && setParameters.setBDesc.categories){
-        const category = setParameters.setBDesc.categories.filter((item) => (item.name === label))[0];
-        diffLable = (category === undefined || category === null) ? '' : category.label;
-      }
+    }
 
+    console.log('parts: ',parts);
 
-      let currCategoryParts = {
-        attributeLabel: setParameters.setBDesc.label,
-        categoryLabel: diffLable === '' ? label : diffLable,
-        categoryAmount: num,
-        parts: {}
-      };
+    let data = [];
 
-      const currHeaderNum = setParameters.setA.length;
-
-      const {intersection: intersect} = intersection(setParameters.setA,setParameters.setB);
-      const numHeader = intersect.length;
+    for (const part of parts) {
+      let dataItem = {};
+      dataItem['value'] = part.intersection.intersectAmount;
+      dataItem[part.dim1] = part.cat1;
+      dataItem[part.dim2] = part.cat2;
       
-      label = '';
-      if(setParameters.setACategory) {
-        label = setParameters.setACategory;
-      }
-      if(setParameters.setACategory && setParameters.setACategory.label){
-        label = setParameters.setACategory.label;
-      }
+      data.push(dataItem);
+    }
 
-      diffLable = '';
-      if (setParameters.setADesc && setParameters.setADesc.categories){
-        const category = setParameters.setADesc.categories.filter((item) => (item.name === label))[0];
-        diffLable = (category === undefined || category === null) ? '' : category.label;
-      }
+    return data;
 
-      const currCatForHead = {
-        label: diffLable === '' ? label : diffLable,
-        intersectionAmount: numHeader,
-        currHeaderAmount: currHeaderNum
-      };
-
-      currCategoryParts.parts = currCatForHead;
-
-    return currCategoryParts;
   }
 
   public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, score: IMeasureResult)
   {
-    let formatData = this.formatData(setParameters) as any;
+    const IsAdjRand = (score.additionalData && score.additionalData === 'adjrand');
+    
+    let formatData = this.formatData(setParameters, IsAdjRand) as any;
+  
     console.log('Parallel Sets - generateVisualization',{setParameters,formatData});
 
     // delete old tooltip
@@ -78,44 +199,12 @@ export class ParallelSets implements IMeasureVisualization{
     // console.log('width: ',width);
 
 
-    //dimensions for the parallel sets
-    //added prefix of dimension, otherwise the parallel sets can't be drawn with the same dimension twice
-    let dimension1 = setParameters.setBDesc.label+'\uFEFF'; //append ZERO WIDTH NO-BREAK SPACE 
-    let dimension2 = (setParameters.setACategory === 'Selected') ? 'Selection' : 'Stratification Groups';
-
-    let parSetData = [];
-
-          let pSDIntersection = {};
-          pSDIntersection['value'] = formatData.parts.intersectionAmount;
-          pSDIntersection[dimension1] = formatData.categoryLabel;
-          pSDIntersection[dimension2] = formatData.parts.label;
-          if((pSDIntersection as any).value > 0){
-            parSetData.push(pSDIntersection);
-          }
-
-          let pSDCategoryOther = {};
-          pSDCategoryOther['value'] = formatData.categoryAmount - formatData.parts.intersectionAmount;
-          pSDCategoryOther[dimension1] = formatData.categoryLabel;
-          pSDCategoryOther[dimension2] = 'Others';
-          if((pSDCategoryOther as any).value > 0){
-            parSetData.push(pSDCategoryOther);
-          }
-
-          let pSDOtherCategory = {};
-          pSDOtherCategory['value'] = formatData.parts.currHeaderAmount - formatData.parts.intersectionAmount;
-          pSDOtherCategory[dimension1] = 'Others';
-          pSDOtherCategory[dimension2] = formatData.parts.label;
-          if((pSDOtherCategory as any).value > 0){
-            parSetData.push(pSDOtherCategory);
-          }
-
-
-    console.log('ParSets - data: ', parSetData);
+    console.log('ParSets - formatData.data: ', formatData.data);
 
     // console.log('SVG Conatiner - width: ',width);
     let chart = (<any>d3).parsets()
       .tension(0.5) //[0 .. 1] -> 1 = straight line 
-      .dimensions([dimension1, dimension2])
+      .dimensions([formatData.dimension1, formatData.dimension2])
       .value(function (d) {return d.value;})
       .width(svgWidth)
       .height(svgHeight)
@@ -133,56 +222,64 @@ export class ParallelSets implements IMeasureVisualization{
                                               // .attr('height', chart.height() + svg2DimLabelHeight);
     
     // draw parallel sets
-    svgFigureGroup.datum(parSetData).call(chart);
+    svgFigureGroup.datum(formatData.data).call(chart);
 
     // add class to tooltip
     d3.select("body").selectAll("div.parsets.tooltip").classed('measure',true);
 
-    //rotation um 90 von den SVG parallel sets
-    //svgFigureGroup.attr('transform','rotate(-90) translate(-'+width+',0)');
-
-    let svgRibbons = svgFigureGroup.selectAll('g.ribbon');
-    // console.log('svgRibon: ',svgRibbons);
-
-    const category = setParameters.setBDesc.categories.filter((item) => (item.name === setParameters.setBCategory))[0];
-    const categoryLabel = (category === undefined || category === null) ? setParameters.setBCategory.label : category.label;
-
-    
-    const columnTable = setParameters.setADesc.categories.filter((item) => (item.name === setParameters.setACategory))[0];
-    const columnLabel = (columnTable === undefined || columnTable === null) ? setParameters.setACategory.label : columnTable.label;
-
-    //highlight and color ribbons
-    this.highlightAndColorParSetsRibbons(setParameters, svgRibbons, dimension1, categoryLabel, columnLabel);
-    svgFigureGroup.selectAll('g.ribbon-mouse').remove();
-    svgRibbons.on('.drag',null)
-
-    //move label dimensions underneath parallel sets
+    // edit dimensions
     let svgDimensions = svgFigureGroup.selectAll('g.dimension');
-    this.moveParSetsDimensionLabels(svgDimensions);
+    // remove interactions for the dimensions
     svgDimensions.selectAll('text.dimension').selectAll('tspan.sort').remove();
     svgDimensions.on('.drag', null);
     svgDimensions.selectAll('g.category').on('.drag', null);
+    // move label dimensions underneath parallel sets
+    this.moveParSetsDimensionLabels(svgDimensions);
+
+
+    // edit ribbons
+    let svgRibbons = svgFigureGroup.selectAll('g.ribbon');
+    // console.log('svgRibon: ',svgRibbons);
+
+    // remove interations for the ribbons
+    svgFigureGroup.selectAll('g.ribbon-mouse').remove();
+    svgRibbons.on('.drag',null);
+
+    // coloring of the ribbons
+    if(IsAdjRand) {
+      this.colorRibbonsAdjRand(setParameters, svgRibbons, formatData.dimension1);
+    }else {
+      this.highlightAndColorRibbons(setParameters, svgRibbons, formatData.dimension1);
+    }
+    
   }
 
 
   // sets the ribbon color and highlights the selected on in the parallel sets vis
-  private highlightAndColorParSetsRibbons(setParameters: ISetParameters, svgRibbons: d3.Selection<any>, dimensionName: string, category: string, tableColumn: string)
+  private highlightAndColorRibbons(setParameters: ISetParameters, svgRibbons: d3.Selection<any>, dimensionName: string)
   {
-    console.log('highlight and color ribbons: ', {setParameters, svgRibbons, dimensionName, category, tableColumn});
-    //highlight current path
-    let svgPaths = svgRibbons.selectAll('path')
+    console.log('highlight and color ribbons: ', {setParameters, svgRibbons, dimensionName});
+    
+    const category = setParameters.setBDesc.categories.filter((item) => (item.name === setParameters.setBCategory))[0];
+    const categoryLabel = (category === undefined || category === null) ? setParameters.setBCategory.label : category.label;
+
+    const columnTable = setParameters.setADesc.categories.filter((item) => (item.name === setParameters.setACategory))[0];
+    const columnLabel = (columnTable === undefined || columnTable === null) ? setParameters.setACategory.label : columnTable.label;
+
+    //highlight and color paths
+    svgRibbons.selectAll('path')
       .each(function (d) {
         d3.select(this).classed('selected', false);
 
         //the path between the selected row and column will be marked as selected (higher opacity)
-        if ((d.parent.name === category && d.node.name === tableColumn) || (d.parent.name === tableColumn && d.node.name === category)) {
+        if ((d.parent.name === categoryLabel && d.node.name === columnLabel) || (d.parent.name === columnLabel && d.node.name === categoryLabel)) {
           d3.select(this).classed('selected', true);
         }
 
         if (setParameters.setBDesc.categories && setParameters.setBDesc.categories.filter((a) => (a.name===setParameters.setBCategory)).length === 1 ){
           
           //all paths connected to the category of the dimension will be coloured in category's color
-          if((d.parent.dimension === dimensionName && d.parent.name === category) || (d.node.dimension === dimensionName && d.node.name === category)){
+          if((d.parent.dimension === dimensionName && d.parent.name === categoryLabel) || (d.node.dimension === dimensionName && d.node.name === categoryLabel)){
             const color = setParameters.setBDesc.categories.filter((a) => (a.name===setParameters.setBCategory))[0].color;
             if (color !== null) {
               d3.select(this).style('fill', color);
@@ -194,7 +291,7 @@ export class ParallelSets implements IMeasureVisualization{
         }else{
           if (setParameters.setBCategory && setParameters.setBCategory.color) {
             const color = setParameters.setBCategory.color;
-            if((d.parent.dimension === dimensionName && d.parent.name === category) || (d.node.dimension === dimensionName && d.node.name === category)){
+            if((d.parent.dimension === dimensionName && d.parent.name === categoryLabel) || (d.node.dimension === dimensionName && d.node.name === categoryLabel)){
               d3.select(this).style('fill', color);
               d3.select(this).style('stroke', color);
             }else {
@@ -202,15 +299,37 @@ export class ParallelSets implements IMeasureVisualization{
             }
           }else {
           d3.select(this).classed('category-selected',true); //make all selected
-            if((d.parent.name === 'Others' && d.node.name !== category) || (d.node.name === 'Others' && d.parent.name !== category)) {
+            if((d.parent.name === 'Others' && d.node.name !== categoryLabel) || (d.node.name === 'Others' && d.parent.name !== categoryLabel)) {
               //only the path between others and not the current category are coloured gray
               d3.select(this).classed('category-selected',false);
               d3.select(this).classed('category-gray',true);
             }
           }
         }
-        console.log('path.this: ', d3.select(this));
-        console.log('path.d: ',d);
+        // console.log('path.this: ', d3.select(this));
+        // console.log('path.d: ',d);
+      });
+  }
+
+  private colorRibbonsAdjRand(setParameters: ISetParameters, svgRibbons: d3.Selection<any>, dimensionName: string)
+  {
+    const categories = setParameters.setBDesc.categories;
+    svgRibbons.selectAll('path')
+      .each(function (d) {
+
+        let categoryName = '';
+        if (d.node.dimension === dimensionName) {
+          categoryName = d.node.name;
+        }else {
+          categoryName = d.parent.name;
+        }
+
+        const color = categories.filter((item) => (item.label === categoryName))[0].color;
+        d3.select(this).style('fill', color);
+        d3.select(this).style('stroke', color);
+
+        // console.log('path.this: ', d3.select(this));
+        // console.log('path.d: ',d);
       });
   }
 
