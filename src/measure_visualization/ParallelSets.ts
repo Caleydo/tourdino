@@ -18,10 +18,16 @@ export class ParallelSets implements IMeasureVisualization{
         label = setParameters.setBCategory.label;
       }
 
+      let diffLable = '';
+      if (setParameters.setBDesc && setParameters.setBDesc.categories){
+        const category = setParameters.setBDesc.categories.filter((item) => (item.name === label))[0];
+        diffLable = (category === undefined || category === null) ? '' : category.label;
+      }
+
 
       let currCategoryParts = {
         attributeLabel: setParameters.setBDesc.label,
-        categoryLabel: label,
+        categoryLabel: diffLable === '' ? label : diffLable,
         categoryAmount: num,
         parts: {}
       };
@@ -31,15 +37,22 @@ export class ParallelSets implements IMeasureVisualization{
       const {intersection: intersect} = intersection(setParameters.setA,setParameters.setB);
       const numHeader = intersect.length;
       
-
+      label = '';
       if(setParameters.setACategory) {
         label = setParameters.setACategory;
       }
       if(setParameters.setACategory && setParameters.setACategory.label){
         label = setParameters.setACategory.label;
       }
+
+      diffLable = '';
+      if (setParameters.setADesc && setParameters.setADesc.categories){
+        const category = setParameters.setADesc.categories.filter((item) => (item.name === label))[0];
+        diffLable = (category === undefined || category === null) ? '' : category.label;
+      }
+
       const currCatForHead = {
-        label: label,
+        label: diffLable === '' ? label : diffLable,
         intersectionAmount: numHeader,
         currHeaderAmount: currHeaderNum
       };
@@ -52,7 +65,7 @@ export class ParallelSets implements IMeasureVisualization{
   public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, score: IMeasureResult)
   {
     let formatData = this.formatData(setParameters) as any;
-    // console.log('Parallel Sets - generateVisualization');
+    console.log('Parallel Sets - generateVisualization',{setParameters,formatData});
 
     // delete old tooltip
     let tooltipParSets = d3.select("body").selectAll("div.parsets.tooltip").remove();
@@ -131,8 +144,15 @@ export class ParallelSets implements IMeasureVisualization{
     let svgRibbons = svgFigureGroup.selectAll('g.ribbon');
     // console.log('svgRibon: ',svgRibbons);
 
+    const category = setParameters.setBDesc.categories.filter((item) => (item.name === setParameters.setBCategory))[0];
+    const categoryLabel = (category === undefined || category === null) ? setParameters.setBCategory.label : category.label;
+
+    
+    const columnTable = setParameters.setADesc.categories.filter((item) => (item.name === setParameters.setACategory))[0];
+    const columnLabel = (columnTable === undefined || columnTable === null) ? setParameters.setACategory.label : columnTable.label;
+
     //highlight and color ribbons
-    this.highlightAndColorParSetsRibbons(setParameters, svgRibbons, dimension1, setParameters.setBCategory, setParameters.setACategory);
+    this.highlightAndColorParSetsRibbons(setParameters, svgRibbons, dimension1, categoryLabel, columnLabel);
     svgFigureGroup.selectAll('g.ribbon-mouse').remove();
     svgRibbons.on('.drag',null)
 
@@ -142,45 +162,13 @@ export class ParallelSets implements IMeasureVisualization{
     svgDimensions.selectAll('text.dimension').selectAll('tspan.sort').remove();
     svgDimensions.on('.drag', null);
     svgDimensions.selectAll('g.category').on('.drag', null);
-
-    //highlight label of current path
-    this.highlightParSetsSelectedLabel(setParameters, svgDimensions, setParameters.setBCategory);
   }
- 
-  // highlights the backgroud colour of the label of the selected category in parallel sets vis
-  private highlightParSetsSelectedLabel(setParameters: ISetParameters, svgDimensions: d3.Selection<any>, category: string)
-  {
-    // console.log('highlight dimension labels: ', {svgDimensions, category});
 
-    //highlight label of current path
-    svgDimensions.selectAll('g')
-    .each(function (d) {
-      // console.log('dim.g.d: ',d);
-      // console.log('dim.g.this: ',d3.select(this));
-
-      //unhiglight all rect for labels
-      d3.select(this).select('rect').classed('selected', false);
-    
-      //highlight rect of label for the selected category
-      if (d.name === category) {
-        d3.select(this).select('rect').classed('selected', true);
-        if (setParameters.setBDesc.categories && setParameters.setBDesc.categories.filter((a) => (a.label===setParameters.setBCategory)).length === 1 ){
-          let color = setParameters.setBDesc.categories.filter((a) => (a.label===setParameters.setBCategory))[0].color;
-          if (color !== null) {
-            d3.select(this).select('rect').style('fill', color);
-          }
-        }else{
-          d3.select(this).select('rect').style('fill', '#fba74d');
-        }
-      }
-
-    });  
-  }
 
   // sets the ribbon color and highlights the selected on in the parallel sets vis
   private highlightAndColorParSetsRibbons(setParameters: ISetParameters, svgRibbons: d3.Selection<any>, dimensionName: string, category: string, tableColumn: string)
   {
-    // console.log('highlight and color ribbons: ', {svgRibbons, dimensionName, category, tableColumn});
+    console.log('highlight and color ribbons: ', {setParameters, svgRibbons, dimensionName, category, tableColumn});
     //highlight current path
     let svgPaths = svgRibbons.selectAll('path')
       .each(function (d) {
@@ -191,11 +179,11 @@ export class ParallelSets implements IMeasureVisualization{
           d3.select(this).classed('selected', true);
         }
 
-        if (setParameters.setBDesc.categories && setParameters.setBDesc.categories.filter((a) => (a.label===setParameters.setBCategory)).length === 1 ){
+        if (setParameters.setBDesc.categories && setParameters.setBDesc.categories.filter((a) => (a.name===setParameters.setBCategory)).length === 1 ){
           
           //all paths connected to the category of the dimension will be coloured in category's color
           if((d.parent.dimension === dimensionName && d.parent.name === category) || (d.node.dimension === dimensionName && d.node.name === category)){
-            let color = setParameters.setBDesc.categories.filter((a) => (a.label===setParameters.setBCategory))[0].color;
+            const color = setParameters.setBDesc.categories.filter((a) => (a.name===setParameters.setBCategory))[0].color;
             if (color !== null) {
               d3.select(this).style('fill', color);
               d3.select(this).style('stroke', color);
@@ -204,15 +192,25 @@ export class ParallelSets implements IMeasureVisualization{
             d3.select(this).attr('class','category-gray');
           }
         }else{
+          if (setParameters.setBCategory && setParameters.setBCategory.color) {
+            const color = setParameters.setBCategory.color;
+            if((d.parent.dimension === dimensionName && d.parent.name === category) || (d.node.dimension === dimensionName && d.node.name === category)){
+              d3.select(this).style('fill', color);
+              d3.select(this).style('stroke', color);
+            }else {
+              d3.select(this).classed('category-gray',true);
+            }
+          }else {
           d3.select(this).classed('category-selected',true); //make all selected
-          if((d.parent.name === 'Others' && d.node.name !== category) || (d.node.name === 'Others' && d.parent.name !== category)) {
-            //only the path between others and not the current category are coloured gray
-            d3.select(this).classed('category-selected',false);
-            d3.select(this).classed('category-gray',true);
+            if((d.parent.name === 'Others' && d.node.name !== category) || (d.node.name === 'Others' && d.parent.name !== category)) {
+              //only the path between others and not the current category are coloured gray
+              d3.select(this).classed('category-selected',false);
+              d3.select(this).classed('category-gray',true);
+            }
           }
         }
-        // console.log('path.this: ', d3.select(this));
-        // console.log('path.d: ',d);
+        console.log('path.this: ', d3.select(this));
+        console.log('path.d: ',d);
       });
   }
 
