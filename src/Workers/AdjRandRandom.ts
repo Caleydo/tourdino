@@ -49,7 +49,7 @@ function calcAdjRand(arr1: Array<any>, arr2: Array<any>) : number {
 
 ctx.onmessage = (event) => {
   try {
-    let setA: Array<any> = event.data.setA; 
+    let setA: Array<any> = event.data.setA;
     let setB: Array<any> = event.data.setB;
 
     const actualScore = calcAdjRand(setA, setB);
