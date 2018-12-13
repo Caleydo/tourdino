@@ -29,7 +29,7 @@ function calc(setNumber: Array<any>, setCategory: Array<any>) {
     })
   }
 
-  
+
   let enrichmentScoreCategories = [];
 
   for(let i=0; i<propertyCategories.length; i++)
@@ -47,7 +47,7 @@ function calc(setNumber: Array<any>, setCategory: Array<any>) {
 function calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: string, amountCategory: number): {
   category: string,
   enrichmentScore: number} {
-  
+
   let propertiesCategory = {
     category: currCategory,
     values: [],
@@ -68,9 +68,9 @@ function calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: stri
       currValue = currValue - termMinus;
     }
 
-    propertiesCategory.values.push(currValue);     
+    propertiesCategory.values.push(currValue);
   }
-  
+
 
   const min = Math.min(...propertiesCategory.values);
   const max = Math.max(...propertiesCategory.values);
@@ -100,19 +100,19 @@ ctx.onmessage = function (event) {
     let rndScores = [];
     for (let idx=0; idx<permutations; idx++) {
       // permutate the category set
-      // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle 
+      // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
       for(let i=n-1; i>0; i--){
         let k = getRandomInt(0,i);
         let tmp = setCategory[i];
-        setCategory[i] = setCategory[k]; 
+        setCategory[i] = setCategory[k];
         setCategory[k] = tmp;
       }
       rndScores.push(calc(setNumber, setCategory));
 
     }
-    
+
     let properties = []
-    
+
     // calculate the p-value for each category
     for(let i=0; i<categories.length; i++)
     {
@@ -135,7 +135,7 @@ ctx.onmessage = function (event) {
       properties.push(tmp)
     }
 
-    // console.log('Enrichment Score - Permutation: ', {actualScores,properties});      
+    // console.log('Enrichment Score - Permutation: ', {actualScores,properties});
     // const p = Math.max(...properties.map((item) => (item.pvalue)));
 
     ctx.postMessage(properties)
