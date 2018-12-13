@@ -258,7 +258,7 @@ export class ParallelSets implements IMeasureVisualization{
   // sets the ribbon color and highlights the selected on in the parallel sets vis
   private highlightAndColorRibbons(setParameters: ISetParameters, svgRibbons: d3.Selection<any>, dimensionName: string)
   {
-    console.log('highlight and color ribbons: ', {setParameters, svgRibbons, dimensionName});
+    // console.log('highlight and color ribbons: ', {setParameters, svgRibbons, dimensionName});
     
     const category = setParameters.setBDesc.categories.filter((item) => (item.name === setParameters.setBCategory))[0];
     const categoryLabel = (category === undefined || category === null) ? setParameters.setBCategory.label : category.label;
