@@ -1,4 +1,4 @@
-import {IMeasureVisualization, intersection, ISetParameters, IMeasureResult, getRoundedNumberWithDigitsAfterDeciaml} from '../';
+import {IMeasureVisualization, intersection, ISetParameters, IMeasureResult} from '../';
 import * as d3 from 'd3';
 import 'd3.parsets';
 
