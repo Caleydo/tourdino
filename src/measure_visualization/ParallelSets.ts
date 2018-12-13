@@ -1,4 +1,4 @@
-import {IMeasureVisualization, intersection, ISetParameters, IMeasureResult} from '../';
+import {IMeasureVisualization, intersection, ISetParameters, IMeasureResult, getRoundedNumberWithDigitsAfterDeciaml} from '../';
 import * as d3 from 'd3';
 import 'd3.parsets';
 
@@ -182,11 +182,11 @@ export class ParallelSets implements IMeasureVisualization{
 
   public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, score: IMeasureResult)
   {
-    const IsAdjRand = (score.additionalData && score.additionalData === 'adjrand');
+    const IsAdjRand = (score.additionalData && score.additionalData === 'adjrand') ? true : false;
     
     let formatData = this.formatData(setParameters, IsAdjRand) as any;
   
-    console.log('Parallel Sets - generateVisualization',{setParameters,formatData});
+    console.log('Parallel Sets - generateVisualization',{setParameters, score, formatData, IsAdjRand});
 
     // delete old tooltip
     let tooltipParSets = d3.select("body").selectAll("div.parsets.tooltip").remove();
@@ -199,7 +199,7 @@ export class ParallelSets implements IMeasureVisualization{
     // console.log('width: ',width);
 
 
-    console.log('ParSets - formatData.data: ', formatData.data);
+    // console.log('ParSets - formatData.data: ', formatData.data);
 
     // console.log('SVG Conatiner - width: ',width);
     let chart = (<any>d3).parsets()

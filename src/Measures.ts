@@ -465,7 +465,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
 
     if (0 === (maxIndex - expectedIndex)) {
       // division by zero --> adj_index = NaN
-      return measureResultObj(1, Number.NaN);
+      return measureResultObj(1, Number.NaN, this.id);
     }
     const adjIndex = (index - expectedIndex) / (maxIndex - expectedIndex);
 
