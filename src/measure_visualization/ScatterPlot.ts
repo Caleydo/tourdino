@@ -2,37 +2,37 @@ import {IMeasureVisualization, ISetParameters, IMeasureResult} from '../';
 import * as d3 from 'd3';
 
 
-export class ScatterPlot implements IMeasureVisualization{
+export class ScatterPlot implements IMeasureVisualization {
 
-  private formatData(setParameters: ISetParameters)
-  {
+  private formatData(setParameters: ISetParameters) {
     // data points
-    let dataPoints = [];
+    const dataPoints = [];
+    // tslint:disable-next-line:prefer-for-of
     for(let i=0; i<setParameters.setA.length; i++) {
       dataPoints.push({x: setParameters.setA[i],
-                      y: setParameters.setB[i]})
+                      y: setParameters.setB[i]});
     }
 
-    let validDataPoints = dataPoints.filter((item) => { 
+    const validDataPoints = dataPoints.filter((item) => {
       let valid = true;
       // x
-      if((item.x === undefined) || (item.x === null) || (Number.isNaN(item.x))){
+      if((item.x === undefined) || (item.x === null) || (Number.isNaN(item.x))) {
         valid = false;
       }
 
       // y
-      if((item.y === undefined) || (item.y === null) || (Number.isNaN(item.y))){
+      if((item.y === undefined) || (item.y === null) || (Number.isNaN(item.y))) {
         valid = false;
       }
-      return valid; 
+      return valid;
     });
 
     // domains
-    let domainSpace = 0.01; //add space to domain so that the data points are not on the axis
-    const xValue = validDataPoints.map((item => (item.x)));
-    const yValue = validDataPoints.map((item => (item.y)));
-    let xDomain = [Math.min(...xValue),Math.max(...xValue)];
-    let yDomain = [Math.min(...yValue),Math.max(...yValue)];
+    const domainSpace = 0.01; //add space to domain so that the data points are not on the axis
+    const xValue = validDataPoints.map(((item) => (item.x)));
+    const yValue = validDataPoints.map(((item) => (item.y)));
+    const xDomain = [Math.min(...xValue),Math.max(...xValue)];
+    const yDomain = [Math.min(...yValue),Math.max(...yValue)];
 
     // add space to x-domain
     xDomain[0] = Math.min(xDomain[0],0);
@@ -41,68 +41,67 @@ export class ScatterPlot implements IMeasureVisualization{
     yDomain[0] = Math.min(yDomain[0],0);
     yDomain[1] = yDomain[1];
 
-    let scatterPlot = {
-      dataPoints: validDataPoints,
-      xLabel: setParameters.setADesc.label,
-      xDomain: xDomain,
-      yLabel: setParameters.setBDesc.label,
-      yDomain: yDomain
-    }
+    const scatterPlot = {
+      'dataPoints': validDataPoints,
+      'xLabel': setParameters.setADesc.label,
+      'xDomain': xDomain,
+      'yLabel': setParameters.setBDesc.label,
+      'yDomain': yDomain
+    };
 
     return scatterPlot;
   }
 
-  public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, score: IMeasureResult)
-  {
-    let formatData = this.formatData(setParameters);
+  public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, score: IMeasureResult) {
+    const formatData = this.formatData(setParameters);
     console.log('Scatter Plot - generateVisualization', {setParameters, formatData});
 
     // remove old tooltip
     d3.select('body').selectAll('div.measure.tooltip').remove();
 
     // new tooltip
-    let tooltipScatterPlot = d3.select('body').append('div')
+    const tooltipScatterPlot = d3.select('body').append('div')
                                               .style('display', 'none')
                                               .style('opacity', 0)
                                               .attr('class', 'tooltip measure');
-    
+
 
     // get size of space and calculate scatter plot size
-    let containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
+    const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
 
-    let labelOffsetAxisX = 35;
-    let labelOffsetAxisY = 15;
-    let maxHeight = 220;
-    let margin = {top: 10, right: 20, bottom: 20+labelOffsetAxisX, left: 55+labelOffsetAxisY};
-    let width = containerWidth - margin.left - margin.right;
-    let height = maxHeight - margin.top - margin.bottom;
+    const labelOffsetAxisX = 35;
+    const labelOffsetAxisY = 15;
+    const maxHeight = 220;
+    const margin = {top: 10, right: 20, bottom: 20+labelOffsetAxisX, left: 55+labelOffsetAxisY};
+    const width = containerWidth - margin.left - margin.right;
+    const height = maxHeight - margin.top - margin.bottom;
 
     // x: scales + axis + map function for the data points
-    let xScale = d3.scale.linear().range([0, width]);
-    let xAxis = d3.svg.axis().scale(xScale).orient('bottom');
+    const xScale = d3.scale.linear().range([0, width]);
+    const xAxis = d3.svg.axis().scale(xScale).orient('bottom');
     xAxis.tickFormat((d) => {
-      if(Math.abs(d)<1000){
+      if(Math.abs(d)<1000) {
         return d;
       }
       return d3.format('0.1e')(d); });
-    let xMap = function(d) { return xScale(d.x);};
-    
+      const xMap = function(d) { return xScale(d.x);};
+
     // y: scale + axis + map function for the data points
-    let yScale = d3.scale.linear().range([height, 0]);
-    let yAxis = d3.svg.axis().scale(yScale).orient('left');
+    const yScale = d3.scale.linear().range([height, 0]);
+    const yAxis = d3.svg.axis().scale(yScale).orient('left');
     yAxis.tickFormat((d) => {
-      if(Math.abs(d)<1000){
+      if(Math.abs(d)<1000) {
         return d;
       }
       return d3.format('0.1e')(d); });
-    let yMap = function(d) { return yScale(d.y);};
+      const yMap = function(d) { return yScale(d.y);};
 
     // svg canvas
-    let svgCanvas = miniVisualisation.append('svg')
+    const svgCanvas = miniVisualisation.append('svg')
           .attr('width',width + margin.left + margin.right)
-          .attr('height',height + margin.top + margin.bottom);      
+          .attr('height',height + margin.top + margin.bottom);
 
-    let svgFigureGroup = svgCanvas.append('g')
+    const svgFigureGroup = svgCanvas.append('g')
                                   .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
                                   .attr('class','scatterplot');
 
@@ -144,7 +143,7 @@ export class ScatterPlot implements IMeasureVisualization{
       .attr('cx', xMap)
       .attr('cy', yMap)
       .on('mouseover', function(d) {
-                        let m = d3.mouse(d3.select('body').node());
+                        const m = d3.mouse(d3.select('body').node());
                         tooltipScatterPlot.transition()
                                           .duration(500)
                                           .style('display','block')
