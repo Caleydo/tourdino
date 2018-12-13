@@ -638,18 +638,16 @@ export class EnrichmentScore extends ASimilarityMeasure {
 
     // define number and category sets
 
-    if((typeof set1[0] === 'number') && (typeof set2[0] === 'string')){
+    if ((typeof set1[0] === 'number') && (typeof set2[0] === 'string')) {
       numericSet = set1;
       categorySet = set2;
       categories = uniqueSet2;
-    }else if((typeof set1[0] === 'string') && (typeof set2[0] === 'number')){
+    } else if ((typeof set1[0] === 'string') && (typeof set2[0] === 'number')) {
       categorySet = set1;
       categories = uniqueSet1;
       numericSet = set2;
-    }else if(uniqueSet1.length < uniqueSet2.length)
-    {
-      if(isNaN(Number(set1[0])))
-      { // first element of set 1 is NOT a number
+    } else if (uniqueSet1.length < uniqueSet2.length) {
+      if(isNaN(Number(set1[0]))) { // first element of set 1 is NOT a number
         categorySet = set1;
         categories = uniqueSet1;
         numericSet = set2;
