@@ -53,7 +53,7 @@ export class LineChart implements IMeasureVisualization {
     validCombinedSet.sort((a,b) => { return b.value - a.value;});
     // console.log('combineSet: ', validCombinedSet);
 
-    const dataLines = [];
+    let dataLines = [];
     //
     for(let i=0; i<validCombinedSet.length; i++) {
       for(let c=0; c<categories.length; c++) {
@@ -97,7 +97,23 @@ export class LineChart implements IMeasureVisualization {
       }
     }
 
+    // sort data lines from low to high
+    dataLines.sort((a,b) => { return a.pvalue - b.pvalue; });
     console.log('dataLines: ', dataLines);
+    const numbDataLines = dataLines.length;
+
+    // filter out all data lines with a p-value bigger than 0.05
+    const filteredDataLines = dataLines.filter((item) => (item.pvalue <= 0.05));
+    console.log('filteredDataLines: ', filteredDataLines);
+
+    // make sure at least one datarow will be displayed
+    if(filteredDataLines.length === 0) {
+      if(numbDataLines > 0) {
+        filteredDataLines.push(dataLines[0]);
+      }
+    }
+
+    dataLines = filteredDataLines;
 
     const minMaxValues = []; //for domains
 
@@ -113,6 +129,8 @@ export class LineChart implements IMeasureVisualization {
       dataLine.scorePos = dataLine.values.filter((item) => (item.y === score)).map((item) => (item.x));
     }
 
+    // sort data lines from hight to low (-> allows better hover capabilities)
+    dataLines.sort((a,b) => { return Math.abs(b.enrichmentScore) - Math.abs(a.enrichmentScore); });
 
     const domainSpace = 0.01; //add space to domain so that the data points are not on the axis
     const xValue = validCombinedSet.map(((item) => (item.value)));
