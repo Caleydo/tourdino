@@ -141,7 +141,7 @@ ctx.onmessage = function (event) {
     ctx.postMessage(properties)
   } catch(error) {
     console.error(`Cannot calculate Enrichment Score p-value.\tError Type: ${error.name}\tMessage: ${error.message}\nStackTrace: ${error.stack}`);
-    return ctx.postMessage(null);
+    return ctx.postMessage(Number.NaN);
   }
 
   self.close(); //Close worker as I only use it once
