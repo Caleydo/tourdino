@@ -49,13 +49,8 @@ function calcAdjRand(arr1: Array<any>, arr2: Array<any>) : number {
 
 ctx.onmessage = (event) => {
   try {
-<<<<<<< HEAD
-    let setA: Array<any> = event.data.setA;
-    let setB: Array<any> = event.data.setB;
-=======
     const setA: Array<any> = event.data.setA;
     const setB: Array<any> = event.data.setB;
->>>>>>> keckelt/6/pool
 
     const actualScore = calcAdjRand(setA, setB);
     const rndScores = new Array<number>(1000); // array with 1000 entries
