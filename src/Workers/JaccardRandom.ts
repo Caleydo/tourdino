@@ -39,6 +39,4 @@ ctx.onmessage = (event) => {
     console.error(`Cannot calculate Jaccard p-value.\tError Type: ${error.name}\tMessage: ${error.message}\nStackTrace: ${error.stack}`);
     return ctx.postMessage(Number.NaN);
   }
-
-  self.close(); //Close worker as I only use it once
 };

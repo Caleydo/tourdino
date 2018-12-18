@@ -10,6 +10,4 @@ ctx.onmessage = (event) => {
     console.error(`Cannot calculate p-value.\tError Type: ${error.name}\tMessage: ${error.message}\nStackTrace: ${error.stack}`);
     return ctx.postMessage(Number.NaN);
   }
-
-  self.close();
 };
