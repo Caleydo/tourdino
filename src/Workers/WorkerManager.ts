@@ -93,7 +93,7 @@ export abstract class ATouringWorker {
     }
   }
 
-  public async calculate(data: any): Promise<number> {
+  public async calculate(data: any): Promise<any> {
     return new Promise(async (resolve, reject) => {
       try {
         const actualWorker = await WorkerManager.getSlot(this);
