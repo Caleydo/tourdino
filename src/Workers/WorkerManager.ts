@@ -1,11 +1,10 @@
-
 /**
  * To store the promise together with its resolve/reject functions, so that we can call them somewhere else
  */
 interface IWorkerPromise {
   promise: Promise<Worker>;
-  resolve: (value?: Worker | PromiseLike<Worker>) => void;
-  reject: (value?: Worker | PromiseLike<Worker>) => void;
+  resolve: (value?: Worker) => void;
+  reject: (value?: Worker) => void;
 }
 
 
@@ -14,14 +13,14 @@ interface IWorkerPromise {
  */
 export class WorkerManager {
   private static workers = new Map<ATouringWorker, IWorkerPromise>();
-  private static readonly logicalProcessors = window.navigator.hardwareConcurrency; // https://developer.mozilla.org/en-US/docs/Web/API/NavigatorConcurrentHardware/hardwareConcurrency
+  public static readonly MAX_WORKERS = window.navigator.hardwareConcurrency; // https://developer.mozilla.org/en-US/docs/Web/API/NavigatorConcurrentHardware/hardwareConcurrency
 
   /**
    * Returns a worker when an execution slot is free.
    * @param tWorker
    */
   public static getSlot(tWorker: ATouringWorker): Promise<Worker> {
-    let resolveF, rejectF;
+    let resolveF: (value?: Worker) => void, rejectF : (value?: Worker) => void;
     const promise = new Promise<Worker>((resolve, reject) => {
       // we need the resolve/reject function to resolve the promise once another worker has finished
       resolveF = resolve;
@@ -31,8 +30,8 @@ export class WorkerManager {
     const workerPromise = {promise, resolve: resolveF, reject: rejectF};
     WorkerManager.workers.set(tWorker, workerPromise);
 
-    if (this.workers.size <= this.logicalProcessors) {
-      resolveF(tWorker.getWorker()); // resolve the first 4/8/16 workers immediately, they will resolve the next promises
+    if (this.workers.size <= this.MAX_WORKERS) {
+      resolveF(tWorker.getWorker()); // resolve the first n workers immediately, they will resolve the next promises
     }
 
     return promise;
@@ -43,12 +42,15 @@ export class WorkerManager {
    * @param tWorker
    */
   public static deregister(tWorker: ATouringWorker) {
+    console.log('deregister');
     WorkerManager.workers.delete(tWorker);
     const entry = WorkerManager.workers.entries().next().value;
     if (entry) {
-      const [nextTWorker, nextWorkerPromise] = entry; // can't deconstruct if undefined, so do it here
-      nextWorkerPromise.resolve(nextTWorker.getWorker()); // resolve the next workerpromise
-    } // else: map is empty / no more workers
+      entry[1].resolve(entry[0].getWorker()); // resolve the next workerpromise
+    } else { // else: map is empty / no more workers
+      console.log('cleanup workers');
+      this.terminateAll(); //get rid of workers
+    }
   }
 
   /**
@@ -56,9 +58,10 @@ export class WorkerManager {
    */
   public static terminateAll() {
     for (const [tWorker, workerPromise] of WorkerManager.workers) {
-      // abort worker and promise, as we can't tell wether it was already resolved
+      // abort promise, as we can't tell wether it was already resolved
       workerPromise.reject(); // abort waiting for slot
-      tWorker.getWorker().terminate(); // abort calculation
+      //abort all workers of that worker type
+      tWorker.terminate();
     }
 
     WorkerManager.workers = new Map<ATouringWorker, IWorkerPromise>(); // create a new, empty map
@@ -69,10 +72,28 @@ export class WorkerManager {
  * A Wrapper for the JavaScript Workers.
  */
 export abstract class ATouringWorker {
-  worker: Worker;
-  public abstract getWorker(): Worker;
+  public abstract getWorkerInstance(): Worker;
+  public abstract getWorkers(): Worker[];
 
-  public async calculate(data: any): Promise<any> {
+  public getWorker(): Worker {
+    const workers = this.getWorkers();
+
+    if (workers.length < WorkerManager.MAX_WORKERS) {
+      workers.unshift(this.getWorkerInstance()); //add new worker to the beginning of the list
+    }
+
+    const worker = workers.shift(); //remove first element of array...
+    workers.push(worker); // ... append it to the end ...
+    return worker; // ... and use it for some task
+  }
+
+  public terminate() {
+    while (this.getWorkers().length > 0) {
+      this.getWorkers().pop().terminate(); // abort calculation
+    }
+  }
+
+  public async calculate(data: any): Promise<number> {
     return new Promise(async (resolve, reject) => {
       try {
         const actualWorker = await WorkerManager.getSlot(this);
@@ -84,6 +105,7 @@ export abstract class ATouringWorker {
           }
           WorkerManager.deregister(this); // let worker remove himself from map (to start new workers)
         };
+        console.log('start computing');
         actualWorker.postMessage(data);
       } catch(error) {
         // we get no slot ;(
@@ -99,12 +121,13 @@ export abstract class ATouringWorker {
  * A wrapper for the Jaccard Randomization worker.
  */
 export class JaccardRandomizationWorker extends ATouringWorker {
-  public getWorker(): Worker {
-    if (!this.worker) {
-      this.worker = new (<any>require('worker-loader?name=JaccardRandom.js!./JaccardRandom'))();
-    }
+  static workers: Worker[] = [];
+  public getWorkers() {
+    return JaccardRandomizationWorker.workers;
+  }
 
-    return this.worker;
+  public getWorkerInstance(): Worker {
+    return new (<any>require('worker-loader?name=JaccardRandom.js!./JaccardRandom'))();
   }
 }
 
@@ -112,12 +135,13 @@ export class JaccardRandomizationWorker extends ATouringWorker {
  * A wrapper for the Adjusted Rand Randomization worker.
  */
 export class AdjustedRandRandomizationWorker extends ATouringWorker {
-  public getWorker(): Worker {
-    if (!this.worker) {
-      this.worker = new (<any>require('worker-loader?name=AdjRandRandom.js!./AdjRandRandom'))();
-    }
+  static workers: Worker[] = [];
+  public getWorkers() {
+    return AdjustedRandRandomizationWorker.workers;
+  }
 
-    return this.worker;
+  public getWorkerInstance(): Worker {
+      return new (<any>require('worker-loader?name=AdjRandRandom.js!./AdjRandRandom'))();
   }
 }
 
@@ -125,11 +149,12 @@ export class AdjustedRandRandomizationWorker extends ATouringWorker {
  * A wrapper for the Jaccard Randomization worker.
  */
 export class EnrichmentRandomizationWorker extends ATouringWorker {
-  public getWorker(): Worker {
-    if (!this.worker) {
-      this.worker = new (<any>require('worker-loader?name=EnrichmentScorePermutation.js!./EnrichmentScorePermutation'))();
-    }
+  static workers: Worker[] = [];
+  public getWorkers() {
+    return EnrichmentRandomizationWorker.workers;
+  }
 
-    return this.worker;
+  public getWorkerInstance(): Worker {
+      return new (<any>require('worker-loader?name=EnrichmentScorePermutation.js!./EnrichmentScorePermutation'))();
   }
 }
