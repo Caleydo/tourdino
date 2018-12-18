@@ -86,18 +86,25 @@ export function getRandomInt(min, max) {
 export function getRandomUniqueIntegers(n, max) {
   if (n > max+1) {
     throw new Error(`You requested more unique numbers than can fit between 0 and ${max}. n=${n}`);
-  } else if (n === max+1) {
-    return [...Array(n)].map((_,i) => i); // every integer between 0 and max is needed, so scrap that random stuff
   }
 
-  const integers = [];
-  while (integers.length < n) {
-    const integer = getRandomInt(0, max);
-    if (integers.indexOf(integer) === -1) {
-      integers.push(integer);
+  if (n > max/4) {
+    const integers = [...Array(max+1)].map((_,i) => i); //start with all integers between 0 and max
+
+    while (integers.length !== n) { //skipped if n = max+1  --> all integers between 0 and max
+      integers.splice(getRandomInt(0, integers.length), 1); // definetly one hit per iteration
     }
+    return integers;
+  } else {
+    const integers = [];
+    while (integers.length < n) {
+      const integer = getRandomInt(0, max);
+      if (integers.indexOf(integer) === -1) { // not every iteration might add an element
+        integers.push(integer);
+      }
+    }
+    return integers;
   }
-  return integers;
 }
 
 /**
