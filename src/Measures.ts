@@ -3,7 +3,7 @@ import {defaultMeasureOptions} from './config';
 import {ParallelSets} from './measure_visualization/ParallelSets';
 import {BoxPlot} from './measure_visualization/BoxPlot';
 import {ScatterPlot} from './measure_visualization/ScatterPlot';
-import {intersection, binom2, measureResultObj, sleep, binom, getModulo} from './util';
+import {intersection, binom2, measureResultObj, sleep} from './util';
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
 import {LineChart} from './measure_visualization/LineChart';

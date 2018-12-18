@@ -72,7 +72,6 @@
   "dependencies": {
     "@types/d3": "3.5.36",
     "@types/jquery": "2.0.33",
-    "big.js": "^5.2.2",
     "d3": "3.5.17",
     "d3.parsets": "git+https://github.com/jasondavies/d3-parsets.git#v1.2.4",
     "d3-grubert-boxplot": "gist:366430a0ac8e6e55ce09b040b5b493a6",
