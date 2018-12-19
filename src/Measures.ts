@@ -57,6 +57,11 @@ export abstract class ASimilarityMeasure implements ISimilarityMeasure {
   }
 
   public abstract calc(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<IMeasureResult>;
+
+  protected pValueAvailability (original: number, valid: number, threshold = 0): boolean {
+    const ratio = valid/original;
+    return (ratio >= threshold);
+  }
 }
 
 /**
@@ -185,20 +190,28 @@ export class StudentTTest extends ASimilarityMeasure {
     let score = scoreP1 * scoreP2;
     let scoreForPCalc = score;
 
-    const intersect = intersection(setAValid,setBValid);
-    if ((intersect.intersection.length === setAValid.length) && (setAValid.length === setBValid.length)) {
-      scoreForPCalc = 0.000001;
+    const availA = this.pValueAvailability(setA.length,setAValid.length);
+    const availB = this.pValueAvailability(setB.length,setBValid.length);
+    let pValue = 0;
+
+    if(availA && availB) {
+      const intersect = intersection(setAValid,setBValid);
+      if ((intersect.intersection.length === setAValid.length) && (setAValid.length === setBValid.length)) {
+        scoreForPCalc = 0.000001;
+      }
+
+      // console.log('Result: ', {selction: {muSelection,varSelection},
+      //                         category: {muCategory,varCategory},
+      //                         scores: {scoreP1,scoreP2,score},
+      //                         intersectSets: {intersect}
+      //                         });
+      // console.log('T-Test: ',score, '| df: ',nCategory + nSelection-2);
+      // console.log('-------');
+
+      pValue = jStat.jStat.ttest(scoreForPCalc, nCategory + nSelection, 2);
+    } else {
+      pValue = -1;
     }
-
-    // console.log('Result: ', {selction: {muSelection,varSelection},
-    //                         category: {muCategory,varCategory},
-    //                         scores: {scoreP1,scoreP2,score},
-    //                         intersectSets: {intersect}
-    //                         });
-    // console.log('T-Test: ',score, '| df: ',nCategory + nSelection-2);
-    // console.log('-------');
-
-    let pValue = jStat.jStat.ttest(scoreForPCalc, nCategory + nSelection, 2);
 
     score = score || 0;
     pValue = pValue || 0;
@@ -349,12 +362,18 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
     // console.log('-------');
     let score = zValue;
 
-    if (zValue === 0) {
-      zValue = 0.000001;
+    const availA = this.pValueAvailability(setA.length,setAValid.length);
+    const availB = this.pValueAvailability(setB.length,setBValid.length);
+    let pValue = 0;
+    if(availA && availB) {
+      if (zValue === 0) {
+          zValue = 0.000001;
+        }
+
+      pValue = jStat.jStat.ztest(zValue, 2);
+    }else {
+      pValue = -1;
     }
-
-    let pValue = jStat.jStat.ztest(zValue, 2);
-
     score = score || 0;
     pValue = pValue || 0;
 
@@ -517,17 +536,24 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
     const spearmanCorr = jStat.jStat.spearmancoeff(validPoints.map((item) => item.x), validPoints.map((item) => item.y));
     // console.log('spearman rho', spearmanCorr)
 
+    const avail = this.pValueAvailability(points.length,validPoints.length);
+    let pValue = 0;
+
     // calc p-value
-    let tValue = (spearmanCorr * Math.sqrt(n-2)) / Math.sqrt(1 - spearmanCorr * spearmanCorr);
+    if(avail) {
+      let tValue = (spearmanCorr * Math.sqrt(n-2)) / Math.sqrt(1 - spearmanCorr * spearmanCorr);
 
-    if (tValue === 0) {
-      tValue = 0.000001;
+      if (tValue === 0) {
+        tValue = 0.000001;
+      }
+
+      // console.log(tValue, n)
+      pValue = jStat.jStat.ttest(tValue, n, 2);
+      // console.log('spear p val', pValue)
+      pValue = pValue >= 0 && pValue <= 1 ? pValue : Number.NaN;
+    } else {
+      pValue = -1;
     }
-
-    // console.log(tValue, n)
-    let pValue = jStat.jStat.ttest(tValue, n, 2);
-    // console.log('spear p val', pValue)
-    pValue = pValue >= 0 && pValue <= 1 ? pValue : Number.NaN;
 
     return measureResultObj(spearmanCorr, pValue); // async function --> returns promise
   }
@@ -586,14 +612,21 @@ export class PearsonCorrelation extends ASimilarityMeasure {
     const pearsonCorr = jStat.jStat.corrcoeff(seqX,seqY);
 
 
+    const avail = this.pValueAvailability(points.length,validPoints.length);
+    let pValue = 0;
+
     // calc p-value
-    let tValue = (pearsonCorr * Math.sqrt(n-2)) / Math.sqrt(1 - pearsonCorr * pearsonCorr);
+    if(avail) {
+      let tValue = (pearsonCorr * Math.sqrt(n-2)) / Math.sqrt(1 - pearsonCorr * pearsonCorr);
 
-    if (tValue === 0) {
-      tValue = 0.000001;
+      if (tValue === 0) {
+        tValue = 0.000001;
+      }
+
+      pValue = jStat.jStat.ttest(tValue, n, 2);
+    } else {
+      pValue = -1;
     }
-
-    let pValue = jStat.jStat.ttest(tValue, n, 2);
     pValue = pValue || 0;
 
     return measureResultObj(pearsonCorr,pValue); // async function --> returns promise
@@ -716,8 +749,13 @@ export class EnrichmentScore extends ASimilarityMeasure {
     // console.timeEnd('enrichment-'+id+'-time');
     // console.groupEnd();
 
-    const properties = await this.calcPValuePermutation(numericSet, categorySet,enrichmentScoreCategories);
-    const p = Math.min(...properties.map((item) => (item.pvalue)));
+    const avail = this.pValueAvailability(combinedSet.length,validCombinedSet.length);
+
+    // calc p-value
+    const properties = await this.calcPValuePermutation(numericSet, categorySet, enrichmentScoreCategories);
+    let p = Math.min(...properties.map((item) => (item.pvalue)));
+
+    p = avail ? p : -1;
 
     return measureResultObj(overallScore,p,properties); // async function --> returns promise
   }
