@@ -40,8 +40,8 @@ function calcAdjRand(arr1: Array<any>, arr2: Array<any>) : number {
     // calc
 
     if (0 === (maxIndex - expectedIndex)) {
-      // division by zero --> adj_index = NaN
-      return 1;
+      // division by zero --> adj_index = 0;
+      return 0;
     }
 
     return (index - expectedIndex) / (maxIndex - expectedIndex);
