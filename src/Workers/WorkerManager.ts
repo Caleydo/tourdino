@@ -42,13 +42,11 @@ export class WorkerManager {
    * @param tWorker
    */
   public static deregister(tWorker: ATouringWorker) {
-    console.log('deregister');
     WorkerManager.workers.delete(tWorker);
     const entry = WorkerManager.workers.entries().next().value;
     if (entry) {
       entry[1].resolve(entry[0].getWorker()); // resolve the next workerpromise
     } else { // else: map is empty / no more workers
-      console.log('cleanup workers');
       this.terminateAll(); //get rid of workers
     }
   }
@@ -105,11 +103,14 @@ export abstract class ATouringWorker {
           }
           WorkerManager.deregister(this); // let worker remove himself from map (to start new workers)
         };
-        console.log('start computing');
+        actualWorker.onerror = (errEvent) => { // Handle runtime errors of worker
+          console.error(`Runtime Error in ${errEvent.filename}@${errEvent.lineno}:\t${errEvent.message}.`);
+          reject('runtime error');
+        };
+
         actualWorker.postMessage(data);
-      } catch(error) {
-        // we get no slot ;(
-          reject('Aborted');
+      } catch(error) { // if the the promise we await is rejected
+        reject('Aborted'); // we get no slot ;(
       }
     });
   }
