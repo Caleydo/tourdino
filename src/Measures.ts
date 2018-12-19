@@ -324,7 +324,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
         }
 
       pValue = jStat.jStat.ztest(zValue, 2);
-    }else {
+    } else {
       pValue = -1;
     }
     score = score || 0;
