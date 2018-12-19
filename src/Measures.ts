@@ -35,7 +35,7 @@ export abstract class ASimilarityMeasure implements ISimilarityMeasure {
 
   public abstract calc(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<IMeasureResult>;
 
-  protected pValueAvailability (original: number, valid: number, threshold = 0): boolean {
+  protected pValueAvailability (original: number, valid: number, threshold = 0.9): boolean {
     const ratio = valid/original;
     return (ratio >= threshold);
   }
