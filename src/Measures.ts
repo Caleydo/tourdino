@@ -1,4 +1,4 @@
-import {IAttributeDesc, Comparison, SCOPE, ISimilarityMeasure, IMeasureOptions, Type, IMeasureResult, IMeasureVisualization} from './interfaces';
+import {Comparison, SCOPE, ISimilarityMeasure, IMeasureOptions, Type, IMeasureResult, IMeasureVisualization} from './interfaces';
 import {defaultMeasureOptions} from './config';
 import {ParallelSets} from './measure_visualization/ParallelSets';
 import {BoxPlot} from './measure_visualization/BoxPlot';
@@ -324,7 +324,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
         }
 
       pValue = jStat.jStat.ztest(zValue, 2);
-    }else {
+    } else {
       pValue = -1;
     }
     score = score || 0;
@@ -414,8 +414,8 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     // calc
 
     if (0 === (maxIndex - expectedIndex)) {
-      // division by zero --> adj_index = NaN
-      return measureResultObj(1, Number.NaN, this.id);
+      // division by zero --> adj_index = 0 --> p Value = 1
+      return measureResultObj(0, 1, this.id);
     }
     const adjIndex = (index - expectedIndex) / (maxIndex - expectedIndex);
 
