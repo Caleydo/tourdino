@@ -5,39 +5,33 @@ function calc(setNumber: Array<any>, setCategory: Array<any>) {
   const categories = setCategory.filter((item, index, self) => self.indexOf(item) === index);
 
   // combine both sets
-  let combinedSet = [];
-  for(let i=0; i<setNumber.length; i++){
+  const combinedSet = [];
+  for(let i=0; i<setNumber.length; i++) {
     combinedSet.push({
       category: setCategory[i],
       value: setNumber[i]
     });
   }
 
-  let validCombinedSet = combinedSet.filter((item) => { return (item.value !== undefined) && (item.value !== null) && (!Number.isNaN(item.value)); });
+  const validCombinedSet = combinedSet.filter((item) => { return (item.value !== undefined) && (item.value !== null) && (!Number.isNaN(item.value)); });
   // sort the combined set
   validCombinedSet.sort((a,b) => { return b.value - a.value;});
 
   //define category sets
-  let propertyCategories = [];
-  for(let c=0; c<categories.length; c++)
-  {
-    const currCategory = categories[c];
-    let numCategory = validCombinedSet.filter((item) => { return item.category === currCategory; }).length;
+  const propertyCategories = [];
+  for (const currCategory of categories) {
+    const numCategory = validCombinedSet.filter((item) => { return item.category === currCategory; }).length;
     propertyCategories.push({
       name: currCategory,
       amount: numCategory
-    })
+    });
   }
 
 
-  let enrichmentScoreCategories = [];
+  const enrichmentScoreCategories = [];
 
-  for(let i=0; i<propertyCategories.length; i++)
-  {
-    const currCategory = propertyCategories[i].name;
-    const amountCategory = propertyCategories[i].amount;
-
-    enrichmentScoreCategories.push(calcEnrichmentScoreCategory(validCombinedSet, currCategory, amountCategory));
+  for (const propCat of propertyCategories) {
+    enrichmentScoreCategories.push(calcEnrichmentScoreCategory(validCombinedSet, propCat.name, propCat.amount));
   }
 
   return enrichmentScoreCategories;
@@ -48,7 +42,7 @@ function calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: stri
   category: string,
   enrichmentScore: number} {
 
-  let propertiesCategory = {
+  const propertiesCategory = {
     category: currCategory,
     values: [],
     enrichmentScore: 0};
@@ -59,12 +53,10 @@ function calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: stri
   let currValue = 0;
 
   // go through all items
-  for(let i=0; i<setCombined.length; i++)
-  {
-    if(setCombined[i].category === currCategory)
-    {
+  for (const set of setCombined) {
+    if(set.category === currCategory) {
       currValue = currValue + termPlus;
-    }else {
+    } else {
       currValue = currValue - termMinus;
     }
 
@@ -90,20 +82,20 @@ ctx.onmessage = function (event) {
   try {
     const setNumber: Array<any> = event.data.setNumber;
     const setCategory: Array<any> = event.data.setCategory;
-    const actualScores: Array<any> = event.data.actualScores
+    const actualScores: Array<any> = event.data.actualScores;
 
     const n = setCategory.length;
     const categories = setCategory.filter((item, index, self) => self.indexOf(item) === index);
 
     // calculate enrichment scores for each category of all the permutations
     const permutations = 1000;
-    let rndScores = [];
+    const rndScores = [];
     for (let idx=0; idx<permutations; idx++) {
       // permutate the category set
       // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
-      for(let i=n-1; i>0; i--){
-        let k = getRandomInt(0,i);
-        let tmp = setCategory[i];
+      for(let i=n-1; i>0; i--) {
+        const k = getRandomInt(0,i);
+        const tmp = setCategory[i];
         setCategory[i] = setCategory[k];
         setCategory[k] = tmp;
       }
@@ -111,38 +103,33 @@ ctx.onmessage = function (event) {
 
     }
 
-    let properties = []
+    const properties = [];
 
     // calculate the p-value for each category
-    for(let i=0; i<categories.length; i++)
-    {
-      // current category
-      let currCategory = categories[i];
+    for (const currCategory of categories) {
       // get all enrichment score of the current category for all permutations
-      let permScoresCategory = rndScores.map((arrItem) => {
+      const permScoresCategory = rndScores.map((arrItem) => {
         return arrItem.filter((catItem) => (catItem.category === currCategory)).map((item) => (item.enrichmentScore));
-      })
+      });
       // get actual enrichment score for current category
-      let actualScore = actualScores.filter((item) => (item.category === currCategory)).map((item) => (item.enrichmentScore))[0];
-      let pvalue = permScoresCategory.filter((score) => Math.abs(score) > Math.abs(actualScore)).length/1000.0;
-      let tmp = {
+      const actualScore = actualScores.filter((item) => (item.category === currCategory)).map((item) => (item.enrichmentScore))[0];
+      const pvalue = permScoresCategory.filter((score) => Math.abs(score) > Math.abs(actualScore)).length/1000.0;
+      const tmp = {
         category: currCategory,
         // permScoresCategory: permScoresCategory,
         // actualScore: actualScore,
-        pvalue: pvalue
+         pvalue
       };
 
-      properties.push(tmp)
+      properties.push(tmp);
     }
 
     // console.log('Enrichment Score - Permutation: ', {actualScores,properties});
     // const p = Math.max(...properties.map((item) => (item.pvalue)));
 
-    ctx.postMessage(properties)
+    ctx.postMessage(properties);
   } catch(error) {
     console.error(`Cannot calculate Enrichment Score p-value.\tError Type: ${error.name}\tMessage: ${error.message}\nStackTrace: ${error.stack}`);
-    return ctx.postMessage(null);
+    return ctx.postMessage(Number.NaN);
   }
-
-  self.close(); //Close worker as I only use it once
-}
+};

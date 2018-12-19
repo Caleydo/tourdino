@@ -26,7 +26,7 @@ ctx.onmessage = (event) => {
       const rndScores = new Array(1000); // array with 1000 entries
       const drawSize = setA.length;
 
-      for (let scoreIndex of rndScores.keys()) {
+      for (const scoreIndex of rndScores.keys()) {
         const rndIndices = getRandomUniqueIntegers(drawSize, allData.length-1);
         const rndSet = rndIndices.map((index) => allData[index]); //get elments with the random indices
         rndScores[scoreIndex] = calc(rndSet, setB);
@@ -39,6 +39,4 @@ ctx.onmessage = (event) => {
     console.error(`Cannot calculate Jaccard p-value.\tError Type: ${error.name}\tMessage: ${error.message}\nStackTrace: ${error.stack}`);
     return ctx.postMessage(Number.NaN);
   }
-
-  self.close(); //Close worker as I only use it once
-}
+};

@@ -48,23 +48,28 @@ function calcAdjRand(arr1: Array<any>, arr2: Array<any>) : number {
 }
 
 ctx.onmessage = (event) => {
+  const rndScoreCount =  1000.0;
+
   try {
-    let setA: Array<any> = event.data.setA;
-    let setB: Array<any> = event.data.setB;
+    const setA: Array<any> = event.data.setA;
+    const setB: Array<any> = event.data.setB;
 
     const actualScore = calcAdjRand(setA, setB);
-    const rndScores = new Array<number>(1000); // array with 1000 entries
+    const rndScores = new Array<number>(rndScoreCount); // array with 1000 entries
 
     for (const scoreIndex of rndScores.keys()) {
-      shuffle(setA); // the array is shuffled in place!
-      shuffle(setB);
+      if (scoreIndex % 2 === 0) { //alternate array shuffling (shuffling one array is enough)
+        shuffle(setA); // the array is shuffled in place!
+      } else {
+        shuffle(setB);
+      }
       rndScores[scoreIndex] = calcAdjRand(setA, setB);
     }
 
-    const p = rndScores.filter((rndScore) => rndScore > actualScore).length/1000.0; //  filter the array so only higher scores remain, then divide by number of computations. .0 to force floating point division
+    const p = rndScores.filter((rndScore) => rndScore > actualScore).length/rndScoreCount; //  filter the array so only higher scores remain, then divide by number of computations. .0 to force floating point division
     ctx.postMessage(p);
   } catch(error) {
     console.error(`Cannot calculate p-value.\tError Type: ${error.name}\tMessage: ${error.message}\nStackTrace: ${error.stack}`);
     return ctx.postMessage(Number.NaN);
   }
-}
+};
