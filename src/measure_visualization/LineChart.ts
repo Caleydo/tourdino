@@ -6,6 +6,7 @@ export class LineChart implements IMeasureVisualization {
   private formatData(setParameters: ISetParameters, score: IMeasureResult) {
     let numericSet;
     let categorySet;
+    let defCategories;
     let categories;
     let xLabel;
 
@@ -13,12 +14,14 @@ export class LineChart implements IMeasureVisualization {
       numericSet = setParameters.setA;
       xLabel = setParameters.setADesc.label;
       categorySet = setParameters.setB;
-      categories = setParameters.setBDesc.categories;
+      defCategories = setParameters.setBDesc.categories;
+      categories = setParameters.setB.filter((item, index, self) => self.indexOf(item) === index).map((item) => { return {'name': item};});
     }else {
       numericSet = setParameters.setB;
       xLabel = setParameters.setBDesc.label;
       categorySet = setParameters.setA;
-      categories = setParameters.setADesc.categories;
+      defCategories = setParameters.setADesc.categories;
+      categories = setParameters.setA.filter((item, index, self) => self.indexOf(item) === index).map((item) => { return {'name': item};});
     }
 
     // combine both sets
@@ -34,10 +37,19 @@ export class LineChart implements IMeasureVisualization {
     // sort the combined set
     validCombinedSet.sort((a,b) => { return b.value - a.value;});
     const amountItems = validCombinedSet.length;
-
+    // console.log('properties: ', {validCombinedSet, categories, defCategories});
     //define category sets
     for(const category of categories) {
       const currCategory = category.name;
+
+      const currDefCategory = defCategories.filter((item) => {return item.name === currCategory;});
+      if(currDefCategory.length === 0) {
+        category.label = 'Missing values';
+        category.color = '#808080';
+      }else {
+        category.label = currDefCategory[0].label;
+        category.color = currDefCategory[0].color;
+      }
       const numCategory = validCombinedSet.filter((item) => { return item.category === currCategory; }).length;
       category.amount = numCategory;
 

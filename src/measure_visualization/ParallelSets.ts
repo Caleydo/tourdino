@@ -129,16 +129,27 @@ export class ParallelSets implements IMeasureVisualization {
     const setACategories = setParameters.setA.filter((item, index, self) => self.indexOf(item) === index);
     const dim2 = setParameters.setBDesc.label;
     const setBCategories = setParameters.setB.filter((item, index, self) => self.indexOf(item) === index);
-
+    console.log('parameters: ',{'setA': {set: setA, dim: dim1, cate: setACategories}, 'setB': {set: setB, dim: dim2, cate: setBCategories}});
     const parts = [];
     for (const categoryA of setACategories) {
       const currCatAIds = setA.filter((item) => (item.value === categoryA)).map((item) => (item.id));
-      const categoryALabel = setParameters.setADesc.categories.filter((item) => (item.name === categoryA))[0].label;
+      let categoryALabel;
+
+      if (categoryA === null) {
+        categoryALabel = 'Missing values';
+      } else {
+        categoryALabel = setParameters.setADesc.categories.filter((item) => (item.name === categoryA))[0].label;
+      }
 
       for (const categoryB of setBCategories) {
         const currCatBIds = setB.filter((item) => (item.value === categoryB)).map((item) => (item.id));
-        const categoryBLabel = setParameters.setBDesc.categories.filter((item) => (item.name === categoryB))[0].label;
+        let categoryBLabel;
 
+        if (categoryB === null) {
+          categoryBLabel = 'Missing values';
+        } else {
+          categoryBLabel = setParameters.setBDesc.categories.filter((item) => (item.name === categoryB))[0].label;
+        }
         const intersect = intersection(currCatAIds,currCatBIds);
         const amounts = {
           intersectAmount: intersect.intersection.length,
@@ -318,9 +329,14 @@ export class ParallelSets implements IMeasureVisualization {
           categoryName = d.parent.name;
         }
 
-        const color = categories.filter((item) => (item.label === categoryName))[0].color;
-        d3.select(this).style('fill', color);
-        d3.select(this).style('stroke', color);
+        const category = categories.filter((item) => (item.label === categoryName));
+        if(category.length !== 0) {
+          d3.select(this).style('fill', category[0].color);
+          d3.select(this).style('stroke', category[0].color);
+        } else {
+          d3.select(this).style('fill', '#808080');
+          d3.select(this).style('stroke', '#808080');
+        }
 
         // console.log('path.this: ', d3.select(this));
         // console.log('path.d: ',d);
