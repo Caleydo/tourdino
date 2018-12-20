@@ -135,20 +135,22 @@ export class ParallelSets implements IMeasureVisualization {
       const currCatAIds = setA.filter((item) => (item.value === categoryA)).map((item) => (item.id));
       let categoryALabel;
 
-      if (categoryA === null) {
+      const defCategoryA = setParameters.setADesc.categories.filter((item) => (item.name === categoryA));
+      if (defCategoryA.length === 0) {
         categoryALabel = 'Missing values';
       } else {
-        categoryALabel = setParameters.setADesc.categories.filter((item) => (item.name === categoryA))[0].label;
+        categoryALabel = defCategoryA[0].label;
       }
 
       for (const categoryB of setBCategories) {
         const currCatBIds = setB.filter((item) => (item.value === categoryB)).map((item) => (item.id));
         let categoryBLabel;
 
-        if (categoryB === null) {
+        const defCategoryB = setParameters.setBDesc.categories.filter((item) => (item.name === categoryB));
+        if (defCategoryB.length === 0) {
           categoryBLabel = 'Missing values';
         } else {
-          categoryBLabel = setParameters.setBDesc.categories.filter((item) => (item.name === categoryB))[0].label;
+          categoryBLabel = defCategoryB[0].label;
         }
         const intersect = intersection(currCatAIds,currCatBIds);
         const amounts = {
