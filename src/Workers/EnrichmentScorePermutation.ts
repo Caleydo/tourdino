@@ -87,33 +87,42 @@ ctx.onmessage = function (event) {
     const n = setCategory.length;
     const categories = setCategory.filter((item, index, self) => self.indexOf(item) === index);
 
-    // calculate enrichment scores for each category of all the permutations
+    // if only one category exist the enrichmentScore = 0 and the p-value can be set to 1 without the permutation
+    const usePermutation = !(actualScores && actualScores.length === 1 && (actualScores[0].enrichmentScore === 0));
+
     const permutations = 1000;
     const rndScores = [];
-    for (let idx=0; idx<permutations; idx++) {
-      // permutate the category set
-      // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
-      for(let i=n-1; i>0; i--) {
-        const k = getRandomInt(0,i);
-        const tmp = setCategory[i];
-        setCategory[i] = setCategory[k];
-        setCategory[k] = tmp;
-      }
-      rndScores.push(calc(setNumber, setCategory));
 
+    if(usePermutation) {
+      // calculate enrichment scores for each category of all the permutations
+      for (let idx=0; idx<permutations; idx++) {
+        // permutate the category set
+        // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+        for(let i=n-1; i>0; i--) {
+          const k = getRandomInt(0,i);
+          const tmp = setCategory[i];
+          setCategory[i] = setCategory[k];
+          setCategory[k] = tmp;
+        }
+        rndScores.push(calc(setNumber, setCategory));
+
+      }
     }
 
     const properties = [];
 
     // calculate the p-value for each category
     for (const currCategory of categories) {
-      // get all enrichment score of the current category for all permutations
-      const permScoresCategory = rndScores.map((arrItem) => {
-        return arrItem.filter((catItem) => (catItem.category === currCategory)).map((item) => (item.enrichmentScore));
-      });
-      // get actual enrichment score for current category
-      const actualScore = actualScores.filter((item) => (item.category === currCategory)).map((item) => (item.enrichmentScore))[0];
-      const pvalue = permScoresCategory.filter((score) => Math.abs(score) > Math.abs(actualScore)).length/1000.0;
+      let pvalue = 1; // without permutation p-value = 1
+      if(usePermutation) {
+        // get all enrichment score of the current category for all permutations
+        const permScoresCategory = rndScores.map((arrItem) => {
+          return arrItem.filter((catItem) => (catItem.category === currCategory)).map((item) => (item.enrichmentScore));
+        });
+        // get actual enrichment score for current category
+        const actualScore = actualScores.filter((item) => (item.category === currCategory)).map((item) => (item.enrichmentScore))[0];
+        pvalue = permScoresCategory.filter((score) => Math.abs(score) > Math.abs(actualScore)).length/1000.0;
+      }
       const tmp = {
         category: currCategory,
         // permScoresCategory: permScoresCategory,
