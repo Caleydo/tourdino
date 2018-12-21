@@ -149,7 +149,7 @@ export class BoxPlot implements IMeasureVisualization {
       if((Math.abs(d)<1000 && Math.abs(d)>0.01) || d === 0) {
         return ''+Math.round(d*100)/100;
       }
-      return d3.format('0.1e')(d); 
+      return d3.format('0.1e')(d);
     });
 
     // draw the boxplots
