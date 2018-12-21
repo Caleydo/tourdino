@@ -146,10 +146,11 @@ export class BoxPlot implements IMeasureVisualization {
       .orient('left');
 
     yAxis.tickFormat((d) => {
-        if(Math.abs(d)<1000) {
-          return d;
-        }
-        return d3.format('0.1e')(d); });
+      if((Math.abs(d)<1000 && Math.abs(d)>0.01) || d === 0) {
+        return ''+Math.round(d*100)/100;
+      }
+      return d3.format('0.1e')(d); 
+    });
 
     // draw the boxplots
     svgFigureGroup.selectAll('.boxplot')
