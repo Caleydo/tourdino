@@ -211,8 +211,8 @@ export class LineChart implements IMeasureVisualization {
     const xScale = d3.scale.linear().range([0, width]);
     const xAxis = d3.svg.axis().scale(xScale).orient('bottom');
     xAxis.tickFormat((d) => {
-      if(Math.abs(d)<1000) {
-        return d;
+      if((Math.abs(d)<1000 && Math.abs(d)>0.01) || d === 0) {
+        return ''+Math.round(d*100)/100;
       }
       return d3.format('0.1e')(d); });
       const xMap = function(d) { return xScale(d.x);};
@@ -221,8 +221,8 @@ export class LineChart implements IMeasureVisualization {
     const yScale = d3.scale.linear().range([height, 0]);
     const yAxis = d3.svg.axis().scale(yScale).orient('left');
     yAxis.tickFormat((d) => {
-      if(Math.abs(d)<1000) {
-        return d;
+      if((Math.abs(d)<1000 && Math.abs(d)>0.01) || d === 0) {
+        return ''+Math.round(d*100)/100;
       }
       return d3.format('0.1e')(d); });
       const yMap = function(d) { return yScale(d.y);};
