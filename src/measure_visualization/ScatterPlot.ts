@@ -41,11 +41,13 @@ export class ScatterPlot implements IMeasureVisualization {
     yDomain[0] = Math.min(yDomain[0],0);
     yDomain[1] = yDomain[1];
 
+    const yOriginalLabel = setParameters.setBDesc.label;
+    const yLabel = yOriginalLabel.length > 27 ? yOriginalLabel.substring(0,27)+'...' : yOriginalLabel;
     const scatterPlot = {
       'dataPoints': validDataPoints,
       'xLabel': setParameters.setADesc.label,
       'xDomain': xDomain,
-      'yLabel': setParameters.setBDesc.label,
+      'yLabel': yLabel,
       'yDomain': yDomain
     };
 
@@ -80,8 +82,8 @@ export class ScatterPlot implements IMeasureVisualization {
     const xScale = d3.scale.linear().range([0, width]);
     const xAxis = d3.svg.axis().scale(xScale).orient('bottom');
     xAxis.tickFormat((d) => {
-      if(Math.abs(d)<1000) {
-        return d;
+      if((Math.abs(d)<1000 && Math.abs(d)>0.01) || d === 0) {
+        return ''+Math.round(d*100)/100;
       }
       return d3.format('0.1e')(d); });
       const xMap = function(d) { return xScale(d.x);};
@@ -90,8 +92,8 @@ export class ScatterPlot implements IMeasureVisualization {
     const yScale = d3.scale.linear().range([height, 0]);
     const yAxis = d3.svg.axis().scale(yScale).orient('left');
     yAxis.tickFormat((d) => {
-      if(Math.abs(d)<1000) {
-        return d;
+      if((Math.abs(d)<1000 && Math.abs(d)>0.01) || d === 0) {
+        return ''+Math.round(d*100)/100;
       }
       return d3.format('0.1e')(d); });
       const yMap = function(d) { return yScale(d.y);};
