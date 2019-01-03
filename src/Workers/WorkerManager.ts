@@ -97,9 +97,9 @@ export abstract class ATouringWorker {
         const actualWorker = await WorkerManager.getSlot(this);
         actualWorker.onmessage = (event) => {
           if (event.data.error) {
-            reject(event.data.error);
+            reject(event.data.error); // explicitly set by me with try/catch inside worker
           } else {
-            Number.isNaN(event.data) ? reject(event.data) : resolve(event.data);
+            resolve(event.data);
           }
           WorkerManager.deregister(this); // let worker remove himself from map (to start new workers)
         };

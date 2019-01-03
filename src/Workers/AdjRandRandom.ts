@@ -70,6 +70,6 @@ ctx.onmessage = (event) => {
     ctx.postMessage(p);
   } catch(error) {
     console.error(`Cannot calculate p-value.\tError Type: ${error.name}\tMessage: ${error.message}\nStackTrace: ${error.stack}`);
-    return ctx.postMessage(Number.NaN);
+    ctx.postMessage({error: error.message}); // pass the error and check for it, rather than rethrowing and have it 'unhandled'; use message because the whole error object cannot be cloned
   }
 };
