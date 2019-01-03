@@ -13,22 +13,18 @@ export class ParallelSets implements IMeasureVisualization {
 
   private formatData(setParameters: ISetParameters, isAdjRand: boolean): IFormatedDataParallelSet {
     // console.log('Parallel Sets - formatData');
+    const dimension1 = setParameters.setBDesc.label;
+    let dimension2 = setParameters.setADesc.label;
+    let data: Array<any>;
+
     if(isAdjRand) {
-
-      const dimension1 = setParameters.setBDesc.label;
-      const dimension2 = setParameters.setADesc.label;
-
-      const data = this.formatDataAdjRand(setParameters, dimension1, dimension2);
-
-      return {'dimension1': dimension1, 'dimension2': dimension2, 'data':data};
-    }else {
-
-      const dimension1 = setParameters.setBDesc.label+'\uFEFF'; //append ZERO WIDTH NO-BREAK SPACE --> so that both dimension can be Selection
-      const dimension2 = (setParameters.setACategory === 'Selected' || setParameters.setACategory === 'Unselected') ? 'Selection' : 'Stratification Groups';
-      const data = this.formatDataSelectionAgainstCatOrGroup(setParameters, dimension1, dimension2);
-
-      return {'dimension1': dimension1, 'dimension2': dimension2, 'data':data};
+      data = this.formatDataAdjRand(setParameters, dimension1, dimension2);
+    } else {
+      dimension2 += '\uFEFF'; //append ZERO WIDTH NO-BREAK SPACE, so that both dimension can have the same label
+      data = this.formatDataSelectionAgainstCatOrGroup(setParameters, dimension1, dimension2);
     }
+
+    return {dimension1, dimension2, data};
   }
 
   private formatDataSelectionAgainstCatOrGroup(setParameters: ISetParameters, dimension1: string, dimension2: string): any {
@@ -257,7 +253,7 @@ export class ParallelSets implements IMeasureVisualization {
     // coloring of the ribbons
     if(isAdjRand) {
       this.colorRibbonsAdjRand(setParameters, svgRibbons, formatData.dimension1);
-    }else {
+    } else {
       this.highlightAndColorRibbons(setParameters, svgRibbons, formatData.dimension1);
     }
 
@@ -293,19 +289,19 @@ export class ParallelSets implements IMeasureVisualization {
               d3.select(this).style('fill', color);
               d3.select(this).style('stroke', color);
             }
-          }else {
+          } else {
             d3.select(this).attr('class','category-gray');
           }
-        }else {
+        } else {
           if (setParameters.setBCategory && setParameters.setBCategory.color) {
             const color = setParameters.setBCategory.color;
             if((d.parent.dimension === dimensionName && d.parent.name === categoryLabel) || (d.node.dimension === dimensionName && d.node.name === categoryLabel)) {
               d3.select(this).style('fill', color);
               d3.select(this).style('stroke', color);
-            }else {
+            } else {
               d3.select(this).classed('category-gray',true);
             }
-          }else {
+          } else {
           d3.select(this).classed('category-selected',true); //make all selected
             if((d.parent.name === 'Others' && d.node.name !== categoryLabel) || (d.node.name === 'Others' && d.parent.name !== categoryLabel)) {
               //only the path between others and not the current category are coloured gray
@@ -327,7 +323,7 @@ export class ParallelSets implements IMeasureVisualization {
         let categoryName = '';
         if (d.node.dimension === dimensionName) {
           categoryName = d.node.name;
-        }else {
+        } else {
           categoryName = d.parent.name;
         }
 
@@ -361,7 +357,7 @@ export class ParallelSets implements IMeasureVisualization {
       //identifiy the current dimension
       if(d.y === 45) {
         index = 0;
-      }else {
+      } else {
         index = 1;
       }
 
