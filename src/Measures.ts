@@ -367,59 +367,15 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
 
 
   public async calc(arr1: Array<any>, arr2: Array<any>) {
-    await sleep(0);
-
     if (arr1.length !== arr2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
 
-    // deduce catgeories from strings, e.g.: ['Cat1', 'Cat3', 'Cat2', 'Cat2', 'Cat1', 'Cat3']
-    const A = [...new Set(arr1)]; // The set removes duplicates, and the conversion to array gives the content an order
-    const B = [...new Set(arr2)];
-
-    // and build a contingency table:
-    //        A.1   A.2   A.3
-    //  B.1   n11   n12   n13
-    //  B.2   n21   n22   n23
-    //  B.3   n31   n32   n33
-    const table = new Array(B.length).fill([]); // rows
-    table.forEach((row, i) => table[i] = new Array(A.length).fill(0)); // columns
-
-    for (const i of arr1.keys()) { // iterate over indices
-      const ai = A.indexOf(arr1[i]);
-      const bi = B.indexOf(arr2[i]);
-      table[bi][ai] += 1; // count the co-occurences
-    }
-
-    // https://web.archive.org/web/20171205003116/https://davetang.org/muse/2017/09/21/adjusted-rand-index/
-    const rowsSums = table.map((row) => row.reduce((sum, curr) => sum += curr)); // reduce each row to the sum
-    const colSums = A.map((cat, i) => table.reduce((sum, curr) => sum += curr[i], 0)); // reduce each all rows to the sum of column i
-
-    //const cellBinomSum = table.reduce((rowsum, row) => rowsum + row.reduce((colsum, col) => colsum += binom2(col), 0), 0);
-    const cellBinomSum = table.reduce((sum, row) => sum + row.reduce((colsum, col) => colsum += binom2(col), 0), 0); // set accumulator to zero!
-
-    //use 0 as initial value, otherwise reduce takes the first element as initial value and the binom coefficient is nt calculated for it!
-    const rowBinomSum = rowsSums.reduce((sum, curr) => sum += binom2(curr), 0);
-    const colBinomSum = colSums.reduce((sum, curr) => sum += binom2(curr), 0);
-
-    const index = cellBinomSum;
-    const expectedIndex = (rowBinomSum * colBinomSum) / binom2(arr1.length);
-    const maxIndex = 0.5 * (rowBinomSum + colBinomSum);
-
-    // await sleep(5000); //test asynchronous behaviour
-    // calc
-
-    if (0 === (maxIndex - expectedIndex)) {
-      // division by zero --> adj_index = 0 --> p Value = 1
-      return measureResultObj(0, 1, this.id);
-    }
-    const adjIndex = (index - expectedIndex) / (maxIndex - expectedIndex);
-
-    const p = await this.calcP_Randomize(arr1, arr2);
-    return measureResultObj(adjIndex, p, this.id); // async function --> returns promise
+    const {score, p} = await this.calcP_Randomize(arr1, arr2);
+    return measureResultObj(score, p, this.id); // async function --> returns promise
   }
 
-  async calcP_Randomize(arr1: any[], arr2: any[]): Promise<number> {
+  async calcP_Randomize(arr1: any[], arr2: any[]): Promise<{score: number, p: number}> {
     return new AdjustedRandRandomizationWorker().calculate({setA: arr1, setB: arr2});
   }
 
