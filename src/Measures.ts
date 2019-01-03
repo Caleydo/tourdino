@@ -62,15 +62,11 @@ export class JaccardSimilarity extends ASimilarityMeasure {
 
 
   public async calc(setA: Array<any>, setB: Array<any>, allData: Array<any>) {
-    const {intersection: intersect, arr1: filteredsetA, arr2: filteredsetB} = intersection(setA, setB);
-    let score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
-    score = score || 0;
-
-    const p = await this.calcP_Randomize(setA, setB, allData);
+    const {score, p} = await this.calc_Randomize(setA, setB, allData);
     return measureResultObj(score, p);
   }
 
-  async calcP_Randomize(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<number> {
+  async calc_Randomize(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<{score: number, p: number}> {
     return new JaccardRandomizationWorker().calculate({setA, setB, allData});
   }
 }

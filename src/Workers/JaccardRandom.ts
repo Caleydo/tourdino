@@ -33,7 +33,7 @@ ctx.onmessage = (event) => {
       }
 
       const p = rndScores.filter((rndScore) => rndScore > actualScore).length/1000.0; //  filter the array so only higher jaccard scores remain, then divide by number of computations. .0 to force floating point division
-      ctx.postMessage(p);
+      ctx.postMessage({score: actualScore, p});
     }
   } catch(error) {
     console.error(`Cannot calculate Jaccard p-value.\tError Type: ${error.name}\tMessage: ${error.message}\nStackTrace: ${error.stack}`);
