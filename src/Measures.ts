@@ -547,6 +547,13 @@ export class EnrichmentScore extends ASimilarityMeasure {
     this.scope = SCOPE.ATTRIBUTES;
   }
 
+  isArrayOfNumbers(arr: any): arr is number[] {
+    if (Array.isArray(arr)) {
+        return arr.every((item) => item === null || typeof item === 'number');
+    }
+    return false;
+  }
+
 
   public async calc(set1: Array<any>, set2: Array<any>) {
     await sleep(0);
@@ -560,43 +567,25 @@ export class EnrichmentScore extends ASimilarityMeasure {
     // console.groupCollapsed('enrichment-'+id);
     // console.time('enrichment-'+id+'-time');
 
-    let numericSet;
-    let categorySet;
-    let categories;
-    // get destinct values
-    const uniqueSet1 = set1.filter((item, index, self) => self.indexOf(item) === index);
-    const uniqueSet2 = set2.filter((item, index, self) => self.indexOf(item) === index);
+    let numericSet: number[];
+    let categorySet: string[];
+    let categories: string[];
 
     // define number and category sets
 
-    if ((typeof set1[0] === 'number') && (typeof set2[0] === 'string')) {
+    if (this.isArrayOfNumbers(set1)) {
+      // Categories are in set2
       numericSet = set1;
       categorySet = set2;
-      categories = uniqueSet2;
-    } else if ((typeof set1[0] === 'string') && (typeof set2[0] === 'number')) {
+      categories = set2.filter((item, index, self) => self.indexOf(item) === index); // get destinct values
+    } else if (this.isArrayOfNumbers(set2)) {
+      // Categories are in set1
+      numericSet = set2 as any[];
       categorySet = set1;
-      categories = uniqueSet1;
-      numericSet = set2;
-    } else if (uniqueSet1.length < uniqueSet2.length) {
-      if (isNaN(Number(set1[0]))) { // first element of set 1 is NOT a number
-        categorySet = set1;
-        categories = uniqueSet1;
-        numericSet = set2;
-      } else { // first element of set 1 is a number
-        categorySet = set2;
-        categories = uniqueSet2;
-        numericSet = set1;
-      }
+      categories = set1.filter((item, index, self) => self.indexOf(item) === index);
     } else {
-      if (isNaN(Number(set2[0]))) { // first element of set 2 is NOT a number
-        categorySet = set2;
-        categories = uniqueSet2;
-        numericSet = set1;
-      } else { // first element of set 2 is a number
-        categorySet = set1;
-        categories = uniqueSet1;
-        numericSet = set2;
-      }
+      // neither is a set of numbers
+      throw new Error('Neither of the sets contains numbers. Cant calcute enrichment score.');
     }
 
     // combine both sets

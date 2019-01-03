@@ -95,17 +95,16 @@ ctx.onmessage = function (event) {
 
     if(usePermutation) {
       // calculate enrichment scores for each category of all the permutations
-      for (let idx=0; idx<permutations; idx++) {
+      for (let idx = 0; idx < permutations; idx++) {
         // permutate the category set
         // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
-        for(let i=n-1; i>0; i--) {
+        for(let i = n - 1; i > 0; i--) {
           const k = getRandomInt(0,i);
           const tmp = setCategory[i];
           setCategory[i] = setCategory[k];
           setCategory[k] = tmp;
         }
         rndScores.push(calc(setNumber, setCategory));
-
       }
     }
 
