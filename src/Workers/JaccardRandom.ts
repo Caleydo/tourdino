@@ -18,9 +18,9 @@ ctx.onmessage = (event) => {
     const actualScore = calc(setA, setB);
 
     if (actualScore === 1) {
-      ctx.postMessage(0.0); // Jaccard score is maximum, the other random sets can't get a higher score
+      ctx.postMessage({score: actualScore, p: 0.0}); // Jaccard score is maximum, the other random sets can't get a higher score
     } else if (actualScore === 0) {
-      ctx.postMessage(1.0); // Jaccard score is minimum, the other random sets can't get a lower score
+      ctx.postMessage({score: actualScore, p: 1.0}); // Jaccard score is minimum, the other random sets can't get a lower score
     } else {
       // The score is neither maximum nor minimum, so we compare it to random scores:
       const rndScores = new Array(1000); // array with 1000 entries
