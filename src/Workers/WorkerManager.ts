@@ -1,3 +1,8 @@
+// Worker Info:
+// https://www.html5rocks.com/en/tutorials/workers/basics/#toc-errors
+// https://www.loxodrome.io/post/web-worker-performance/
+
+
 /**
  * To store the promise together with its resolve/reject functions, so that we can call them somewhere else
  */
