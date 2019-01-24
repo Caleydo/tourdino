@@ -439,16 +439,20 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
     const avail = this.pValueAvailability(points.length,validPoints.length);
     let pValue = 0;
 
-    // calc p-value
+    // calc p-value (Recommended for n >= 19)
+    // https://ncss-wpengine.netdna-ssl.com/wp-content/themes/ncss/pdf/Procedures/PASS/Spearmans_Rank_Correlation_Tests-Simulation.pdf
+    // http://janda.org/c10/Lectures/topic06/L24-significanceR.htm
+    // https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient#Determining_significance
+    // https://stats.stackexchange.com/a/22821/194427
     if(avail) {
-      let tValue = (spearmanCorr * Math.sqrt(n-2)) / Math.sqrt(1 - spearmanCorr * spearmanCorr);
+      let tValue = (spearmanCorr * Math.sqrt(n-2)) / Math.sqrt(1 - spearmanCorr * spearmanCorr); // if correlation = 1 --> tValue = infinity (+/-)
 
       if (tValue === 0) {
         tValue = 0.000001;
       }
 
       // console.log(tValue, n)
-      pValue = jStat.jStat.ttest(tValue, n, 2);
+      pValue = jStat.jStat.ttest(tValue, n - 2, 2); // n- 2 degrees of freedom (as in the tValue calculation above)
       // console.log('spear p val', pValue)
       pValue = pValue >= 0 && pValue <= 1 ? pValue : Number.NaN;
     } else {
@@ -456,6 +460,11 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
     }
 
     return measureResultObj(spearmanCorr, pValue); // async function --> returns promise
+  }
+
+  protected pValueAvailability (original: number, valid: number, threshold = 0.9): boolean {
+    // (Determining the significance via t-distribution is recommended for n >= 19), source: https://ncss-wpengine.netdna-ssl.com/wp-content/themes/ncss/pdf/Procedures/PASS/Spearmans_Rank_Correlation_Tests-Simulation.pdf
+    return valid >= 19 && super.pValueAvailability(original, valid, threshold);
   }
 }
 
