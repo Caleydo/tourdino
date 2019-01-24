@@ -34,6 +34,17 @@ export abstract class ASimilarityMeasure implements ISimilarityMeasure {
   }
 }
 
+
+//   _____       _______             _____       _______
+//  / ____|   /\|__   __|           / ____|   /\|__   __|
+// | |       /  \  | |     ______  | |       /  \  | |
+// | |      / /\ \ | |    |______| | |      / /\ \ | |
+// | |____ / ____ \| |             | |____ / ____ \| |
+//  \_____/_/    \_\_|              \_____/_/    \_\_|
+// =================================================================
+// =================================================================
+
+
 /**
  * Also known as the Tanimoto distance metric.
  */
@@ -92,78 +103,51 @@ export class OverlapSimilarity extends ASimilarityMeasure {
 }
 
 
+/**
+ * Also known as the Tanimoto distance metric.
+ */
 @MeasureDecorator()
-export class StudentTTest extends ASimilarityMeasure {
+export class AdjustedRandIndex extends ASimilarityMeasure {
 
   constructor() {
     super();
 
-    this.id = 'student_test';
-    this.label = 'Student\'s t-Test';
-    this.description = 'Compares the means of two groups (assuimg equal variances in their respective normal distributions).';
-    this.visualization = new BoxPlot();
+    this.id = 'adjrand';
+    this.label = 'Adjusted Rand Index';
+    this.description = 'Measures the similarity between two categorical attributes. \
+    The adjusted Rand index is based on counting pairs of items that are in the same or different categories in the two attributes.';
 
-    this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
-    this.scope = SCOPE.SETS;
+    this.visualization = new ParallelSets();
+
+    this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
+    this.scope = SCOPE.ATTRIBUTES;
   }
 
 
-  public async calc(setA: Array<any>, setB: Array<any>) {
-    await sleep(0);
-    const setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
-    const nSelection = setAValid.length;
-    const muSelection = d3.mean(setAValid);
-    const varSelection = d3.variance(setAValid);
-
-    //category
-    const setBValid = setB.filter((value) => {return (value !== null && value !== undefined);});
-    const nCategory = setBValid.length;
-    const muCategory = d3.mean(setBValid);
-    const varCategory = d3.variance(setBValid);
-
-    // console.log('Input: ',{set : {setA,setB},
-    //                        ValidSet : {setAValid,setBValid}});
-
-    const scoreP1 = Math.sqrt((nSelection * nCategory * (nSelection + nCategory - 2)) / (nSelection + nCategory));
-    const scoreP2 = (muSelection - muCategory) / Math.sqrt((nSelection - 1) * varSelection + (nCategory - 1) * varCategory);
-    let score = scoreP1 * scoreP2;
-    let scoreForPCalc = score;
-
-    const availA = this.pValueAvailability(setA.length,setAValid.length);
-    const availB = this.pValueAvailability(setB.length,setBValid.length);
-    let pValue = 0;
-
-    if(availA && availB) {
-      const intersect = intersection(setAValid,setBValid);
-      if ((intersect.intersection.length === setAValid.length) && (setAValid.length === setBValid.length)) {
-        scoreForPCalc = 0.000001;
-      }
-
-      // console.log('Result: ', {selction: {muSelection,varSelection},
-      //                         category: {muCategory,varCategory},
-      //                         scores: {scoreP1,scoreP2,score},
-      //                         intersectSets: {intersect}
-      //                         });
-      // console.log('T-Test: ',score, '| df: ',nCategory + nSelection-2);
-      // console.log('-------');
-
-      pValue = jStat.jStat.ttest(scoreForPCalc, nCategory + nSelection, 2);
-    } else {
-      pValue = -1;
+  public async calc(arr1: Array<any>, arr2: Array<any>) {
+    if (arr1.length !== arr2.length) {
+      throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
 
-    score = score || 0;
-    pValue = pValue || 0;
+    const {score, p} = await this.calcP_Randomize(arr1, arr2);
+    return measureResultObj(score, p, this.id); // async function --> returns promise
+  }
 
-    return measureResultObj(score,pValue);
+  async calcP_Randomize(arr1: any[], arr2: any[]): Promise<{score: number, p: number}> {
+    return new AdjustedRandRandomizationWorker().calculate({setA: arr1, setB: arr2});
   }
 }
 
-interface IRankObJ {
- set: string;
- value: any;
- rank?: number;
-}
+
+//  _   _ _    _ __  __            _   _ _    _ __  __
+// | \ | | |  | |  \/  |          | \ | | |  | |  \/  |
+// |  \| | |  | | \  / |  ______  |  \| | |  | | \  / |
+// | . ` | |  | | |\/| | |______| | . ` | |  | | |\/| |
+// | |\  | |__| | |  | |          | |\  | |__| | |  | |
+// |_| \_|\____/|_|  |_|          |_| \_|\____/|_|  |_|
+// =================================================================
+// =================================================================
+
 
 @MeasureDecorator()
 export class WilcoxonRankSumTest extends ASimilarityMeasure {
@@ -336,42 +320,73 @@ export class MannWhitneyUTest extends WilcoxonRankSumTest {
 }
 
 
-/**
- * Also known as the Tanimoto distance metric.
- */
 @MeasureDecorator()
-export class AdjustedRandIndex extends ASimilarityMeasure {
+export class StudentTTest extends ASimilarityMeasure {
 
   constructor() {
     super();
 
-    this.id = 'adjrand';
-    this.label = 'Adjusted Rand Index';
-    this.description = 'Measures the similarity between two categorical attributes. \
-    The adjusted Rand index is based on counting pairs of items that are in the same or different categories in the two attributes.';
+    this.id = 'student_test';
+    this.label = 'Student\'s t-Test';
+    this.description = 'Compares the means of two groups (assuimg equal variances in their respective normal distributions).';
+    this.visualization = new BoxPlot();
 
-    this.visualization = new ParallelSets();
-
-    this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
-    this.scope = SCOPE.ATTRIBUTES;
+    this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
+    this.scope = SCOPE.SETS;
   }
 
 
-  public async calc(arr1: Array<any>, arr2: Array<any>) {
-    if (arr1.length !== arr2.length) {
-      throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
+  public async calc(setA: Array<any>, setB: Array<any>) {
+    await sleep(0);
+    const setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
+    const nSelection = setAValid.length;
+    const muSelection = d3.mean(setAValid);
+    const varSelection = d3.variance(setAValid);
+
+    //category
+    const setBValid = setB.filter((value) => {return (value !== null && value !== undefined);});
+    const nCategory = setBValid.length;
+    const muCategory = d3.mean(setBValid);
+    const varCategory = d3.variance(setBValid);
+
+    // console.log('Input: ',{set : {setA,setB},
+    //                        ValidSet : {setAValid,setBValid}});
+
+    const scoreP1 = Math.sqrt((nSelection * nCategory * (nSelection + nCategory - 2)) / (nSelection + nCategory));
+    const scoreP2 = (muSelection - muCategory) / Math.sqrt((nSelection - 1) * varSelection + (nCategory - 1) * varCategory);
+    let score = scoreP1 * scoreP2;
+    let scoreForPCalc = score;
+
+    const availA = this.pValueAvailability(setA.length,setAValid.length);
+    const availB = this.pValueAvailability(setB.length,setBValid.length);
+    let pValue = 0;
+
+    if(availA && availB) {
+      const intersect = intersection(setAValid,setBValid);
+      if ((intersect.intersection.length === setAValid.length) && (setAValid.length === setBValid.length)) {
+        scoreForPCalc = 0.000001;
+      }
+
+      // console.log('Result: ', {selction: {muSelection,varSelection},
+      //                         category: {muCategory,varCategory},
+      //                         scores: {scoreP1,scoreP2,score},
+      //                         intersectSets: {intersect}
+      //                         });
+      // console.log('T-Test: ',score, '| df: ',nCategory + nSelection-2);
+      // console.log('-------');
+
+      pValue = jStat.jStat.ttest(scoreForPCalc, nCategory + nSelection, 2);
+    } else {
+      pValue = -1;
     }
 
-    const {score, p} = await this.calcP_Randomize(arr1, arr2);
-    return measureResultObj(score, p, this.id); // async function --> returns promise
+    score = score || 0;
+    pValue = pValue || 0;
+
+    return measureResultObj(score,pValue);
   }
-
-  async calcP_Randomize(arr1: any[], arr2: any[]): Promise<{score: number, p: number}> {
-    return new AdjustedRandRandomizationWorker().calculate({setA: arr1, setB: arr2});
-  }
-
-
 }
+
 
 @MeasureDecorator()
 export class SpearmanCorrelation extends ASimilarityMeasure {
@@ -456,6 +471,7 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
   }
 }
 
+
 @MeasureDecorator()
 export class PearsonCorrelation extends ASimilarityMeasure {
 
@@ -528,6 +544,17 @@ export class PearsonCorrelation extends ASimilarityMeasure {
     return measureResultObj(pearsonCorr,pValue); // async function --> returns promise
   }
 }
+
+
+//   _____       _______            _   _ _    _ __  __
+//  / ____|   /\|__   __|          | \ | | |  | |  \/  |
+// | |       /  \  | |     ______  |  \| | |  | | \  / |
+// | |      / /\ \ | |    |______| | . ` | |  | | |\/| |
+// | |____ / ____ \| |             | |\  | |__| | |  | |
+//  \_____/_/    \_\_|             |_| \_|\____/|_|  |_|
+// =================================================================
+// =================================================================
+
 
 @MeasureDecorator()
 export class EnrichmentScore extends ASimilarityMeasure {
@@ -687,3 +714,13 @@ export class EnrichmentScore extends ASimilarityMeasure {
   }
 }
 
+// ===========================================================================================
+// ===========================================================================================
+// ===========================================================================================
+
+
+interface IRankObJ {
+  set: string;
+  value: any;
+  rank?: number;
+ }
