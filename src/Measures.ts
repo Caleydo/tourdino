@@ -540,7 +540,8 @@ export class EnrichmentScore extends ASimilarityMeasure {
     // TODO improve the measure description somehow:
     this.id = 'enrichment';
     this.label = 'Enrichment Score';
-    this.description = 'The enrichment score determines if a set is differentially expressed in different categories.';
+    this.description = 'The enrichment score is calculated for every category and tests if any category\'s values are concentrated in a certain range.';
+
     this.visualization = new LineChart();
 
     this.type = Comparison.get(Type.NUMERICAL, Type.CATEGORICAL);
