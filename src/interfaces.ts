@@ -2,7 +2,6 @@
  * Constants that describes a type like numerical or categorical.
  */
 export class Type {
-  // TODO make an enum again (string enums need at least typescript 2.4)
 
   private constructor(private value: string) {}
 
@@ -28,7 +27,6 @@ export class Type {
  * Describes an comparison of two types
  */
 export class Comparison {
-
   private static comparisons = new Map<String, Comparison>();
   public readonly typeA: Type;
   public readonly typeB: Type;
