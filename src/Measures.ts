@@ -358,7 +358,9 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     // TODO improve the measure description somehow:
     this.id = 'adjrand';
     this.label = 'Adjusted Rand Index';
-    this.description = 'Is a measure for the similarity between two data sets.';
+    this.description = 'Measures the similarity between two categorical attributes. \
+    The adjusted Rand index is based on counting all pairs of samples that are in the same or different categories in the two attributes.';
+
     this.visualization = new ParallelSets();
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
