@@ -184,7 +184,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
     // TODO improve the measure description somehow:
     this.id = 'wilcoxon-rank-sum_test';
     this.label = 'Wilcoxon Rank-Sum Test';
-    this.description = 'Compares two samples of homogenity (non-parametric test).';
+    this.description = 'Tests if the two groups of values stem from the same distribution. It is also known as Mann–Whitney U test.';
     this.visualization = new BoxPlot();
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
@@ -342,6 +342,7 @@ export class MannWhitneyUTest extends WilcoxonRankSumTest {
 
     this.id = 'mwu_test';
     this.label = 'Mann-Whitney U Test';
+    this.description = 'Tests if the two groups of values stem from the same distribution. It is also known as Wilcoxon rank-sum test.';
   }
 }
 
