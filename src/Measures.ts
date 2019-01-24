@@ -1,9 +1,8 @@
-import {Comparison, SCOPE, ISimilarityMeasure, IMeasureOptions, Type, IMeasureResult, IMeasureVisualization} from './interfaces';
-import {defaultMeasureOptions} from './config';
+import {Comparison, SCOPE, ISimilarityMeasure, Type, IMeasureResult, IMeasureVisualization} from './interfaces';
 import {ParallelSets} from './measure_visualization/ParallelSets';
 import {BoxPlot} from './measure_visualization/BoxPlot';
 import {ScatterPlot} from './measure_visualization/ScatterPlot';
-import {intersection, binom2, measureResultObj, sleep} from './util';
+import {intersection,  measureResultObj, sleep} from './util';
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
 import {LineChart} from './measure_visualization/LineChart';
@@ -12,7 +11,7 @@ import {JaccardRandomizationWorker, AdjustedRandRandomizationWorker, EnrichmentR
 export const registeredClasses = new Array<ASimilarityMeasure>();
 export function MeasureDecorator() {
   return function (target: {new(): ASimilarityMeasure}) { // only instantiable subtypes of ASimilarityClass can be passed.
-    registeredClasses.push(new target()); //TODO apply options
+    registeredClasses.push(new target());
   };
 }
 
@@ -26,12 +25,6 @@ export abstract class ASimilarityMeasure implements ISimilarityMeasure {
 
   public type: Comparison;
   public scope: SCOPE;
-
-  protected readonly options: IMeasureOptions;
-
-  constructor(options = defaultMeasureOptions()) {
-    this.options = options;
-  }
 
   public abstract calc(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<IMeasureResult>;
 
@@ -47,10 +40,9 @@ export abstract class ASimilarityMeasure implements ISimilarityMeasure {
 @MeasureDecorator()
 export class JaccardSimilarity extends ASimilarityMeasure {
 
-  constructor(options?: IMeasureOptions) {
-    super(options);
+  constructor() {
+    super();
 
-    // TODO improve the measure description somehow:
     this.id = 'jaccard';
     this.label = 'Jaccard Index';
     this.description = 'The index shows the similarity of two sets by normalizing their intersection with the union of the sets.';
@@ -75,10 +67,9 @@ export class JaccardSimilarity extends ASimilarityMeasure {
 @MeasureDecorator()
 export class OverlapSimilarity extends ASimilarityMeasure {
 
-  constructor(options?: IMeasureOptions) {
-    super(options);
+  constructor() {
+    super();
 
-    // TODO improve the measure description somehow:
     this.id = 'overlap';
     this.label = 'Overlap Coefficient'; //Szymkiewicz-Simpson
     this.description = 'The overlap coefficient shows the similarity of two sets by dividing their intersection by the size of the smaller set..';
@@ -104,8 +95,8 @@ export class OverlapSimilarity extends ASimilarityMeasure {
 @MeasureDecorator()
 export class StudentTTest extends ASimilarityMeasure {
 
-  constructor(options?: IMeasureOptions) {
-    super(options);
+  constructor() {
+    super();
 
     // TODO improve the measure description somehow:
     this.id = 'student_test';
@@ -178,8 +169,8 @@ interface IRankObJ {
 @MeasureDecorator()
 export class WilcoxonRankSumTest extends ASimilarityMeasure {
 
-  constructor(options?: IMeasureOptions) {
-    super(options);
+  constructor() {
+    super();
 
     // TODO improve the measure description somehow:
     this.id = 'wilcoxon-rank-sum_test';
@@ -337,8 +328,8 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
 @MeasureDecorator()
 export class MannWhitneyUTest extends WilcoxonRankSumTest {
 
-  constructor(options?: IMeasureOptions) {
-    super(options);
+  constructor() {
+    super();
 
     this.id = 'mwu_test';
     this.label = 'Mann-Whitney U Test';
@@ -353,8 +344,8 @@ export class MannWhitneyUTest extends WilcoxonRankSumTest {
 @MeasureDecorator()
 export class AdjustedRandIndex extends ASimilarityMeasure {
 
-  constructor(options?: IMeasureOptions) {
-    super(options);
+  constructor() {
+    super();
 
     // TODO improve the measure description somehow:
     this.id = 'adjrand';
@@ -388,8 +379,8 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
 @MeasureDecorator()
 export class SpearmanCorrelation extends ASimilarityMeasure {
 
-  constructor(options?: IMeasureOptions) {
-    super(options);
+  constructor() {
+    super();
 
     // TODO improve the measure description somehow:
     this.id = 'spearmanCor';
@@ -472,8 +463,8 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
 @MeasureDecorator()
 export class PearsonCorrelation extends ASimilarityMeasure {
 
-  constructor(options?: IMeasureOptions) {
-    super(options);
+  constructor() {
+    super();
 
     // TODO improve the measure description somehow:
     this.id = 'pearsonCor';
@@ -546,8 +537,8 @@ export class PearsonCorrelation extends ASimilarityMeasure {
 @MeasureDecorator()
 export class EnrichmentScore extends ASimilarityMeasure {
 
-  constructor(options?: IMeasureOptions) {
-    super(options);
+  constructor() {
+    super();
 
     // TODO improve the measure description somehow:
     this.id = 'enrichment';

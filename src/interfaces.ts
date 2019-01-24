@@ -124,22 +124,6 @@ export interface ISimilarityFunc {
   (setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<IMeasureResult>;
 }
 
-
-export interface IMeasureOptions {
-  /**
-   * With custom weights, the order of similarity measures returned by the manager can be influenced.
-   * Measures with higher weight are prioritized.
-   * @default 0
-   */
-  weight: number;
-
-  /**
-   * Option to enable/disbale a measure.
-   * @default true
-   */
-  enabled: boolean;
-}
-
 export interface IMeasureResult {
   /**
    * Value of the used measure type (e.g. z-value,t-value)
