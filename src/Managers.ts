@@ -46,7 +46,7 @@ export class MethodManager {
     const measures = new Array<ISimilarityMeasure>();
     for (const measure of registeredClasses) {
       if (measure.scope === scope && measure.type.equals(Comparison.get(a, b))) {
-        measures.push(measure); // TODO: consider weights
+        measures.push(measure);
       }
     }
 

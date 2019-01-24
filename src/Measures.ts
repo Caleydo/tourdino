@@ -98,7 +98,6 @@ export class StudentTTest extends ASimilarityMeasure {
   constructor() {
     super();
 
-    // TODO improve the measure description somehow:
     this.id = 'student_test';
     this.label = 'Student\'s t-Test';
     this.description = 'Compares the means of two groups (assuimg equal variances in their respective normal distributions).';
@@ -172,7 +171,6 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
   constructor() {
     super();
 
-    // TODO improve the measure description somehow:
     this.id = 'wilcoxon-rank-sum_test';
     this.label = 'Wilcoxon Rank-Sum Test';
     this.description = 'Tests if the two groups of values stem from the same distribution. It is also known as Mann–Whitney U test.';
@@ -347,7 +345,6 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
   constructor() {
     super();
 
-    // TODO improve the measure description somehow:
     this.id = 'adjrand';
     this.label = 'Adjusted Rand Index';
     this.description = 'Measures the similarity between two categorical attributes. \
@@ -382,7 +379,6 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
   constructor() {
     super();
 
-    // TODO improve the measure description somehow:
     this.id = 'spearmanCor';
     this.label = 'Spearman\'s Rank Correlation Coefficient';
     this.description = 'The Spearman\'s rank correlation coefficient is a nonparametic measure for statistical dependence between rankings of two sets. '+
@@ -466,7 +462,6 @@ export class PearsonCorrelation extends ASimilarityMeasure {
   constructor() {
     super();
 
-    // TODO improve the measure description somehow:
     this.id = 'pearsonCor';
     this.label = 'Pearson Correlation Coefficient';
     this.description = 'The Pearson correlation coefficient is a measure for the linear correlation between two data sets. '+
@@ -540,7 +535,6 @@ export class EnrichmentScore extends ASimilarityMeasure {
   constructor() {
     super();
 
-    // TODO improve the measure description somehow:
     this.id = 'enrichment';
     this.label = 'Enrichment Score';
     this.description = 'The enrichment score is calculated for every category and tests if any category\'s values are concentrated in a certain range.';
