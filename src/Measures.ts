@@ -53,7 +53,7 @@ export class JaccardSimilarity extends ASimilarityMeasure {
     // TODO improve the measure description somehow:
     this.id = 'jaccard';
     this.label = 'Jaccard Index';
-    this.description = 'The size of the intersection divided by the size of the union of the sample sets.';
+    this.description = 'The index shows the similarity of two sets by normalizing their intersection with the union of the sets.';
     this.visualization = new ParallelSets();
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
@@ -81,7 +81,7 @@ export class OverlapSimilarity extends ASimilarityMeasure {
     // TODO improve the measure description somehow:
     this.id = 'overlap';
     this.label = 'Overlap Coefficient'; //Szymkiewicz-Simpson
-    this.description = 'The size of the intersection divided by the size of the smaller set.';
+    this.description = 'The overlap coefficient shows the similarity of two sets by dividing their intersection by the size of the smaller set..';
     this.visualization = new ParallelSets();
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
@@ -360,7 +360,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     this.id = 'adjrand';
     this.label = 'Adjusted Rand Index';
     this.description = 'Measures the similarity between two categorical attributes. \
-    The adjusted Rand index is based on counting all pairs of samples that are in the same or different categories in the two attributes.';
+    The adjusted Rand index is based on counting pairs of items that are in the same or different categories in the two attributes.';
 
     this.visualization = new ParallelSets();
 
