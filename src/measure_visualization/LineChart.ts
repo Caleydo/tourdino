@@ -62,7 +62,7 @@ export class LineChart implements IMeasureVisualization {
     }
 
     // sort the combined set
-    validCombinedSet.sort((a,b) => { return b.value - a.value;});
+    validCombinedSet.sort((a,b) => { return a.value - b.value;});
     // console.log('combineSet: ', validCombinedSet);
 
     let dataLines = [];
@@ -179,152 +179,154 @@ export class LineChart implements IMeasureVisualization {
 
   public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, score: IMeasureResult) {
     const formatData = this.formatData(setParameters,score);
-    console.log('Line Chart - generateVisualization', {setParameters, formatData});
+    console.log('Line Chart - generateVisualization', {setParameters, formatData, score});
     // console.log('formatData: ', formatData);
 
 
     // remove old tooltip
     d3.select('body').selectAll('div.measure.tooltip').remove();
 
-    // new tooltip
-    const tooltipLineChart = d3.select('body').append('div')
-                                              .style('display', 'none')
-                                              .style('opacity', 0)
-                                              .attr('class', 'tooltip measure');
+    if(score.pValue !== -1) {
+
+      // new tooltip
+      const tooltipLineChart = d3.select('body').append('div')
+                                                .style('display', 'none')
+                                                .style('opacity', 0)
+                                                .attr('class', 'tooltip measure');
 
 
-    // get size of space and calculate scatter plot size
-    const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
+      // get size of space and calculate scatter plot size
+      const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
 
-    const labelOffsetAxisX = 35;
-    const labelOffsetAxisY = 15;
-    const maxHeight = 220;
-    const margin = {top: 10, right: 20, bottom: 20+labelOffsetAxisX, left: 55+labelOffsetAxisY};
-    const width = containerWidth - margin.left - margin.right;
-    const height = maxHeight - margin.top - margin.bottom;
+      const labelOffsetAxisX = 35;
+      const labelOffsetAxisY = 15;
+      const maxHeight = 220;
+      const margin = {top: 10, right: 20, bottom: 20+labelOffsetAxisX, left: 55+labelOffsetAxisY};
+      const width = containerWidth - margin.left - margin.right;
+      const height = maxHeight - margin.top - margin.bottom;
 
-    // create baseline values
-    const baseline = formatData.xDomain.map((item) => { return {x: Number(item),
-                                                              y: 0};}) as any;
+      // create baseline values
+      const baseline = formatData.xDomain.map((item) => { return {x: Number(item),
+                                                                y: 0};}) as any;
 
-    // x: scales + axis + map function for the data points
-    const xScale = d3.scale.linear().range([0, width]);
-    const xAxis = d3.svg.axis().scale(xScale).orient('bottom');
-    xAxis.tickFormat((d) => {
-      if((Math.abs(d)<1000 && Math.abs(d)>0.01) || d === 0) {
-        return ''+Math.round(d*100)/100;
+      // x: scales + axis + map function for the data points
+      const xScale = d3.scale.linear().range([0, width]);
+      const xAxis = d3.svg.axis().scale(xScale).orient('bottom');
+      xAxis.tickFormat((d) => {
+        if((Math.abs(d)<1000 && Math.abs(d)>0.01) || d === 0) {
+          return ''+Math.round(d*100)/100;
+        }
+        return d3.format('0.1e')(d); });
+        const xMap = function(d) { return xScale(d.x);};
+
+      // y: scale + axis + map function for the data points
+      const yScale = d3.scale.linear().range([height, 0]);
+      const yAxis = d3.svg.axis().scale(yScale).orient('left');
+      yAxis.tickFormat((d) => {
+        if((Math.abs(d)<1000 && Math.abs(d)>0.01) || d === 0) {
+          return ''+Math.round(d*100)/100;
+        }
+        return d3.format('0.1e')(d); });
+        const yMap = function(d) { return yScale(d.y);};
+
+      // line function
+      const line = d3.svg.line()
+                          .x((d) => xMap(d))
+                          .y((d) => yMap(d));
+
+      // svg canvas
+      const svgCanvas = miniVisualisation.append('svg')
+            .attr('width',width + margin.left + margin.right)
+            .attr('height',height + margin.top + margin.bottom);
+
+            const svgFigureGroup = svgCanvas.append('g')
+                                    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+                                    .attr('class','linechart');
+
+      // set scale.domain
+      xScale.domain(formatData.xDomain).nice();
+      yScale.domain(formatData.yDomain).nice();
+
+      // add axis to the canvas
+      // x-axis
+      svgFigureGroup.append('g')
+                    .attr('class', 'x axis')
+                    .attr('transform', 'translate(0,' + height + ')')
+                    .call(xAxis)
+                    .append('text')
+                      .attr('class', 'label')
+                      .attr('x', width/2)
+                      .attr('y', 35)
+                      .style('text-anchor', 'middle')
+                      .text(formatData.xLabel);
+
+      // y-axis
+      svgFigureGroup.append('g')
+                    .attr('class', 'y axis')
+                    .call(yAxis)
+                    .append('text')
+                      .attr('class', 'label')
+                      .attr('transform', 'rotate(-90)')
+                      .attr('y', -margin.left+labelOffsetAxisY)
+                      .attr('x', -(maxHeight-margin.bottom)/2)
+                      .style('text-anchor', 'middle')
+                      .text(formatData.yLabel);
+
+
+      // data lines
+      svgFigureGroup.append('g')
+                    .attr('class', 'all-datalines')
+                    .selectAll('path')
+                      .data(formatData.dataLines)
+                      .enter().append('path')
+                        .attr('class','dataline')
+                        .attr('d',(d) => line(d.values))
+                        .style('stroke',(d) => d !== null  ? d.color : null)
+                        .style('fill',(d) => d !== null  ? d.color : null)
+                        .on('mouseover', function(d) {
+                          const m = d3.mouse(d3.select('body').node());
+                          tooltipLineChart.transition()
+                                            .duration(500)
+                                            .style('display','block')
+                                            .style('opacity', .9);
+                          const tooltipText = `Category: ${d.category}</br>Enrichment Score: ${d.enrichmentScore.toFixed(3)}`;
+                          const textPValue = d.pvalue === null ? '' : `</br>p-Value: ${d.pvalue.toFixed(3)}`;
+                          tooltipLineChart.html(tooltipText+textPValue)
+                                            .style('left', (m[0] + 5) + 'px')
+                                            .style('top', (m[1]- 28) + 'px');
+                        })
+                        .on('mouseout', function(d) {
+                          tooltipLineChart.transition()
+                                            .duration(500)
+                                            .style('display','none')
+                                            .style('opacity', 0);
+                        });
+
+
+      // add baseline at 0
+      svgFigureGroup.append('g')
+                    .attr('class', 'baseline')
+                    .append('path')
+                      .attr('d',line(baseline))
+                      .style('stroke','black');
+
+                      const svgScorePoints = svgFigureGroup.append('g')
+                                        .attr('class', 'score-datapoints');
+
+      const lines = formatData.dataLines.length;
+
+      for(let i=0; i<lines; i++) {
+        if(formatData.dataLines[i].scorePos && formatData.dataLines[i].scorePos.length > 0) {
+          // data point for enrichment score (onyl the first one will be drawn)
+          svgScorePoints.append('circle')
+                        .attr('r', 3)
+                        .attr('cx', xScale(formatData.dataLines[i].scorePos[0]))
+                        .attr('cy', yScale(formatData.dataLines[i].enrichmentScore));
+        }
       }
-      return d3.format('0.1e')(d); });
-      const xMap = function(d) { return xScale(d.x);};
 
-    // y: scale + axis + map function for the data points
-    const yScale = d3.scale.linear().range([height, 0]);
-    const yAxis = d3.svg.axis().scale(yScale).orient('left');
-    yAxis.tickFormat((d) => {
-      if((Math.abs(d)<1000 && Math.abs(d)>0.01) || d === 0) {
-        return ''+Math.round(d*100)/100;
-      }
-      return d3.format('0.1e')(d); });
-      const yMap = function(d) { return yScale(d.y);};
-
-    // line function
-    const line = d3.svg.line()
-                        .x((d) => xMap(d))
-                        .y((d) => yMap(d));
-
-    // svg canvas
-    const svgCanvas = miniVisualisation.append('svg')
-          .attr('width',width + margin.left + margin.right)
-          .attr('height',height + margin.top + margin.bottom);
-
-          const svgFigureGroup = svgCanvas.append('g')
-                                  .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-                                  .attr('class','linechart');
-
-    // set scale.domain
-    xScale.domain(formatData.xDomain).nice();
-    yScale.domain(formatData.yDomain).nice();
-
-    // add axis to the canvas
-    // x-axis
-    svgFigureGroup.append('g')
-                  .attr('class', 'x axis')
-                  .attr('transform', 'translate(0,' + height + ')')
-                  .call(xAxis)
-                  .append('text')
-                    .attr('class', 'label')
-                    .attr('x', width/2)
-                    .attr('y', 35)
-                    .style('text-anchor', 'middle')
-                    .text(formatData.xLabel);
-
-    // y-axis
-    svgFigureGroup.append('g')
-                  .attr('class', 'y axis')
-                  .call(yAxis)
-                  .append('text')
-                    .attr('class', 'label')
-                    .attr('transform', 'rotate(-90)')
-                    .attr('y', -margin.left+labelOffsetAxisY)
-                    .attr('x', -(maxHeight-margin.bottom)/2)
-                    .style('text-anchor', 'middle')
-                    .text(formatData.yLabel);
-
-
-    // data lines
-    svgFigureGroup.append('g')
-                  .attr('class', 'all-datalines')
-                  .selectAll('path')
-                    .data(formatData.dataLines)
-                    .enter().append('path')
-                      .attr('class','dataline')
-                      .attr('d',(d) => line(d.values))
-                      .style('stroke',(d) => d !== null  ? d.color : null)
-                      .style('fill',(d) => d !== null  ? d.color : null)
-                      .on('mouseover', function(d) {
-                        const m = d3.mouse(d3.select('body').node());
-                        tooltipLineChart.transition()
-                                          .duration(500)
-                                          .style('display','block')
-                                          .style('opacity', .9);
-                        const tooltipText = `Category: ${d.category}</br>Enrichment Score: ${d.enrichmentScore.toFixed(3)}`;
-                        const textPValue = d.pvalue === null ? '' : `</br>p-Value: ${d.pvalue.toFixed(3)}`;
-                        tooltipLineChart.html(tooltipText+textPValue)
-                                          .style('left', (m[0] + 5) + 'px')
-                                          .style('top', (m[1]- 28) + 'px');
-                      })
-                      .on('mouseout', function(d) {
-                        tooltipLineChart.transition()
-                                          .duration(500)
-                                          .style('display','none')
-                                          .style('opacity', 0);
-                      });
-
-
-    // add baseline at 0
-    svgFigureGroup.append('g')
-                  .attr('class', 'baseline')
-                  .append('path')
-                    .attr('d',line(baseline))
-                    .style('stroke','black');
-
-                    const svgScorePoints = svgFigureGroup.append('g')
-                                       .attr('class', 'score-datapoints');
-
-    const lines = formatData.dataLines.length;
-
-    for(let i=0; i<lines; i++) {
-      if(formatData.dataLines[i].scorePos && formatData.dataLines[i].scorePos.length > 0) {
-        // data point for enrichment score (onyl the first one will be drawn)
-        svgScorePoints.append('circle')
-                      .attr('r', 3)
-                      .attr('cx', xScale(formatData.dataLines[i].scorePos[0]))
-                      .attr('cy', yScale(formatData.dataLines[i].enrichmentScore));
-      }
     }
-
   }
-
 
 
 }

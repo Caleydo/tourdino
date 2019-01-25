@@ -613,61 +613,69 @@ export class EnrichmentScore extends ASimilarityMeasure {
       throw new Error('Neither of the sets contains numbers. Cant calcute enrichment score.');
     }
 
-    // combine both sets
-    const combinedSet = [];
-    for (let i=0; i<set1.length; i++) {
-      combinedSet.push({
-        category: categorySet[i],
-        value: numericSet[i]
-      });
-    }
-
-    const validCombinedSet = combinedSet.filter((item) => { return (item.value !== undefined) && (item.value !== null) && (!Number.isNaN(item.value)); });
-    // sort the combined set
-    validCombinedSet.sort((a,b) => { return b.value - a.value;});
-
-    // console.log('combinedSet: ',combinedSet);
-    // console.log('validCombinedSet: ',validCombinedSet);
-    //define category sets
-    const propertyCategories = [];
-    for (const currCategory of categories) {
-      const numCategory = validCombinedSet.filter((item) => { return item.category === currCategory; }).length;
-      propertyCategories.push({
-        name: currCategory,
-        amount: numCategory
-      });
-    }
-
-
-    const enrichmentScoreCategories = [];
-    for (const propertyCategory of propertyCategories) {
-      const currCategory = propertyCategory.name;
-      const amountCategory = propertyCategory.amount;
-      enrichmentScoreCategories.push(this.calcEnrichmentScoreCategory(validCombinedSet, currCategory, amountCategory));
-    }
-
     let overallScore = 0;
-    // console.log('enrichmentScoreCategories.length: ',enrichmentScoreCategories.length);
-    for (const esCategory of enrichmentScoreCategories) {
-      const score = esCategory.enrichmentScore;
-      overallScore = Math.abs(score) > Math.abs(overallScore) ? score : overallScore;
-      // console.log('overallScore-loop: ',{score,overallScore});
+    let properties  = [];
+    let p = -1;
+
+    // only calculate if more than 1 category exists
+    if(categories.length>1) {
+
+      // combine both sets
+      const combinedSet = [];
+      for (let i=0; i<set1.length; i++) {
+        combinedSet.push({
+          category: categorySet[i],
+          value: numericSet[i]
+        });
+      }
+
+      const validCombinedSet = combinedSet.filter((item) => { return (item.value !== undefined) && (item.value !== null) && (!Number.isNaN(item.value)); });
+      // sort the combined set
+      validCombinedSet.sort((a,b) => { return a.value - b.value;});
+
+      // console.log('combinedSet: ',combinedSet);
+      // console.log('validCombinedSet: ',validCombinedSet);
+      //define category sets
+      const propertyCategories = [];
+      for (const currCategory of categories) {
+        const numCategory = validCombinedSet.filter((item) => { return item.category === currCategory; }).length;
+        propertyCategories.push({
+          name: currCategory,
+          amount: numCategory
+        });
+      }
+
+      const enrichmentScoreCategories = [];
+      for (const propertyCategory of propertyCategories) {
+        const currCategory = propertyCategory.name;
+        const amountCategory = propertyCategory.amount;
+        enrichmentScoreCategories.push(this.calcEnrichmentScoreCategory(validCombinedSet, currCategory, amountCategory));
+      }
+
+      
+      // console.log('enrichmentScoreCategories.length: ',enrichmentScoreCategories.length);
+      for (const esCategory of enrichmentScoreCategories) {
+        const score = esCategory.enrichmentScore;
+        overallScore = Math.abs(score) > Math.abs(overallScore) ? score : overallScore;
+        // console.log('overallScore-loop: ',{score,overallScore});
+      }
+
+      // console.log('enrichmentScoreCategories: ',enrichmentScoreCategories);
+      // console.log('overallScore: ',overallScore);
+
+      // console.log('sumCategories: ', sumCategories);
+      // console.timeEnd('enrichment-'+id+'-time');
+      // console.groupEnd();
+
+      const avail = this.pValueAvailability(combinedSet.length,validCombinedSet.length);
+
+      // calc p-value
+      properties = await this.calcPValuePermutation(numericSet, categorySet, enrichmentScoreCategories);
+      p = Math.min(...properties.map((item) => (item.pvalue)));
+
+      p = avail ? p : -1;
+
     }
-
-    // console.log('enrichmentScoreCategories: ',enrichmentScoreCategories);
-    // console.log('overallScore: ',overallScore);
-
-    // console.log('sumCategories: ', sumCategories);
-    // console.timeEnd('enrichment-'+id+'-time');
-    // console.groupEnd();
-
-    const avail = this.pValueAvailability(combinedSet.length,validCombinedSet.length);
-
-    // calc p-value
-    const properties = await this.calcPValuePermutation(numericSet, categorySet, enrichmentScoreCategories);
-    let p = Math.min(...properties.map((item) => (item.pvalue)));
-
-    p = avail ? p : -1;
 
     return measureResultObj(overallScore,p,properties); // async function --> returns promise
   }
