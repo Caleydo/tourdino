@@ -652,7 +652,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
         enrichmentScoreCategories.push(this.calcEnrichmentScoreCategory(validCombinedSet, currCategory, amountCategory));
       }
 
-      
+
       // console.log('enrichmentScoreCategories.length: ',enrichmentScoreCategories.length);
       for (const esCategory of enrichmentScoreCategories) {
         const score = esCategory.enrichmentScore;
