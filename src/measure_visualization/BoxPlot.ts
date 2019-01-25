@@ -211,27 +211,18 @@ export class BoxPlot implements IMeasureVisualization {
     }
 
     // tooltip
-    boxElements.on('mouseover', function(d) {
-                  // console.log('boxplot.tooltip.d',d)
-                  const m = d3.mouse(d3.select('body').node());
-                  tooltipBoxplot.transition()
-                      .duration(500)
-                      .style('display','block')
-                      .style('opacity', .9);
+    boxElements.append('title')
+                .classed('tooltip.measure',true)
+                .text(function(d) {
+
                   const min = (d[1][0]).toFixed(2);
                   const q1 = (d[1].quartiles[0]).toFixed(2);
                   const median = (d[1].quartiles[1]).toFixed(2);
                   const q3 = (d[1].quartiles[2]).toFixed(2);
                   const max = (d[1][d[1].length-1]).toFixed(2);
-                  tooltipBoxplot	.html(`min = ${min}</br>q1 = ${q1}</br>median = ${median}</br>q3 = ${q3}</br>max = ${max}`)
-                      .style('left', m[0] + 30 + 'px')
-                      .style('top', m[1] - 20 + 'px');
-                })
-                .on('mouseout', function(d) {
-                  tooltipBoxplot.transition()
-                        .duration(500)
-                        .style('display','none')
-                        .style('opacity', 0);
+                  const text = `min = ${min}\nq1 = ${q1}\nmedian = ${median}\nq3 = ${q3}\nmax = ${max}`;
+
+                  return text;
                 });
 
   }

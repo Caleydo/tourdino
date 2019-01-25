@@ -196,6 +196,12 @@ export class ParallelSets implements IMeasureVisualization {
     // delete old tooltip
     const tooltipParSets = d3.select('body').selectAll('div.parsets.tooltip').remove();
 
+
+    const tooltipLineChart = d3.select('body').append('div')
+    .style('display', 'none')
+    .style('opacity', 0)
+    .attr('class', 'tooltip measure');
+
     const width = Number(miniVisualisation.style('width').slice(0, -2)); //-25 because the scroll bar (15px) on the left is dynamically added
     const svgWidth = width - 25;
     const svgHeight = 175;
@@ -229,8 +235,10 @@ export class ParallelSets implements IMeasureVisualization {
     // draw parallel sets
     svgFigureGroup.datum(formatData.data).call(chart);
 
-    // add class to tooltip
-    d3.select('body').selectAll('div.parsets.tooltip').classed('measure',true);
+    // remove tooltip (parsets.js), is automatically created when the chart is genereted
+    d3.select('body').selectAll('div.parsets.tooltip').remove();
+
+
 
     // edit dimensions
     const svgDimensions = svgFigureGroup.selectAll('g.dimension');
@@ -256,6 +264,41 @@ export class ParallelSets implements IMeasureVisualization {
     } else {
       this.highlightAndColorRibbons(setParameters, svgRibbons, formatData.dimension1);
     }
+
+    //add tooltip for categories
+    svgDimensions.each(function (d) {
+      const categories = d3.select(this).selectAll('g.category');
+
+      categories.append('title')
+        .classed('tooltip.measure',true)
+        .text(function(d) {
+          let total = 0;
+          const allCats = d.dimension.categories;
+
+          for(const cat of allCats)
+          {
+            total += cat.count;
+          }
+          const percentage = ((d.count/total)*100).toFixed(2);
+
+          return `Category; ${d.name}\nCount: ${d.count} (${percentage}%)`;
+        });
+    });
+
+    // add tooltip for ribbons
+    svgRibbons.selectAll('path')
+      .each(function (d) {
+
+        d3.select(this).append('title')
+          .classed('tooltip.measure',true)
+          .text(function(d) {
+            const dim1Name = d.parent.name;
+            const dim2Name = d.node.name;
+
+            return `Ribbon: ${dim1Name} x ${dim2Name}\nCount: ${d.count}`;
+          });
+      });
+
 
   }
 

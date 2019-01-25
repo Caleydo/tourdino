@@ -283,25 +283,23 @@ export class LineChart implements IMeasureVisualization {
                         .attr('d',(d) => line(d.values))
                         .style('stroke',(d) => d !== null  ? d.color : null)
                         .style('fill',(d) => d !== null  ? d.color : null)
-                        .on('mouseover', function(d) {
-                          const m = d3.mouse(d3.select('body').node());
-                          tooltipLineChart.transition()
-                                            .duration(500)
-                                            .style('display','block')
-                                            .style('opacity', .9);
-                          const tooltipText = `Category: ${d.category}</br>Enrichment Score: ${d.enrichmentScore.toFixed(3)}`;
-                          const textPValue = d.pvalue === null ? '' : `</br>p-Value: ${d.pvalue.toFixed(3)}`;
-                          tooltipLineChart.html(tooltipText+textPValue)
-                                            .style('left', (m[0] + 5) + 'px')
-                                            .style('top', (m[1]- 28) + 'px');
-                        })
-                        .on('mouseout', function(d) {
-                          tooltipLineChart.transition()
-                                            .duration(500)
-                                            .style('display','none')
-                                            .style('opacity', 0);
-                        });
+                        .append('title')
+                          .classed('tooltip.measure',true)
+                          .text(function(d) {
+                            const tooltipText = `Category: ${d.category}\nEnrichment Score: ${d.enrichmentScore.toFixed(3)}`;
+                            let pValueText = '';
+                            if(d.pvalue !== null) {
+                              pValueText = d.pvalue.toFixed(3);
+                              if (d.pvalue === 1) {
+                                pValueText = d.pvalue.toFixed(2);
+                              }else if(d.pvalue === -1) {
+                                pValueText = 'n/a';
+                              }
+                            }
+                            const textPValue = pValueText ===  '' ? '' : `\np-Value: ${pValueText}`;
 
+                            return tooltipText+textPValue;
+                          });
 
       // add baseline at 0
       svgFigureGroup.append('g')

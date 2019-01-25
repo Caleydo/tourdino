@@ -144,22 +144,12 @@ export class ScatterPlot implements IMeasureVisualization {
       .attr('r', 2)
       .attr('cx', xMap)
       .attr('cy', yMap)
-      .on('mouseover', function(d) {
-                        const m = d3.mouse(d3.select('body').node());
-                        tooltipScatterPlot.transition()
-                                          .duration(500)
-                                          .style('display','block')
-                                          .style('opacity', .9);
-                        tooltipScatterPlot.html(`(${formatData.xLabel}: ${d.x}, ${formatData.yLabel}: ${d.y})`)
-                                          .style('left', (m[0] + 5) + 'px')
-                                          .style('top', (m[1]- 28) + 'px');
-                      })
-      .on('mouseout', function(d) {
-                        tooltipScatterPlot.transition()
-                                          .duration(500)
-                                          .style('display','none')
-                                          .style('opacity', 0);
-                      });
+      .append('title')
+        .classed('tooltip.measure',true)
+        .text(function(d) {
+
+          return `${formatData.xLabel}: ${d.x}\n${formatData.yLabel}: ${d.y}`;
+        });
 
 
   }
