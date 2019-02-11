@@ -78,7 +78,7 @@ export class LineChart implements IMeasureVisualization {
         if(i===0) {
           const temp = {category: currCategoryLabel,
                       color: categories[c].color,
-                      pvalue: categories[c].pvalue,
+                      pvalue: score.pValue === -1 ? -1 : categories[c].pvalue,
                       values: []};
           let currValue;
           if(validCombinedSet[i].category === currCategory) {
@@ -192,7 +192,20 @@ export class LineChart implements IMeasureVisualization {
     // remove old tooltip
     d3.select('body').selectAll('div.measure.tooltip').remove();
 
-    if(score.pValue !== -1) {
+
+    // add text for information to the visualization
+    const divDetailInfo = miniVisualisation.select('div.detailVis');
+
+    const visInfoText = formatData.dataLines.length <= 1 ? 'The categorical data set has only one category, therefore no visualization was created.' : 'If the categorical data set has more than five categories only the five most significant are illustrated.';
+
+    const visInfo = divDetailInfo.append('div')
+                                .classed('detailDiv',true)
+                                .text('Details for Visualization: ')
+                                .append('span')
+                                .text(visInfoText);
+
+
+    if(formatData.dataLines.length > 1) {
 
       // new tooltip
       const tooltipLineChart = d3.select('body').append('div')
