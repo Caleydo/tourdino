@@ -88,10 +88,10 @@ export class LineChart implements IMeasureVisualization {
           }
           // extra value so that the line starts and ends with the value 0
           temp.values.push({y: 0,
-                            x: validCombinedSet[i].value});
+                            x: i+1});
           //calculated value
           temp.values.push({y: currValue,
-                            x: validCombinedSet[i].value});
+                            x: i+1});
           dataLines.push(temp);
 
         }else {
@@ -104,26 +104,32 @@ export class LineChart implements IMeasureVisualization {
           }
 
           dataLines[c].values.push({y: currValue,
-                                    x: validCombinedSet[i].value});
+                                    x: i+1});
         }
       }
     }
 
     // sort data lines from low to high
     dataLines.sort((a,b) => { return a.pvalue - b.pvalue; });
-    console.log('dataLines: ', dataLines);
-    const numbDataLines = dataLines.length;
+    // console.log('dataLines: ', dataLines);
+    const numbAllLines = dataLines.length;
+
+    const maxNumberDataLines = 5;
+    const numbPossibleDataLines = Math.min(numbAllLines,maxNumberDataLines);
 
     // filter out all data lines with a p-value bigger than 0.05
-    const filteredDataLines = dataLines.filter((item) => (item.pvalue <= 0.05));
-    console.log('filteredDataLines: ', filteredDataLines);
+    // const filteredDataLines = dataLines.filter((item) => (item.pvalue <= 0.05));
+    // console.log('filteredDataLines: ', filteredDataLines);
 
     // make sure at least one datarow will be displayed
-    if(filteredDataLines.length === 0) {
-      if(numbDataLines > 0) {
-        filteredDataLines.push(dataLines[0]);
-      }
-    }
+    // if(filteredDataLines.length === 0) {
+    //   if(numbDataLines > 0) {
+    //     filteredDataLines.push(dataLines[0]);
+    //   }
+    // }
+
+    // make sure only the defined number of lines are displayed
+    const filteredDataLines = dataLines.slice(0,numbPossibleDataLines);
 
     dataLines = filteredDataLines;
 
@@ -146,7 +152,8 @@ export class LineChart implements IMeasureVisualization {
 
     const domainSpace = 0.01; //add space to domain so that the data points are not on the axis
     const xValue = validCombinedSet.map(((item) => (item.value)));
-    const xDomain = [Math.min(...xValue),Math.max(...xValue)];
+    // const xDomain = [Math.min(...xValue),Math.max(...xValue)];
+    const xDomain = [1,validCombinedSet.length];
     const yDomain = [Math.min(...minMaxValues),Math.max(...minMaxValues)];
 
     if(yDomain[0] === yDomain[1]) {
@@ -167,7 +174,7 @@ export class LineChart implements IMeasureVisualization {
     // xDomain[1] = tmp;
 
     const lineChart = {
-      'xLabel': xLabel,
+      'xLabel': xLabel+' (ranked)',
       'xDomain': xDomain,
       'dataLines': dataLines,
       'yLabel': 'Enrichment Score',
@@ -180,7 +187,6 @@ export class LineChart implements IMeasureVisualization {
   public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, score: IMeasureResult) {
     const formatData = this.formatData(setParameters,score);
     console.log('Line Chart - generateVisualization', {setParameters, formatData, score});
-    // console.log('formatData: ', formatData);
 
 
     // remove old tooltip
