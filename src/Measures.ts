@@ -44,6 +44,82 @@ export abstract class ASimilarityMeasure implements ISimilarityMeasure {
 // =================================================================
 // =================================================================
 
+@MeasureDecorator()
+export class ChiSquareTest extends ASimilarityMeasure {
+
+  constructor() {
+    super();
+
+    this.id = 'chi2_test';
+    this.label = 'Chi-Square Test';
+    this.description = 'TODO...';
+    this.visualization = new ParallelSets();
+
+    this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
+    this.scope = SCOPE.SETS;
+  }
+
+
+  public async calc(setA: Array<any>, setB: Array<any>) {
+    await sleep(0);
+    const setACategories = setA.filter((item, index, self) => self.indexOf(item) === index);
+    const setBCategories = setB.filter((item, index, self) => self.indexOf(item) === index);
+    const allCategories = setACategories.concat(setBCategories).filter((item, index, self) => self.indexOf(item) === index);
+
+    const setASize = setA.length;
+    const setBSize = setB.length;
+    const overallSize = setASize+setBSize;
+
+    const table = [];
+    for(const currCat of allCategories) {
+      const amountSetA = setA.filter((item) => (item===currCat)).length;
+      const amountSetB = setB.filter((item) => (item===currCat)).length;
+      const sum = amountSetA+amountSetB;
+      const setAExp = (setASize * sum) / overallSize;
+      const setAChi = Math.pow(amountSetA - setAExp,2)/setAExp;
+
+      const setBExp = (setBSize * sum) / overallSize;
+      const setBChi = Math.pow(amountSetB - setBExp,2)/setBExp;
+      const sumChi = setAChi + setBChi;
+      const currCell = {
+        category: currCat,
+        setA: amountSetA,
+        setAExp,
+        setAChi,
+        setB: amountSetB,
+        setBExp,
+        setBChi,
+        sum,
+        sumChi
+      };
+      table.push(currCell);
+    }
+
+
+    const allChiForCategories = table.map((a) => (a.sumChi));
+    const chiSquare = allChiForCategories.reduce(this.getSum);
+    const rows = 2; // the two sets
+    const columns = table.length; //number of categories in the two sets
+    const df = (rows-1)*(columns-1);
+    // Phi
+    const phi = Math.sqrt(chiSquare/overallSize);
+    // Cramer's V
+    const t = Math.min(rows-1,columns-1);
+    const cramerV = Math.sqrt(chiSquare/(overallSize*t));
+
+    console.log('ChiSquare - table: ', {setA,setB,allCategories,table,chiSquare,phi,cramerV});
+    let score = chiSquare;
+
+    score = score || 0;
+
+    return measureResultObj(score, -1);
+  }
+
+  public getSum(total: number, numb: number) {
+    return total+numb;
+  }
+
+}
 
 /**
  * Also known as the Tanimoto distance metric.
