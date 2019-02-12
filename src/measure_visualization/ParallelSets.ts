@@ -193,15 +193,6 @@ export class ParallelSets implements IMeasureVisualization {
 
     console.log('Parallel Sets - generateVisualization',{setParameters, score, formatData, IsAdjRand: isAdjRand});
 
-    // delete old tooltip
-    const tooltipParSets = d3.select('body').selectAll('div.parsets.tooltip').remove();
-
-
-    const tooltipLineChart = d3.select('body').append('div')
-    .style('display', 'none')
-    .style('opacity', 0)
-    .attr('class', 'tooltip measure');
-
     const width = Number(miniVisualisation.style('width').slice(0, -2)); //-25 because the scroll bar (15px) on the left is dynamically added
     const svgWidth = width - 25;
     const svgHeight = 175;
@@ -237,7 +228,6 @@ export class ParallelSets implements IMeasureVisualization {
 
     // remove tooltip (parsets.js), is automatically created when the chart is genereted
     d3.select('body').selectAll('div.parsets.tooltip').remove();
-
 
 
     // edit dimensions

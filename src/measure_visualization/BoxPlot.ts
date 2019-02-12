@@ -69,14 +69,6 @@ export class BoxPlot implements IMeasureVisualization {
     const formatData = this.formatData(setParameters);
     // console.log('Box Plot - generateVisualization');
 
-    //remove old tooltip
-    d3.select('body').selectAll('div.measure.tooltip').remove();
-
-    const tooltipBoxplot = d3.select('body').append('div')
-                                          .style('display', 'none')
-                                          .style('opacity', 0)
-                                          .attr('class', 'tooltip measure');
-
     let data = formatData.data;
     let min = Math.min(...data.map((a) => (a[2].min)));
     let max = Math.max(...data.map((a) => (a[2].max)));

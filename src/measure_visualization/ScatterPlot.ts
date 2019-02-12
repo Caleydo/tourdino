@@ -58,16 +58,6 @@ export class ScatterPlot implements IMeasureVisualization {
     const formatData = this.formatData(setParameters);
     console.log('Scatter Plot - generateVisualization', {setParameters, formatData});
 
-    // remove old tooltip
-    d3.select('body').selectAll('div.measure.tooltip').remove();
-
-    // new tooltip
-    const tooltipScatterPlot = d3.select('body').append('div')
-                                              .style('display', 'none')
-                                              .style('opacity', 0)
-                                              .attr('class', 'tooltip measure');
-
-
     // get size of space and calculate scatter plot size
     const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
 

@@ -188,11 +188,6 @@ export class LineChart implements IMeasureVisualization {
     const formatData = this.formatData(setParameters,score);
     console.log('Line Chart - generateVisualization', {setParameters, formatData, score});
 
-
-    // remove old tooltip
-    d3.select('body').selectAll('div.measure.tooltip').remove();
-
-
     // add text for information to the visualization
     const divDetailInfo = miniVisualisation.select('div.detailVis');
 
@@ -206,13 +201,6 @@ export class LineChart implements IMeasureVisualization {
 
 
     if(formatData.dataLines.length > 1) {
-
-      // new tooltip
-      const tooltipLineChart = d3.select('body').append('div')
-                                                .style('display', 'none')
-                                                .style('opacity', 0)
-                                                .attr('class', 'tooltip measure');
-
 
       // get size of space and calculate scatter plot size
       const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
