@@ -32,9 +32,9 @@ export class ParallelSets implements IMeasureVisualization {
     const num = setParameters.setB.length;
 
     let label = '';
-    if(setParameters.setBCategory) {
-      label = setParameters.setBCategory;
-    }
+    // if(setParameters.setBCategory) {
+    //   label = setParameters.setBCategory;
+    // }
     if(setParameters.setBCategory && setParameters.setBCategory.label) {
       label = setParameters.setBCategory.label;
     }
@@ -59,9 +59,9 @@ export class ParallelSets implements IMeasureVisualization {
     const numHeader = intersect.length;
 
     label = '';
-    if(setParameters.setACategory) {
-      label = setParameters.setACategory;
-    }
+    // if(setParameters.setACategory) {
+    //   label = setParameters.setACategory;
+    // }
     if(setParameters.setACategory && setParameters.setACategory.label) {
       label = setParameters.setACategory.label;
     }
@@ -297,10 +297,10 @@ export class ParallelSets implements IMeasureVisualization {
   private highlightAndColorRibbons(setParameters: ISetParameters, svgRibbons: d3.Selection<any>, dimensionName: string) {
     // console.log('highlight and color ribbons: ', {setParameters, svgRibbons, dimensionName});
 
-    const category = setParameters.setBDesc.categories.filter((item) => (item.name === setParameters.setBCategory))[0];
+    const category = setParameters.setBDesc.categories.filter((item) => (item.name === setParameters.setBCategory.label))[0];
     const categoryLabel = (category === undefined || category === null) ? setParameters.setBCategory.label : category.label;
 
-    const columnTable = setParameters.setADesc.categories.filter((item) => (item.name === setParameters.setACategory))[0];
+    const columnTable = setParameters.setADesc.categories.filter((item) => (item.name === setParameters.setACategory.label))[0];
     const columnLabel = (columnTable === undefined || columnTable === null) ? setParameters.setACategory.label : columnTable.label;
 
     //highlight and color paths
@@ -313,11 +313,11 @@ export class ParallelSets implements IMeasureVisualization {
           d3.select(this).classed('selected', true);
         }
 
-        if (setParameters.setBDesc.categories && setParameters.setBDesc.categories.filter((a) => (a.name===setParameters.setBCategory)).length === 1 ) {
+        if (setParameters.setBDesc.categories && setParameters.setBDesc.categories.filter((a) => (a.name===setParameters.setBCategory.label)).length === 1 ) {
 
           //all paths connected to the category of the dimension will be coloured in category's color
           if((d.parent.dimension === dimensionName && d.parent.name === categoryLabel) || (d.node.dimension === dimensionName && d.node.name === categoryLabel)) {
-            const color = setParameters.setBDesc.categories.filter((a) => (a.name===setParameters.setBCategory))[0].color;
+            const color = setParameters.setBDesc.categories.filter((a) => (a.name===setParameters.setBCategory.label))[0].color;
             if (color !== null) {
               d3.select(this).style('fill', color);
               d3.select(this).style('stroke', color);

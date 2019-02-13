@@ -15,12 +15,12 @@ export class BoxPlot implements IMeasureVisualization {
     const setABoxData = [];
     let min = Infinity;
     let max = -Infinity;
-    if(setParameters.setACategory) {
-      label = setParameters.setACategory;
-    }
     if(setParameters.setACategory && setParameters.setACategory.label) {
       label = setParameters.setACategory.label;
     }
+    // if(setParameters.setACategory && setParameters.setACategory.label) {
+    //   label = setParameters.setACategory.label;
+    // }
     setABoxData.push(''+label);
     const setAValid = setParameters.setA.filter((item) => { return (item !== undefined) && (item !== null) && (!Number.isNaN(item)); });
     setABoxData.push(setAValid);
@@ -35,9 +35,9 @@ export class BoxPlot implements IMeasureVisualization {
     const setBBoxData = [];
     min = Infinity;
     max = -Infinity;
-    if(setParameters.setBCategory) {
-      label = setParameters.setBCategory;
-    }
+    // if(setParameters.setBCategory) {
+    //   label = setParameters.setBCategory;
+    // }
     if(setParameters.setBCategory && setParameters.setBCategory.label) {
       label = setParameters.setBCategory.label;
     }
