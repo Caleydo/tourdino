@@ -29,20 +29,30 @@ export class GroupedBarChart implements IMeasureVisualization {
       yMax = Math.max(yMax,currCatInSetB);
 
       const bargrp = {
+        dataColumnLabel: setParameters.setADesc.label,
         categoryLabel: currCat.label,
         color: currCat.color,
         amountSetA: currCatInSetA,
-        amountSetB: currCatInSetB
+        defSetA: setParameters.setACategory,
+        amountSetB: currCatInSetB,
+        defSetB: setParameters.setBCategory
       };
 
-      bargroups.push(bargrp);
+      if(bargrp.defSetA.color === bargrp.defSetB.color) {
+        bargrp.defSetB.color = d3.hsl(bargrp.defSetB.color).brighter();
+      }
+
+      // only categories which have a value dedicated to themselfs
+      if(currCatInSetA > 0 || currCatInSetB > 0) {
+        bargroups.push(bargrp);
+      }
     }
 
     const yDomain = [0,yMax];
 
     const groupedBarChart = {
-      setALabel: setParameters.setACategory,
-      setBLabel: setParameters.setBCategory,
+      setADef: setParameters.setACategory,
+      setBDef: setParameters.setBCategory,
       bargroups,
       yDomain
     };
@@ -57,16 +67,18 @@ export class GroupedBarChart implements IMeasureVisualization {
     // only for more than one category should a visulization be created
     if(formatData.bargroups.length > 1) {
       const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
+      const barWidth = 15;
+      const dataCategorySpace = 2;
 
-      const calcWidth = Math.max(containerWidth, formatData.bargroups.length * 50 + 30);
+      const calcWidth = Math.max(containerWidth, formatData.bargroups.length * (barWidth*2+dataCategorySpace+5) * 1.2);
 
-      const maxHeight = 220;
-      const margin = {top: 10, right: 0, bottom: 50, left: 55};
+      const extraSpaceAxisLabels = 40;
+      const extraSpaceLegend = 33;
+      const maxHeight = 220+extraSpaceAxisLabels+extraSpaceLegend;
+      const margin = {top: 10+extraSpaceLegend, right: 0, bottom: 50+extraSpaceAxisLabels, left: 55};
       const width = calcWidth - margin.left - margin.right;
       const height = maxHeight - margin.top - margin.bottom;
 
-      const nCategories = formatData.bargroups.length;
-      const nBarsInGroup = 2;
       const xDomainCategories = formatData.bargroups.map((item) => (item.categoryLabel));
 
       // yAxis: scale + domain
@@ -74,13 +86,14 @@ export class GroupedBarChart implements IMeasureVisualization {
                             .domain(formatData.yDomain).nice()
                             .range([height , 0]);
       const yAxis = d3.svg.axis().scale(yScale).orient('left');
-      console.log('height: ', height);
+      // console.log('height: ', height);
 
-      // xAxis: 
+      // xAxis: scale for both xAxis + domain
       const x0Scale = d3.scale.ordinal()
                               .domain(xDomainCategories)
-                              .rangeBands([0,width], 0.1);
+                              .rangeBands([0,width], 0.2);
       //scale.rangeBand() -> is the space for 1 band
+
       const x1Scale = d3.scale.ordinal()
                               .domain(['0','1'])
                               .rangeBands([0, x0Scale.rangeBand()]);
@@ -103,31 +116,87 @@ export class GroupedBarChart implements IMeasureVisualization {
       // draw x axis
       svgFigureGroup.append('g')
         .attr('class', 'x axis')
-        .attr('transform', 'translate(0,' + (height  + margin.top) + ')')
-        .call(xAxis);
+        .attr('transform', 'translate(0,' + (height) + ')')
+        .call(xAxis)
+          .selectAll('text')
+          .attr('y', 3)
+          .attr('x', -5)
+          .attr('transform', 'rotate(-45)')
+          .style('text-anchor', 'end')
+          .text(function(d) {
+            const maxLen = 15;
+            const label = d.length > maxLen ? d.slice(0,maxLen-3)+'...' : d;
+            return label;
+          })
+          .append('title')
+            .classed('tooltip.measure',true)
+            .text(function(d) {
+              return d;
+            });
 
+      // draw grouped bar chart
       svgFigureGroup.append('g')
+                    .attr('class', 'all-bargroups')
                     .selectAll('g')
                     .data(formatData.bargroups)
                     .enter().append('g')
-                      .style('fill', '#808080')
+                      .attr('class', 'bargroup')
+                      // .style('fill', '#808080')
                       .attr('transform', function(d, i) { return 'translate(' + x0Scale(d.categoryLabel) + ',0)'; })
                       .selectAll('rect')
                       .data(function(d) {
-                        return [d.amountSetA,d.amountSetB];
+                        const setA  = {
+                          categoryLabel: d.dataColumnLabel,
+                          amount: d.amountSetA,
+                          def: d.defSetA
+                        };
+                        const setB  = {
+                          categoryLabel: d.dataColumnLabel,
+                          amount: d.amountSetB,
+                          def: d.defSetB
+                        };
+                        return [setA,setB];
                       })
                       .enter().append('rect')
-                        .attr('width', 25)//x1Scale.rangeBand())
+                        .attr('class', 'bar')
+                        .style('fill',(d) => (d.def.color))
+                        .attr('width', barWidth)
                         .attr('height',(d) => {
-                          const barH = height - yScale(d);
-                          console.log('bar Height: ', {d,barH});
+                          const barH = height - yScale(d.amount);
                           return barH;})
                         .attr('x', function(d, i) {
-                          const offset = i === 0 ? x1Scale.rangeBand()-25 : 0;
+                          const offset = i === 0 ? x1Scale.rangeBand()-barWidth-dataCategorySpace/2 : dataCategorySpace/2;
                           return x1Scale(''+i)+offset;
                         })
-                        .attr('y', function(d) { return yScale(d); });
+                        .attr('y', function(d) { return yScale(d.amount); })
+                        .append('title')
+                          .classed('tooltip.measure',true)
+                          .text(function(d) {
+                            const tooltipText = `Data Column: ${d.categoryLabel}\nCategory: ${d.def.label}\nAmount: ${d.amount}`;
+                            return tooltipText;
+                          });
 
+      // add legend
+      const legendData = [formatData.setADef,formatData.setBDef];
+      const legend = svgCanvas.append('g')
+                              .attr('class','legend')
+                              .selectAll('g')
+                              .data(legendData)
+                              .enter().append('g')
+                              .attr('transform', function(d,i) {
+                                const offset = i === 0 ? 0 : 17;
+                                return `translate(${margin.left+1},${offset})`;
+                              });
+      legend.append('rect')
+                .attr('x', 0)
+                .attr('width', 15)
+                .attr('height', 15)
+                .attr('fill', (d) => (d.color));
+      legend.append('text')
+                .attr('x', 19)
+                .attr('y', 7.5)
+                .attr('dy', '0.32em')
+                .text(function(d) { return d.label; });
 
 
     }
