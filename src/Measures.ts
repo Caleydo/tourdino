@@ -156,34 +156,6 @@ export class JaccardSimilarity extends ASimilarityMeasure {
 }
 
 
-@MeasureDecorator()
-export class OverlapSimilarity extends ASimilarityMeasure {
-
-  constructor() {
-    super();
-
-    this.id = 'overlap';
-    this.label = 'Overlap Coefficient'; //Szymkiewicz-Simpson
-    this.description = 'The overlap coefficient shows the similarity of two sets by dividing their intersection by the size of the smaller set..';
-    this.visualization = new ParallelSets();
-
-    this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
-    this.scope = SCOPE.SETS;
-  }
-
-
-  public async calc(setA: Array<any>, setB: Array<any>) {
-    await sleep(0);
-    const {intersection: intersect} = intersection(setA, setB);
-    let score = intersect.length /  Math.min(setA.length, setB.length);
-
-    score = score || 0;
-
-    return measureResultObj(score, Number.NaN);
-  }
-}
-
-
 /**
  * Also known as the Tanimoto distance metric.
  */
