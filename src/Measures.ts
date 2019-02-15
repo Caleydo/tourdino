@@ -237,10 +237,6 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
         };
       });
 
-    // console.log('Input: ',{set : {setA,setB},
-    //                        ValidSet : {setAValid,setBValid},
-    //                        RankObj: {selectionRankObj,categoryRankObj}});
-
     //create array with all values and their affiliation
     const collectiveRankSet = selectionRankObj.concat(categoryRankObj);
     //sort the set from low to high
@@ -279,7 +275,6 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
 
       // set rank = index + 1
       collectiveRankSet[i].rank = i+1;
-
     }
 
     // check if the last values where in a region
@@ -297,8 +292,6 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
       regionRange = [];
       region = false;
     }
-
-    // console.log('collectiveRankSet: ',collectiveRankSet);
 
     // split the rankSet into the two categories and get only the rank property
     const selectionRanks = collectiveRankSet
@@ -325,32 +318,23 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
     const minU = Math.min(selectionU,categoryU);
 
     // calculate z-value -> for big sample sizes each more than 10 use normal distribution (z-value)
-    let zValue = (minU - (nSelection * nCategroy)/2) / Math.sqrt((nSelection * nCategroy * (nSelection + nCategroy +1))/12);
-    // console.log('minU: ',minU);
-    // console.log('zValue: ',zValue);
-    // console.log('Us + Uc: ',selectionU+categoryU,'| n1*n2: ',nSelection*nCategroy);
-
-    // console.log('Results: ',{rankSum: {selectionRankSum,categoryRankSum},
-    //                          U_statistic: {selectionU,categoryU},
-    //                          minU: {minU},
-    //                          z_value: {zValue}});
-    // console.log('-------');
-    let score = zValue;
+    let score = (minU - (nSelection * nCategroy)/2) / Math.sqrt((nSelection * nCategroy * (nSelection + nCategroy +1))/12);  // without tie correction: see https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test#Normal_approximation_and_tie_correction
+    score = Math.abs(score);
 
     const availA = this.pValueAvailability(setA.length,setAValid.length);
     const availB = this.pValueAvailability(setB.length,setBValid.length);
-    let pValue = 0;
-    if(availA && availB) {
-      if (zValue === 0) {
-          zValue = 0.000001;
-        }
+    let pValue = -1;
 
-      pValue = jStat.jStat.ztest(zValue, 2);
-    } else {
-      pValue = -1;
+    if(availA && availB) {
+      if (score === 0) {
+        pValue = 1;
+      } else if (score === Infinity || score === -Infinity) {
+        pValue = 0; // at the distributions very tail
+      } else {
+        pValue = jStat.jStat.ztest(score, 2);
+        pValue = pValue >= 0 && pValue <= 1 ? pValue : -1;
+      }
     }
-    score = score || 0;
-    pValue = pValue || 0;
 
     return measureResultObj(score,pValue);
   }
@@ -407,7 +391,7 @@ export class StudentTTest extends ASimilarityMeasure {
 
     const scoreP1 = Math.sqrt((nSelection * nCategory * (nSelection + nCategory - 2)) / (nSelection + nCategory));
     const scoreP2 = (muSelection - muCategory) / Math.sqrt((nSelection - 1) * varSelection + (nCategory - 1) * varCategory);
-    let score = scoreP1 * scoreP2;
+    const score = scoreP1 * scoreP2;
 
     const availA = this.pValueAvailability(setA.length,setAValid.length);
     const availB = this.pValueAvailability(setB.length,setBValid.length);
@@ -423,8 +407,6 @@ export class StudentTTest extends ASimilarityMeasure {
         pValue = pValue >= 0 && pValue <= 1 ? pValue : -1;
       }
     }
-
-    score = score || 0;
 
     return measureResultObj(score,pValue);
   }
