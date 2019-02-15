@@ -411,7 +411,7 @@ export class StudentTTest extends ASimilarityMeasure {
 
     const availA = this.pValueAvailability(setA.length,setAValid.length);
     const availB = this.pValueAvailability(setB.length,setBValid.length);
-    let pValue = 0;
+    let pValue = -1;
 
     if(availA && availB) {
       if (score === 0) {
@@ -420,13 +420,11 @@ export class StudentTTest extends ASimilarityMeasure {
         pValue = 0; // at the distributions very tail
       } else {
         pValue = jStat.jStat.ttest(score, nCategory + nSelection, 2);
+        pValue = pValue >= 0 && pValue <= 1 ? pValue : -1;
       }
-    } else {
-      pValue = -1;
     }
 
     score = score || 0;
-    pValue = pValue || 0;
 
     return measureResultObj(score,pValue);
   }
@@ -573,23 +571,23 @@ export class PearsonCorrelation extends ASimilarityMeasure {
 
 
     const avail = this.pValueAvailability(points.length,validPoints.length);
-    let pValue = 0;
+    let pValue = -1;
 
     // calc p-value
     if(avail) {
-      let tValue = (pearsonCorr * Math.sqrt(n-2)) / Math.sqrt(1 - pearsonCorr * pearsonCorr);
+      const tValue = (pearsonCorr * Math.sqrt(n-2)) / Math.sqrt(1 - pearsonCorr * pearsonCorr);
 
       if (tValue === 0) {
-        tValue = 0.000001;
+        pValue = 1; // in the middle of the t-distribution
+      } else if (tValue === Infinity || tValue === -Infinity) {
+        pValue = 0; // at the distributions very tail
+      } else {
+        pValue = jStat.jStat.ttest(tValue, n, 2);
+        pValue = pValue >= 0 && pValue <= 1 ? pValue : -1;
       }
-
-      pValue = jStat.jStat.ttest(tValue, n, 2);
-    } else {
-      pValue = -1;
     }
-    pValue = pValue || 0;
 
-    return measureResultObj(pearsonCorr,pValue); // async function --> returns promise
+    return measureResultObj(pearsonCorr, pValue); // async function --> returns promise
   }
 }
 
