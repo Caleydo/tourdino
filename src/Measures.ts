@@ -29,7 +29,7 @@ export abstract class ASimilarityMeasure implements ISimilarityMeasure {
 
   public abstract calc(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<IMeasureResult>;
 
-  protected pValueAvailability (original: number, valid: number, threshold = 0.9): boolean {
+  protected pValueAvailability (original: number, valid: number, threshold = 0.1): boolean {
     const ratio = valid/original;
     return (ratio >= threshold);
   }
@@ -546,7 +546,7 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
     return measureResultObj(spearmanCorr, pValue); // async function --> returns promise
   }
 
-  protected pValueAvailability (original: number, valid: number, threshold = 0.9): boolean {
+  protected pValueAvailability (original: number, valid: number, threshold = 0.1): boolean {
     // (Determining the significance via t-distribution is recommended for n >= 19), source: https://ncss-wpengine.netdna-ssl.com/wp-content/themes/ncss/pdf/Procedures/PASS/Spearmans_Rank_Correlation_Tests-Simulation.pdf
     return valid >= 19 && super.pValueAvailability(original, valid, threshold);
   }
