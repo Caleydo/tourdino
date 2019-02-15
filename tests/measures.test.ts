@@ -9,6 +9,10 @@ const MDM2_COPYNR_MALE = [2.34,2.08,1.62,1.91,1.84,2.13,2.02,2.07,2.35,1.76,1.81
 const PRECISION = 6; // difference of values must be <= 0,0000005 (10e-6/2)
 
 
+function arr1toN(n: number) {
+  return Array.from({length: n}, (v, k) => k+1);
+}
+
 describe('Jasmine Test', () => {
   it('close to', () => {
     expect(0.5).toBeCloseTo(0.5+ 0.0000005, 6);
@@ -49,27 +53,79 @@ describe('Spearman Correlation', () => {
   });
 
   it('Test p-Value n/a if less than 10% of values are valid', async () => {
-    const valid = Array(1000).fill(5); // An array of 1000 fives
-    const stillValid = Array(900).fill(null).concat(Array(100).fill(10)); //100 times ten, 900 times null
-    const invalid = Array(901).fill(null).concat(Array(99).fill(10)); //99 times ten, 901 times null
+    const valid = arr1toN(1000); // An array of 1000 fives
+    const stillValid = Array(900).fill(null).concat(arr1toN(100)); //100 times ten, 900 times null
+    const stillValid2 = Array(900).fill(undefined).concat(arr1toN(100)); //100 times ten, 900 times undefined
+
+    const invalid = Array(901).fill(null).concat(arr1toN(99)); //99 times ten, 901 times null
+    const invalid2 = Array(901).fill(undefined).concat(arr1toN(99)); //99 times ten, 901 times undefined
 
     let r = await spearmanr.calc(valid, stillValid);
-    expect(r.pValue).toBeGreaterThanOrEqual(0); // p >= 0
+    expect(r.pValue).not.toEqual(-1); // p >= 0
+
+    r = await spearmanr.calc(valid, stillValid2);
+    expect(r.pValue).not.toEqual(-1); // p >= 0
 
     r = await spearmanr.calc(valid, invalid);
+    expect(r.pValue).toEqual(-1);
+
+    r = await spearmanr.calc(valid, invalid2);
     expect(r.pValue).toEqual(-1);
   });
 
   it('Test p-Value n/a if less than 19 values are in the set', async () => {
+    const valid = arr1toN(30);
+    const stillValid = arr1toN(19).concat(Array(11).fill(null));
+    const invalid1 = arr1toN(18).concat(Array(12).fill(null));
+    const invalid2 = arr1toN(18).concat(Array(12).fill(undefined));
 
+    let r = await spearmanr.calc(valid, stillValid);
+    expect(r.pValue).not.toEqual(-1);
+
+    r = await spearmanr.calc(valid, invalid1);
+    expect(r.pValue).toEqual(-1);
+
+    r = await spearmanr.calc(valid, invalid2);
+    expect(r.pValue).toEqual(-1);
   });
 
   it('perfect positive correlation', async() => {
+    const valid = arr1toN(1000); // An array of 1000 fives
+    const valid2 = arr1toN(1000).map((val) => val*val); // An array of 1000 fives
 
+    const r = await spearmanr.calc(valid, valid2);
+    expect(r.scoreValue).toEqual(1);
+    expect(r.pValue).toEqual(0);
   });
 
-  it('perfect positive correlation', async() => {
+  it('perfect negative correlation', async() => {
+    const valid = arr1toN(1000); // An array of 1000 fives
+    const valid2 = arr1toN(1000).map((val) => val*-2); // An array of 1000 fives
 
+    const r = await spearmanr.calc(valid, valid2);
+    expect(r.scoreValue).toEqual(-1);
+    expect(r.pValue).toEqual(0);
+  });
+
+  it('should throw on different set sizes', async() => {
+    const a = [1,2,3];
+    const b = [1,2,3,4];
+
+    let error = undefined;
+    try {
+      await spearmanr.calc(a, b);
+    } catch(e) {
+      error = e;
+    }
+    expect(error).toBeDefined();
+
+    error = undefined;
+    try {
+      await spearmanr.calc(b, a);
+    } catch(e) {
+      error = e;
+    }
+    expect(error).toBeDefined();
   });
 });
 
