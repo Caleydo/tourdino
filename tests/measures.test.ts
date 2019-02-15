@@ -197,14 +197,48 @@ describe('Wilcoxon rank-sum test', () => {
   it('Female/Male TPM', async () => {
     // RanksumsResult(statistic=1.07024005817599, pvalue=0.2845112676342413)
     const r = await wilcoxon.calc(MDM2_TPM_FEMALE, MDM2_TPM_MALE);
-    expect(r.scoreValue).toBeCloseTo(1.07024005817599, PRECISION);
+    expect(Math.abs(r.scoreValue)).toBeCloseTo(1.07024005817599, PRECISION); //absolute because scipy does have negative
     expect(r.pValue).toBeCloseTo(0.2845112676342413, PRECISION);
   });
 
   it('Female/Male Copy Number', async () => {
     // RanksumsResult(statistic=0.7431595169689759, pvalue=0.4573851097500009)
     const r = await wilcoxon.calc(MDM2_COPYNR_FEMALE, MDM2_COPYNR_MALE);
-    expect(r.scoreValue).toBeCloseTo(0.7431595169689759, PRECISION);
+    expect(Math.abs(r.scoreValue)).toBeCloseTo(0.7431595169689759, PRECISION); //absolute because scipy does have negative
     expect(r.pValue).toBeCloseTo(0.4573851097500009, PRECISION);
+  });
+
+  it('Identical sets', async () => {
+    const setA = arr1toN(50);
+    const setB = arr1toN(50);
+
+    const t = await wilcoxon.calc(setA, setB);
+    expect(t.pValue).toBe(1);
+  });
+
+  it('different sets', async () => {
+      const t = await wilcoxon.calc(arr1toN(50), arr1toN(50).map((val) => val*val));
+    expect(t.pValue).toBeCloseTo(0, PRECISION);
+  });
+
+  it('Test p-Value n/a if less than 10% of values are valid', async () => {
+    const valid = arr1toN(1000); // An array of 1000 fives
+    const stillValid = Array(900).fill(null).concat(arr1toN(100)); //100 times ten, 900 times null
+    const stillValid2 = Array(900).fill(undefined).concat(arr1toN(100)); //100 times ten, 900 times undefined
+
+    const invalid = Array(901).fill(null).concat(arr1toN(99)); //99 times ten, 901 times null
+    const invalid2 = Array(901).fill(undefined).concat(arr1toN(99)); //99 times ten, 901 times undefined
+
+    let t = await wilcoxon.calc(valid, stillValid);
+    expect(t.pValue).not.toEqual(-1); // p >= 0
+
+    t = await wilcoxon.calc(valid, stillValid2);
+    expect(t.pValue).not.toEqual(-1); // p >= 0
+
+    t = await wilcoxon.calc(valid, invalid);
+    expect(t.pValue).toEqual(-1);
+
+    t = await wilcoxon.calc(valid, invalid2);
+    expect(t.pValue).toEqual(-1);
   });
 });
