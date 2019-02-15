@@ -408,27 +408,19 @@ export class StudentTTest extends ASimilarityMeasure {
     const scoreP1 = Math.sqrt((nSelection * nCategory * (nSelection + nCategory - 2)) / (nSelection + nCategory));
     const scoreP2 = (muSelection - muCategory) / Math.sqrt((nSelection - 1) * varSelection + (nCategory - 1) * varCategory);
     let score = scoreP1 * scoreP2;
-    let scoreForPCalc = score;
 
     const availA = this.pValueAvailability(setA.length,setAValid.length);
     const availB = this.pValueAvailability(setB.length,setBValid.length);
     let pValue = 0;
 
     if(availA && availB) {
-      const intersect = intersection(setAValid,setBValid);
-      if ((intersect.intersection.length === setAValid.length) && (setAValid.length === setBValid.length)) {
-        scoreForPCalc = 0.000001;
+      if (score === 0) {
+        pValue = 1; // in the middle of the t-distribution
+      } else if (score === Infinity || score === -Infinity) {
+        pValue = 0; // at the distributions very tail
+      } else {
+        pValue = jStat.jStat.ttest(score, nCategory + nSelection, 2);
       }
-
-      // console.log('Result: ', {selction: {muSelection,varSelection},
-      //                         category: {muCategory,varCategory},
-      //                         scores: {scoreP1,scoreP2,score},
-      //                         intersectSets: {intersect}
-      //                         });
-      // console.log('T-Test: ',score, '| df: ',nCategory + nSelection-2);
-      // console.log('-------');
-
-      pValue = jStat.jStat.ttest(scoreForPCalc, nCategory + nSelection, 2);
     } else {
       pValue = -1;
     }
