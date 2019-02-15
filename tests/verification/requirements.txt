@@ -1,0 +1,7 @@
+#python dependencies
+matplotlib
+numpy
+pandas
+scikit-learn
+scipy
+notebook
