@@ -197,14 +197,14 @@ describe('Wilcoxon rank-sum test', () => {
   it('Female/Male TPM', async () => {
     // RanksumsResult(statistic=1.07024005817599, pvalue=0.2845112676342413)
     const r = await wilcoxon.calc(MDM2_TPM_FEMALE, MDM2_TPM_MALE);
-    expect(Math.abs(r.scoreValue)).toBeCloseTo(1.07024005817599, PRECISION); //absolute because scipy does have negative
+    expect(r.scoreValue).toBeCloseTo(1.07024005817599, PRECISION);
     expect(r.pValue).toBeCloseTo(0.2845112676342413, PRECISION);
   });
 
   it('Female/Male Copy Number', async () => {
     // RanksumsResult(statistic=0.7431595169689759, pvalue=0.4573851097500009)
     const r = await wilcoxon.calc(MDM2_COPYNR_FEMALE, MDM2_COPYNR_MALE);
-    expect(Math.abs(r.scoreValue)).toBeCloseTo(0.7431595169689759, PRECISION); //absolute because scipy does have negative
+    expect(r.scoreValue).toBeCloseTo(0.7431595169689759, PRECISION);
     expect(r.pValue).toBeCloseTo(0.4573851097500009, PRECISION);
   });
 
