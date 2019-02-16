@@ -3,7 +3,7 @@ import {ParallelSets} from './measure_visualization/ParallelSets';
 import {BoxPlot} from './measure_visualization/BoxPlot';
 import {ScatterPlot} from './measure_visualization/ScatterPlot';
 import {GroupedBarChart} from './measure_visualization/GroupedBarChart';
-import {intersection,  measureResultObj, sleep} from './util';
+import {measureResultObj, sleep} from './util';
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
 import {LineChart} from './measure_visualization/LineChart';
@@ -221,7 +221,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
 
   public async calc(setA: Array<any>, setB: Array<any>) {
     await sleep(0);
-    const setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
+    const setAValid = setA.filter((value) => {return (value !== null && value !== undefined && !isNaN(value));});
     const selectionRankObj: IRankObJ[] = setAValid.map((a) => {
         return {
           set: 'selection',
@@ -229,7 +229,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
         };
       });
 
-      const setBValid: IRankObJ[] = setB.filter((value) => {return (value !== null && value !== undefined);});
+      const setBValid: IRankObJ[] = setB.filter((value) => {return (value !== null && value !== undefined && !isNaN(value));});
       const categoryRankObj = setBValid.map((b) => {
         return {
           set: 'category',
