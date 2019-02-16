@@ -187,6 +187,25 @@ describe('Student t-Test', () => {
     t = await ttest.calc(valid, invalid2);
     expect(t.pValue).toEqual(-1);
   });
+
+
+  it('nan/null values should have no impact', async() => {
+    let t = await ttest.calc(MDM2_TPM_FEMALE, MDM2_TPM_MALE);
+    expect(t.scoreValue).toBeCloseTo(1.3403179758643324, PRECISION);
+    expect(t.pValue).toBeCloseTo(0.1805178084442022, PRECISION);
+
+    t = await ttest.calc(MDM2_TPM_FEMALE, MDM2_TPM_MALE_NULL);
+    expect(t.scoreValue).toBeCloseTo(1.3403179758643324, PRECISION);
+    expect(t.pValue).toBeCloseTo(0.1805178084442022, PRECISION);
+
+    t = await ttest.calc(MDM2_TPM_FEMALE_NULL, MDM2_TPM_MALE);
+    expect(t.scoreValue).toBeCloseTo(1.3403179758643324, PRECISION);
+    expect(t.pValue).toBeCloseTo(0.1805178084442022, PRECISION);
+
+    t = await ttest.calc(MDM2_TPM_FEMALE_NULL, MDM2_TPM_MALE_NULL);
+    expect(t.scoreValue).toBeCloseTo(1.3403179758643324, PRECISION);
+    expect(t.pValue).toBeCloseTo(0.1805178084442022, PRECISION);
+  });
 });
 
 
