@@ -375,19 +375,16 @@ export class StudentTTest extends ASimilarityMeasure {
 
   public async calc(setA: Array<any>, setB: Array<any>) {
     await sleep(0);
-    const setAValid = setA.filter((value) => {return (value !== null && value !== undefined);});
+    const setAValid = setA.filter((value) => {return (value !== null && value !== undefined && !isNaN(value));});
     const nSelection = setAValid.length;
     const muSelection = d3.mean(setAValid);
     const varSelection = d3.variance(setAValid);
 
     //category
-    const setBValid = setB.filter((value) => {return (value !== null && value !== undefined);});
+    const setBValid = setB.filter((value) => {return (value !== null && value !== undefined && !isNaN(value));});
     const nCategory = setBValid.length;
     const muCategory = d3.mean(setBValid);
     const varCategory = d3.variance(setBValid);
-
-    // console.log('Input: ',{set : {setA,setB},
-    //                        ValidSet : {setAValid,setBValid}});
 
     const scoreP1 = Math.sqrt((nSelection * nCategory * (nSelection + nCategory - 2)) / (nSelection + nCategory));
     const scoreP2 = (muSelection - muCategory) / Math.sqrt((nSelection - 1) * varSelection + (nCategory - 1) * varCategory);
