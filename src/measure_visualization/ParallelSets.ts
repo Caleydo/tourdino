@@ -265,8 +265,7 @@ export class ParallelSets implements IMeasureVisualization {
           let total = 0;
           const allCats = d.dimension.categories;
 
-          for(const cat of allCats)
-          {
+          for(const cat of allCats) {
             total += cat.count;
           }
           const percentage = ((d.count/total)*100).toFixed(2);

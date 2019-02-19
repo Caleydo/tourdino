@@ -16,7 +16,7 @@ export class LineChart implements IMeasureVisualization {
       categorySet = setParameters.setB;
       defCategories = setParameters.setBDesc.categories;
       categories = setParameters.setB.filter((item, index, self) => self.indexOf(item) === index).map((item) => { return {'name': item};});
-    }else {
+    } else {
       numericSet = setParameters.setB;
       xLabel = setParameters.setBDesc.label;
       categorySet = setParameters.setA;
@@ -46,7 +46,7 @@ export class LineChart implements IMeasureVisualization {
       if(currDefCategory.length === 0) {
         category.label = 'Missing values';
         category.color = '#808080';
-      }else {
+      } else {
         category.label = currDefCategory[0].label;
         category.color = currDefCategory[0].color;
       }
@@ -83,7 +83,7 @@ export class LineChart implements IMeasureVisualization {
           let currValue;
           if(validCombinedSet[i].category === currCategory) {
             currValue = termPlus;
-          }else {
+          } else {
             currValue = 0 - termMinus;
           }
           // extra value so that the line starts and ends with the value 0
@@ -94,12 +94,12 @@ export class LineChart implements IMeasureVisualization {
                             x: i+1});
           dataLines.push(temp);
 
-        }else {
+        } else {
           const lastValue = dataLines[c].values[dataLines[c].values.length-1].y;
           let currValue;
           if(validCombinedSet[i].category === currCategory) {
             currValue = lastValue + termPlus;
-          }else {
+          } else {
             currValue = lastValue - termMinus;
           }
 
@@ -299,7 +299,7 @@ export class LineChart implements IMeasureVisualization {
                               pValueText = d.pvalue.toFixed(3);
                               if (d.pvalue === 1) {
                                 pValueText = d.pvalue.toFixed(2);
-                              }else if(d.pvalue === -1) {
+                              } else if(d.pvalue === -1) {
                                 pValueText = 'n/a';
                               }
                             }
