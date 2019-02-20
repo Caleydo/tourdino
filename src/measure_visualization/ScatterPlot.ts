@@ -34,6 +34,16 @@ export class ScatterPlot implements IMeasureVisualization {
     const xDomain = [Math.min(...xValue),Math.max(...xValue)];
     const yDomain = [Math.min(...yValue),Math.max(...yValue)];
 
+    // regression values 'a' and 'b' -> https://www.crashkurs-statistik.de/einfache-lineare-regression/
+    const xMean = xValue.reduce((a,b) => a + b,0) / xValue.length;
+    const yMean = yValue.reduce((a,b) => a + b,0) / yValue.length;
+
+    const p1 = validDataPoints.map((item) => {return (item.x - xMean) * (item.y-yMean); }).reduce((a,b) => a + b,0);
+    const p2 = xValue.map((item) => Math.pow(item - xMean,2)).reduce((a,b) => a + b,0);
+
+    const regB = p1 / p2;
+    const regA = yMean -regB * xMean;
+
     // add space to x-domain
     xDomain[0] = Math.min(xDomain[0],0);
     xDomain[1] = xDomain[1];
@@ -42,16 +52,28 @@ export class ScatterPlot implements IMeasureVisualization {
     yDomain[1] = yDomain[1];
 
     const yOriginalLabel = setParameters.setBDesc.label;
-    const yLabel = yOriginalLabel.length > 27 ? yOriginalLabel.substring(0,27)+'...' : yOriginalLabel;
+    const yLabel = yOriginalLabel.length > 27 ? yOriginalLabel.substring(0,24)+'...' : yOriginalLabel;
     const scatterPlot = {
       'dataPoints': validDataPoints,
       'xLabel': setParameters.setADesc.label,
       'xDomain': xDomain,
       'yLabel': yLabel,
-      'yDomain': yDomain
+      'yDomain': yDomain,
+      'regression': {
+        a: regA,
+        b: regB
+      }
     };
 
     return scatterPlot;
+  }
+
+  private calcRegressionY(a: number, b: number, x: number): number {
+    return a + b *x;
+  }
+
+  private calcRegressionX(a: number, b: number, y: number): number {
+    return (y-a)/b;
   }
 
   public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, score: IMeasureResult) {
@@ -125,6 +147,22 @@ export class ScatterPlot implements IMeasureVisualization {
                     .attr('x', -(maxHeight-margin.bottom)/2)
                     .style('text-anchor', 'middle')
                     .text(formatData.yLabel);
+
+    // add regression line
+    const xMinMax = xScale.domain();
+    const yReg = xMinMax.map((item) => this.calcRegressionY(formatData.regression.a,formatData.regression.b,item));
+
+    const regStart = {x: xMinMax[0], y: yReg[0]};
+    const regEnd = {x: xMinMax[1], y: yReg[1]};
+
+    svgFigureGroup.append('g')
+    .attr('class', 'regression')
+    .append('line')
+      // .attr('d',`M${xScale(regStart.x)},${yScale(regStart.y)}L${xScale(regEnd.x)},${yScale(regEnd.y)}`);
+      .attr('x1', xScale(regStart.x))
+      .attr('y1', yScale(regStart.y))
+      .attr('x2', xScale(regEnd.x))
+      .attr('y2', yScale(regEnd.y));
 
     // add dots to canvas
     svgFigureGroup.selectAll('.datapoint')
