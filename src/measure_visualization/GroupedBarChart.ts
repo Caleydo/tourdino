@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 
 export class GroupedBarChart implements IMeasureVisualization {
 
-  private formatData(setParameters: ISetParameters, score: IMeasureResult) {
+  protected formatData(setParameters: ISetParameters, score: IMeasureResult) {
     const allCategories = setParameters.setADesc.categories.map((item) => {return {name: item.name, label: item.label, color: item.color};});
     allCategories.push({name: 'Missing values', label: 'Missing values', color: '#808080'});
     console.log('allCategories: ',allCategories);
@@ -85,7 +85,7 @@ export class GroupedBarChart implements IMeasureVisualization {
       const yScale = d3.scale.linear()
                             .domain(formatData.yDomain).nice()
                             .range([height , 0]);
-      const yAxis = d3.svg.axis().scale(yScale).orient('left');
+      const yAxis = this.getYAxis(yScale);
       // console.log('height: ', height);
 
       // xAxis: scale for both xAxis + domain
@@ -200,5 +200,9 @@ export class GroupedBarChart implements IMeasureVisualization {
 
 
     }
+  }
+
+  protected getYAxis(yScale: d3.scale.Linear<number, number>): any {
+    return d3.svg.axis().scale(yScale).orient('left');
   }
 }
