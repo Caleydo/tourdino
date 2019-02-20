@@ -2,7 +2,7 @@ import {Comparison, SCOPE, ISimilarityMeasure, Type, IMeasureResult, IMeasureVis
 import {ParallelSets} from './measure_visualization/ParallelSets';
 import {BoxPlot} from './measure_visualization/BoxPlot';
 import {ScatterPlot} from './measure_visualization/ScatterPlot';
-import {GroupedBarChart} from './measure_visualization/GroupedBarChart';
+import {RelGroupedBarChart} from './measure_visualization/RelGroupedBarChart';
 import {measureResultObj, sleep} from './util';
 import * as d3 from 'd3';
 import {jStat} from 'jStat';
@@ -54,7 +54,7 @@ export class ChiSquareTest extends ASimilarityMeasure {
     this.id = 'chi2_test';
     this.label = 'Chi-Square Test';
     this.description = 'TODO...';
-    this.visualization = new GroupedBarChart();
+    this.visualization = new RelGroupedBarChart();
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
     this.scope = SCOPE.SETS;
