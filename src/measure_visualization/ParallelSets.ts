@@ -1,6 +1,7 @@
 import {IMeasureVisualization, intersection, ISetParameters, IMeasureResult} from '../';
 import * as d3 from 'd3';
 import 'd3.parsets';
+import {SCOPE} from '../interfaces';
 
 
 interface IFormatedDataParallelSet {
@@ -11,14 +12,14 @@ interface IFormatedDataParallelSet {
 
 export class ParallelSets implements IMeasureVisualization {
 
-  private formatData(setParameters: ISetParameters, isAdjRand: boolean): IFormatedDataParallelSet {
+  private formatData(setParameters: ISetParameters, isAttr: boolean): IFormatedDataParallelSet {
     // console.log('Parallel Sets - formatData');
     const dimension1 = setParameters.setBDesc.label;
     let dimension2 = setParameters.setADesc.label;
     let data: Array<any>;
 
-    if(isAdjRand) {
-      data = this.formatDataAdjRand(setParameters, dimension1, dimension2);
+    if(isAttr) {
+      data = this.formatDataAttribute(setParameters, dimension1, dimension2);
     } else {
       dimension2 += '\uFEFF'; //append ZERO WIDTH NO-BREAK SPACE, so that both dimension can have the same label
       data = this.formatDataSelectionAgainstCatOrGroup(setParameters, dimension1, dimension2);
@@ -111,8 +112,8 @@ export class ParallelSets implements IMeasureVisualization {
     return data;
   }
 
-  private formatDataAdjRand(setParameters: ISetParameters, dimension1: string, dimension2: string): any {
-    console.log('Parallel Sets - formatDataAdjRand');
+  private formatDataAttribute(setParameters: ISetParameters, dimension1: string, dimension2: string): any {
+    console.log('Parallel Sets - formatDataAttribute');
     const len = setParameters.setA.length;
     const setA = [];
     const setB = [];
@@ -187,11 +188,10 @@ export class ParallelSets implements IMeasureVisualization {
   }
 
   public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, score: IMeasureResult) {
-    const isAdjRand = (score.additionalData && score.additionalData === 'adjrand') ? true : false;
+    const isAttr = (score.additionalData !== undefined && score.additionalData === SCOPE.ATTRIBUTES) ? true : false;
+    const formatData = this.formatData(setParameters, isAttr) as any;
 
-    const formatData = this.formatData(setParameters, isAdjRand) as any;
-
-    console.log('Parallel Sets - generateVisualization',{setParameters, score, formatData, IsAdjRand: isAdjRand});
+    console.log('Parallel Sets - generateVisualization',{setParameters, score, formatData, isAttr});
 
     const width = Number(miniVisualisation.style('width').slice(0, -2)); //-25 because the scroll bar (15px) on the left is dynamically added
     const svgWidth = width - 25;
@@ -249,8 +249,8 @@ export class ParallelSets implements IMeasureVisualization {
     svgRibbons.on('.drag',null);
 
     // coloring of the ribbons
-    if(isAdjRand) {
-      this.colorRibbonsAdjRand(setParameters, svgRibbons, formatData.dimension1);
+    if(isAttr) {
+      this.colorRibbonsAttribute(setParameters, svgRibbons, formatData.dimension1);
     } else {
       this.highlightAndColorRibbons(setParameters, svgRibbons, formatData.dimension1);
     }
@@ -347,7 +347,7 @@ export class ParallelSets implements IMeasureVisualization {
       });
   }
 
-  private colorRibbonsAdjRand(setParameters: ISetParameters, svgRibbons: d3.Selection<any>, dimensionName: string) {
+  private colorRibbonsAttribute(setParameters: ISetParameters, svgRibbons: d3.Selection<any>, dimensionName: string) {
     const categories = setParameters.setBDesc.categories;
     svgRibbons.selectAll('path')
       .each(function (d) {

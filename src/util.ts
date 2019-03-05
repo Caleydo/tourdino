@@ -42,7 +42,7 @@ export function getModulo(n: number, hits: number): number {
  * @param pVal p-value calculated for the current measure
  */
 export function measureResultObj(scoreVal: number, pVal: number, addData?: any): IMeasureResult {
-  if(addData) {
+  if(addData !== undefined) {
     return {
       scoreValue: scoreVal,
       pValue: pVal,

@@ -183,7 +183,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     }
 
     const {score, p} = await this.calcP_Randomize(arr1, arr2);
-    return measureResultObj(score, p, this.id); // async function --> returns promise
+    return measureResultObj(score, p, this.scope); // async function --> returns promise
   }
 
   async calcP_Randomize(arr1: any[], arr2: any[]): Promise<{score: number, p: number}> {
@@ -191,6 +191,68 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
   }
 }
 
+@MeasureDecorator()
+export class ChiSquareIndependenceTest extends ChiSquareTest {
+
+  constructor() {
+    super();
+
+    this.id = 'chi2_indi_test';
+    this.visualization = new ParallelSets();
+
+    this.scope = SCOPE.ATTRIBUTES;
+  }
+
+  // compare: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3900058
+  public async calc(arrA: Array<any>, arrB: Array<any>) {
+    await sleep(0);
+
+    if (arrA.length !== arrB.length) {
+      throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
+    }
+    const n = arrA.length; // === arrB.length
+    const setACategories = arrA.filter((item, index, self) => self.indexOf(item) === index);
+    const rows = setACategories.length;
+    const setBCategories = arrB.filter((item, index, self) => self.indexOf(item) === index);
+    const columns = setBCategories.length;
+
+    let score = 0;
+    let pValue = -1;
+
+    if (rows <= 1 && columns <= 1) {
+      return measureResultObj(score, pValue);
+    }
+
+    for (const catA of setACategories) { //contingency table rows
+      for (const catB of setBCategories) { //contingency table columns
+        const indices = [];
+        const amountCatA = arrA.filter((val, index) => {  // items with cat A --> row marginal
+          const match = val === catA;
+          if (match) {
+            indices.push(index); //get indices where val = category
+          }
+          return match;
+        }).length;
+        const amountCatB = arrB.filter((val) => val === catB).length;  // items with cat B -> column marginal
+        const observed = indices.map((index) => arrB[index]).filter((val) => val === catB).length; // items with cat A & B
+        const expected = (amountCatA * amountCatB) / n;
+        const chi = Math.pow(observed - expected, 2)/expected;
+
+        score += chi;
+      }
+    }
+
+    const df = (rows-1)*(columns-1);
+    pValue = 1- jStat.jStat.chisquare.cdf(score, df);
+
+    // Cramer's V
+    const t = Math.min(rows-1,columns-1);
+    const cramerV = Math.sqrt(score/(n*t));
+    score = cramerV;
+
+    return measureResultObj(score, pValue, this.scope);
+  }
+}
 
 //  _   _ _    _ __  __            _   _ _    _ __  __
 // | \ | | |  | |  \/  |          | \ | | |  | |  \/  |
