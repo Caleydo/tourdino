@@ -53,7 +53,7 @@ export class ChiSquareTest extends ASimilarityMeasure {
 
     this.id = 'chi2_test';
     this.label = 'Chi-Square Test';
-    this.description = 'TODO...';
+    this.description = 'The Chi-Square test compares the distribution of categories in two sets.';
     this.visualization = new RelGroupedBarChart();
 
     this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
