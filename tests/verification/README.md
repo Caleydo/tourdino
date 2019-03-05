@@ -10,5 +10,5 @@ conda install -c conda-forge  --yes --file requirements.txt
 # Use
 ```
 conda activate touring
-python measures.py
+jupyter notebook
 ```
