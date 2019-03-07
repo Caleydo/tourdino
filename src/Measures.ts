@@ -183,7 +183,7 @@ export class ChiSquareIndependenceTest extends ChiSquareTest {
     let score = 0;
     let pValue = -1;
 
-    if (rows <= 1 && columns <= 1) {
+    if (rows <= 1 || columns <= 1) {
       return measureResultObj(score, pValue);
     }
 
