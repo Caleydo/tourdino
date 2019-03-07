@@ -155,42 +155,6 @@ export class JaccardSimilarity extends ASimilarityMeasure {
   }
 }
 
-
-/**
- * Also known as the Tanimoto distance metric.
- */
-@MeasureDecorator()
-export class AdjustedRandIndex extends ASimilarityMeasure {
-
-  constructor() {
-    super();
-
-    this.id = 'adjrand';
-    this.label = 'Adjusted Rand Index';
-    this.description = 'Measures the similarity between two categorical attributes. \
-    The adjusted Rand index is based on counting pairs of items that are in the same or different categories in the two attributes.';
-
-    this.visualization = new ParallelSets();
-
-    this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
-    this.scope = SCOPE.ATTRIBUTES;
-  }
-
-
-  public async calc(arr1: Array<any>, arr2: Array<any>) {
-    if (arr1.length !== arr2.length) {
-      throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
-    }
-
-    const {score, p} = await this.calcP_Randomize(arr1, arr2);
-    return measureResultObj(score, p, this.scope); // async function --> returns promise
-  }
-
-  async calcP_Randomize(arr1: any[], arr2: any[]): Promise<{score: number, p: number}> {
-    return new AdjustedRandRandomizationWorker().calculate({setA: arr1, setB: arr2});
-  }
-}
-
 @MeasureDecorator()
 export class ChiSquareIndependenceTest extends ChiSquareTest {
 
@@ -251,6 +215,42 @@ export class ChiSquareIndependenceTest extends ChiSquareTest {
     score = cramerV;
 
     return measureResultObj(score, pValue, this.scope);
+  }
+}
+
+
+/**
+ * Also known as the Tanimoto distance metric.
+ */
+@MeasureDecorator()
+export class AdjustedRandIndex extends ASimilarityMeasure {
+
+  constructor() {
+    super();
+
+    this.id = 'adjrand';
+    this.label = 'Adjusted Rand Index';
+    this.description = 'Measures the similarity between two categorical attributes. \
+    The adjusted Rand index is based on counting pairs of items that are in the same or different categories in the two attributes.';
+
+    this.visualization = new ParallelSets();
+
+    this.type = Comparison.get(Type.CATEGORICAL, Type.CATEGORICAL);
+    this.scope = SCOPE.ATTRIBUTES;
+  }
+
+
+  public async calc(arr1: Array<any>, arr2: Array<any>) {
+    if (arr1.length !== arr2.length) {
+      throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
+    }
+
+    const {score, p} = await this.calcP_Randomize(arr1, arr2);
+    return measureResultObj(score, p, this.scope); // async function --> returns promise
+  }
+
+  async calcP_Randomize(arr1: any[], arr2: any[]): Promise<{score: number, p: number}> {
+    return new AdjustedRandRandomizationWorker().calculate({setA: arr1, setB: arr2});
   }
 }
 
