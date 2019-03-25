@@ -117,7 +117,7 @@ export class ChiSquareTest extends ASimilarityMeasure {
       // console.log('ChiSquare - table: ', {setA,setB,allCategories,table,chiSquare,df,pValue});
     }
 
-    return measureResultObj(score, pValue);
+    return measureResultObj(score, pValue, setA.length, setB.length);
   }
 
   public getSum(total: number, numb: number) {
@@ -147,7 +147,7 @@ export class JaccardSimilarity extends ASimilarityMeasure {
 
   public async calc(setA: Array<any>, setB: Array<any>, allData: Array<any>) {
     const {score, p} = await this.calc_Randomize(setA, setB, allData);
-    return measureResultObj(score, p);
+    return measureResultObj(score, p, setA.length, setB.length);
   }
 
   async calc_Randomize(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<{score: number, p: number}> {
@@ -184,7 +184,7 @@ export class ChiSquareIndependenceTest extends ChiSquareTest {
     let pValue = -1;
 
     if (rows <= 1 && columns <= 1) {
-      return measureResultObj(score, pValue);
+      return measureResultObj(score, pValue, setACategories.length, setBCategories.length);
     }
 
     for (const catA of setACategories) { //contingency table rows
@@ -214,7 +214,7 @@ export class ChiSquareIndependenceTest extends ChiSquareTest {
     const cramerV = Math.sqrt(score/(n*t));
     score = cramerV;
 
-    return measureResultObj(score, pValue, this.scope);
+    return measureResultObj(score, pValue, setACategories.length, setBCategories.length, this.scope);
   }
 }
 
@@ -246,7 +246,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     }
 
     const {score, p} = await this.calcP_Randomize(arr1, arr2);
-    return measureResultObj(score, p, this.scope); // async function --> returns promise
+    return measureResultObj(score, p, arr1.length, arr2.length, this.scope); // async function --> returns promise
   }
 
   async calcP_Randomize(arr1: any[], arr2: any[]): Promise<{score: number, p: number}> {
@@ -398,7 +398,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
       }
     }
 
-    return measureResultObj(score,pValue);
+    return measureResultObj(score,pValue, setAValid.length, setBValid.length);
   }
 }
 
@@ -467,7 +467,7 @@ export class StudentTTest extends ASimilarityMeasure {
       }
     }
 
-    return measureResultObj(score,pValue);
+    return measureResultObj(score,pValue,setAValid.length,setBValid.length);
   }
 }
 
@@ -549,7 +549,7 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
       }
     }
 
-    return measureResultObj(spearmanCorr, pValue); // async function --> returns promise
+    return measureResultObj(spearmanCorr, pValue, validPoints.length, validPoints.length); // async function --> returns promise
   }
 
   protected pValueAvailability (original: number, valid: number, threshold = 0.1): boolean {
@@ -628,7 +628,7 @@ export class PearsonCorrelation extends ASimilarityMeasure {
       }
     }
 
-    return measureResultObj(pearsonCorr, pValue); // async function --> returns promise
+    return measureResultObj(pearsonCorr, pValue, validPoints.length, validPoints.length); // async function --> returns promise
   }
 }
 
@@ -703,6 +703,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
     let overallScore = 0;
     let properties  = [];
     let p = -1;
+    let validCombinedSet = null;
 
     // only calculate if more than 1 category exists
     if(categories.length>1) {
@@ -716,7 +717,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
         });
       }
 
-      const validCombinedSet = combinedSet.filter((item) => { return (item.value !== undefined) && (item.value !== null) && (!Number.isNaN(item.value)); });
+      validCombinedSet = combinedSet.filter((item) => { return (item.value !== undefined) && (item.value !== null) && (!Number.isNaN(item.value)); });
       // sort the combined set
       validCombinedSet.sort((a,b) => { return a.value - b.value;});
 
@@ -763,8 +764,8 @@ export class EnrichmentScore extends ASimilarityMeasure {
       p = avail ? p : -1;
 
     }
-
-    return measureResultObj(overallScore,p,properties); // async function --> returns promise
+    const calculatedLength = validCombinedSet === null ? set1.length : validCombinedSet.length;
+    return measureResultObj(overallScore,p,calculatedLength,calculatedLength,properties); // async function --> returns promise
   }
 
   async calcPValuePermutation(numericSet: Array<any>, categorySet: Array<any>, actualScores: Array<any>): Promise<Array<{category: string,pvalue: number}>> {

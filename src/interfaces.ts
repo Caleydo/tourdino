@@ -134,6 +134,16 @@ export interface IMeasureResult {
   pValue: number;
 
   /**
+   * Number of values after filtering out undesirable values for set A
+   */
+  setSizeA: number;
+
+  /**
+   * Number of values after filtering out undesirable values for set B
+   */
+  setSizeB: number;
+
+  /**
    * additional data of the measure
    */
   additionalData?: any;
