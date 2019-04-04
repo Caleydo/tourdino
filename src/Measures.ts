@@ -174,6 +174,7 @@ export class ChiSquareIndependenceTest extends ChiSquareTest {
     if (arrA.length !== arrB.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
+
     const n = arrA.length; // === arrB.length
     const setACategories = arrA.filter((item, index, self) => self.indexOf(item) === index);
     const rows = setACategories.length;
@@ -183,8 +184,15 @@ export class ChiSquareIndependenceTest extends ChiSquareTest {
     let score = 0;
     let pValue = -1;
 
+    /* if (rows <= 1 && columns <= 1) {
+      // 1:1 mapping between the category of attribute A and the one of attribute B --> high association
+      // chi2 would be 0 though, because observed === expected value, and chi2 = (obs - expect)²/expect
+      return measureResultObj(1, 0 , setACategories.length, setBCategories.length);
+    } else */
     if (rows <= 1 || columns <= 1) {
-      return measureResultObj(score, pValue, setACategories.length, setBCategories.length);
+      // chi2 is 0, because observed === expected value, and chi2 = (obs - expect)²/expect
+      // chi2 is really 0, so we can set p to 1s
+      return measureResultObj(score, 1 , setACategories.length, setBCategories.length);
     }
 
     for (const catA of setACategories) { //contingency table rows

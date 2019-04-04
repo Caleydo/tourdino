@@ -120,3 +120,58 @@ describe('Adjusted Rand', () => {
 
   // TODO test randomization
 });
+
+
+describe('Chi2 Independence Test', () => {
+  let chi2Test;
+
+  beforeAll(function() {
+    chi2Test = new ChiSquareIndependenceTest(); // returns Cramers V !!
+  });
+
+  it('Perfect Match', async () => {
+    let chi2 = await chi2Test.calc(['a', 'a', 'a', 'b'], ['e', 'e', 'e', 'f']);
+    expect(chi2.scoreValue).toEqual(1);
+    expect(chi2.pValue).toBeCloseTo(0.04550026, PRECISION); // calculated with https://www.danielsoper.com/statcalc/calculator.aspx?id=11 and another. scipy's p-value seems wrong.
+    chi2 = await chi2Test.calc(['a', 'a', 'b', 'b'], ['c', 'c', 'z', 'z']);
+    expect(chi2.scoreValue).toEqual(1);
+    expect(chi2.pValue).toBeCloseTo(0.04550026, PRECISION);
+  });
+
+  it('Single Category sets', async() => {
+    let chi2 = await chi2Test.calc(['a', 'a', 'a', 'a'], ['a', 'a', 'a', 'a']);
+    expect(chi2.scoreValue).toEqual(0);
+    expect(chi2.pValue).toEqual(1);
+    chi2 = await chi2Test.calc(['a', 'a', 'a', 'a'], ['b', 'b', 'b', 'b']);
+    expect(chi2.scoreValue).toEqual(0);
+    expect(chi2.pValue).toEqual(1);
+
+    chi2 = await chi2Test.calc(['a', 'a', 'a', 'a'], ['a', 'b', 'c', 'd']);
+    expect(chi2.scoreValue).toEqual(0);
+    expect(chi2.pValue).toEqual(1);
+    chi2 = await chi2Test.calc(['a', 'b', 'c', 'd'], ['e', 'e', 'e', 'e']);
+    expect(chi2.scoreValue).toEqual(0);
+    expect(chi2.pValue).toEqual(1);
+  });
+
+  it('should throw on different set sizes', async() => {
+    const a = ['a', 'a', 'b'];
+    const b = ['a', 'b', 'b', 'c'];
+
+    let error = undefined;
+    try {
+      await chi2Test.calc(a, b);
+    } catch(e) {
+      error = e;
+    }
+    expect(error).toBeDefined();
+
+    error = undefined;
+    try {
+      await chi2Test.calc(b, a);
+    } catch(e) {
+      error = e;
+    }
+    expect(error).toBeDefined();
+  });
+});
