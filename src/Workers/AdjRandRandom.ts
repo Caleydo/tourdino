@@ -39,8 +39,6 @@ function calcAdjRand(arr1: Array<any>, arr2: Array<any>) : number {
     const index = cellBinomSum;
     const expectedIndex = (rowBinomSum * colBinomSum) / binom2(arr1.length);
     const maxIndex = 0.5 * (rowBinomSum + colBinomSum);
-    console.log('expectedIndex', expectedIndex);
-    console.log('maxIndex', maxIndex);
 
     if (0 === (maxIndex - expectedIndex)) {
       // division by zero --> adj_index = 0;
@@ -58,7 +56,6 @@ ctx.onmessage = (event) => {
     const setB: Array<any> = event.data.setB;
 
     const actualScore = calcAdjRand(setA, setB);
-    console.log('a', setA, '\tb', setB, '\tscore', actualScore);
 
     if (actualScore === 0) {
       ctx.postMessage({score: actualScore, p: 1}); // adjusted rand = 0 --> p = 1
