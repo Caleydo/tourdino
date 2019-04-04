@@ -7,6 +7,12 @@ function calcAdjRand(arr1: Array<any>, arr2: Array<any>) : number {
     const A = [...new Set(arr1)]; // The set removes duplicates, and the conversion to array gives the content an order
     const B = [...new Set(arr2)];
 
+    if(A.length === 1 &&  B.length === 1) {
+      // inline with sklearn
+      // see https://github.com/scikit-learn/scikit-learn/blob/7b136e9/sklearn/metrics/cluster/supervised.py#L138
+      return 1;
+    }
+
     // and build a contingency table:
     //        A.1   A.2   A.3
     //  B.1   n11   n12   n13
@@ -24,10 +30,8 @@ function calcAdjRand(arr1: Array<any>, arr2: Array<any>) : number {
     // https://web.archive.org/web/20171205003116/https://davetang.org/muse/2017/09/21/adjusted-rand-index/
     const rowsSums = table.map((row) => row.reduce((sum, curr) => sum += curr)); // reduce each row to the sum
     const colSums = A.map((cat, i) => table.reduce((sum, curr) => sum += curr[i], 0)); // reduce each all rows to the sum of column i
-
     //const cellBinomSum = table.reduce((rowsum, row) => rowsum + row.reduce((colsum, col) => colsum += binom2(col), 0), 0);
     const cellBinomSum = table.reduce((sum, row) => sum + row.reduce((colsum, col) => colsum += binom2(col), 0), 0); // set accumulator to zero!
-
     //use 0 as initial value, otherwise reduce takes the first element as initial value and the binom coefficient is nt calculated for it!
     const rowBinomSum = rowsSums.reduce((sum, curr) => sum += binom2(curr), 0);
     const colBinomSum = colSums.reduce((sum, curr) => sum += binom2(curr), 0);
@@ -35,9 +39,8 @@ function calcAdjRand(arr1: Array<any>, arr2: Array<any>) : number {
     const index = cellBinomSum;
     const expectedIndex = (rowBinomSum * colBinomSum) / binom2(arr1.length);
     const maxIndex = 0.5 * (rowBinomSum + colBinomSum);
-
-    // await sleep(5000); //test asynchronous behaviour
-    // calc
+    console.log('expectedIndex', expectedIndex);
+    console.log('maxIndex', maxIndex);
 
     if (0 === (maxIndex - expectedIndex)) {
       // division by zero --> adj_index = 0;
@@ -55,6 +58,7 @@ ctx.onmessage = (event) => {
     const setB: Array<any> = event.data.setB;
 
     const actualScore = calcAdjRand(setA, setB);
+    console.log('a', setA, '\tb', setB, '\tscore', actualScore);
 
     if (actualScore === 0) {
       ctx.postMessage({score: actualScore, p: 1}); // adjusted rand = 0 --> p = 1
