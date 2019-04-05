@@ -80,106 +80,123 @@ export class ScatterPlot implements IMeasureVisualization {
     const formatData = this.formatData(setParameters);
     console.log('Scatter Plot - generateVisualization', {setParameters, formatData});
 
-    // get size of space and calculate scatter plot size
-    const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
 
-    const labelOffsetAxisX = 35;
-    const labelOffsetAxisY = 15;
-    const maxHeight = 220;
-    const margin = {top: 10, right: 20, bottom: 20+labelOffsetAxisX, left: 55+labelOffsetAxisY};
-    const width = containerWidth - margin.left - margin.right;
-    const height = maxHeight - margin.top - margin.bottom;
+    if(formatData.dataPoints.length === 0) {
+    // add text for information to the visualization
+    const divDetailInfo = miniVisualisation.select('div.detailVis');
 
-    // x: scales + axis + map function for the data points
-    const xScale = d3.scale.linear().range([0, width]);
-    const xAxis = d3.svg.axis().scale(xScale).orient('bottom');
-    xAxis.tickFormat((d) => {
-      if((Math.abs(d)<1000 && Math.abs(d)>0.01) || d === 0) {
-        return ''+Math.round(d*100)/100;
-      }
-      return d3.format('0.1e')(d); });
-      const xMap = function(d) { return xScale(d.x);};
+    const visInfoText = 'The data set has no valid value pairs';
 
-    // y: scale + axis + map function for the data points
-    const yScale = d3.scale.linear().range([height, 0]);
-    const yAxis = d3.svg.axis().scale(yScale).orient('left');
-    yAxis.tickFormat((d) => {
-      if((Math.abs(d)<1000 && Math.abs(d)>0.01) || d === 0) {
-        return ''+Math.round(d*100)/100;
-      }
-      return d3.format('0.1e')(d); });
-      const yMap = function(d) { return yScale(d.y);};
+    const visInfo = divDetailInfo.append('div')
+                                .classed('detailDiv',true)
+                                .text('Details for Visualization: ')
+                                .append('span')
+                                .text(visInfoText);
 
-    // svg canvas
-    const svgCanvas = miniVisualisation.append('svg')
-          .attr('width',width + margin.left + margin.right)
-          .attr('height',height + margin.top + margin.bottom);
+    }
 
-    const svgFigureGroup = svgCanvas.append('g')
-                                  .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-                                  .attr('class','scatterplot');
+    if(formatData.dataPoints.length > 0) {
 
-    // set scale.domain
-    xScale.domain(formatData.xDomain).nice();
-    yScale.domain(formatData.yDomain).nice();
+      // get size of space and calculate scatter plot size
+      const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
 
-    // add axis to the canvas
-    // x-axis
-    svgFigureGroup.append('g')
-                  .attr('class', 'x axis')
-                  .attr('transform', 'translate(0,' + height + ')')
-                  .call(xAxis)
-                  .append('text')
-                    .attr('class', 'label')
-                    .attr('x', width/2)
-                    .attr('y', 35)
-                    .style('text-anchor', 'middle')
-                    .text(formatData.xLabel);
+      const labelOffsetAxisX = 35;
+      const labelOffsetAxisY = 15;
+      const maxHeight = 220;
+      const margin = {top: 10, right: 20, bottom: 20+labelOffsetAxisX, left: 55+labelOffsetAxisY};
+      const width = containerWidth - margin.left - margin.right;
+      const height = maxHeight - margin.top - margin.bottom;
 
-    // y-axis
-    svgFigureGroup.append('g')
-                  .attr('class', 'y axis')
-                  .call(yAxis)
-                  .append('text')
-                    .attr('class', 'label')
-                    .attr('transform', 'rotate(-90)')
-                    .attr('y', -margin.left+labelOffsetAxisY)
-                    .attr('x', -(maxHeight-margin.bottom)/2)
-                    .style('text-anchor', 'middle')
-                    .text(formatData.yLabel);
+      // x: scales + axis + map function for the data points
+      const xScale = d3.scale.linear().range([0, width]);
+      const xAxis = d3.svg.axis().scale(xScale).orient('bottom');
+      xAxis.tickFormat((d) => {
+        if((Math.abs(d)<1000 && Math.abs(d)>0.01) || d === 0) {
+          return ''+Math.round(d*100)/100;
+        }
+        return d3.format('0.1e')(d); });
+        const xMap = function(d) { return xScale(d.x);};
 
-    // add regression line
-    const xMinMax = xScale.domain();
-    const yReg = xMinMax.map((item) => this.calcRegressionY(formatData.regression.a,formatData.regression.b,item));
+      // y: scale + axis + map function for the data points
+      const yScale = d3.scale.linear().range([height, 0]);
+      const yAxis = d3.svg.axis().scale(yScale).orient('left');
+      yAxis.tickFormat((d) => {
+        if((Math.abs(d)<1000 && Math.abs(d)>0.01) || d === 0) {
+          return ''+Math.round(d*100)/100;
+        }
+        return d3.format('0.1e')(d); });
+        const yMap = function(d) { return yScale(d.y);};
 
-    const regStart = {x: xMinMax[0], y: yReg[0]};
-    const regEnd = {x: xMinMax[1], y: yReg[1]};
+      // svg canvas
+      const svgCanvas = miniVisualisation.append('svg')
+            .attr('width',width + margin.left + margin.right)
+            .attr('height',height + margin.top + margin.bottom);
 
-    svgFigureGroup.append('g')
-    .attr('class', 'regression')
-    .append('line')
-      // .attr('d',`M${xScale(regStart.x)},${yScale(regStart.y)}L${xScale(regEnd.x)},${yScale(regEnd.y)}`);
-      .attr('x1', xScale(regStart.x))
-      .attr('y1', yScale(regStart.y))
-      .attr('x2', xScale(regEnd.x))
-      .attr('y2', yScale(regEnd.y));
+      const svgFigureGroup = svgCanvas.append('g')
+                                    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+                                    .attr('class','scatterplot');
 
-    // add dots to canvas
-    svgFigureGroup.selectAll('.datapoint')
-    .data(formatData.dataPoints)
-    .enter().append('circle')
-      .attr('class', 'datapoint')
-      .attr('r', 2)
-      .attr('cx', xMap)
-      .attr('cy', yMap)
-      .append('title')
-        .classed('tooltip.measure',true)
-        .text(function(d) {
+      // set scale.domain
+      xScale.domain(formatData.xDomain).nice();
+      yScale.domain(formatData.yDomain).nice();
 
-          return `${formatData.xLabel}: ${d.x}\n${formatData.yLabel}: ${d.y}`;
-        });
+      // add axis to the canvas
+      // x-axis
+      svgFigureGroup.append('g')
+                    .attr('class', 'x axis')
+                    .attr('transform', 'translate(0,' + height + ')')
+                    .call(xAxis)
+                    .append('text')
+                      .attr('class', 'label')
+                      .attr('x', width/2)
+                      .attr('y', 35)
+                      .style('text-anchor', 'middle')
+                      .text(formatData.xLabel);
 
+      // y-axis
+      svgFigureGroup.append('g')
+                    .attr('class', 'y axis')
+                    .call(yAxis)
+                    .append('text')
+                      .attr('class', 'label')
+                      .attr('transform', 'rotate(-90)')
+                      .attr('y', -margin.left+labelOffsetAxisY)
+                      .attr('x', -(maxHeight-margin.bottom)/2)
+                      .style('text-anchor', 'middle')
+                      .text(formatData.yLabel);
 
+      // add regression line
+      const xMinMax = xScale.domain();
+      const yReg = xMinMax.map((item) => this.calcRegressionY(formatData.regression.a,formatData.regression.b,item));
+
+      const regStart = {x: xMinMax[0], y: yReg[0]};
+      const regEnd = {x: xMinMax[1], y: yReg[1]};
+
+      svgFigureGroup.append('g')
+      .attr('class', 'regression')
+      .append('line')
+        // .attr('d',`M${xScale(regStart.x)},${yScale(regStart.y)}L${xScale(regEnd.x)},${yScale(regEnd.y)}`);
+        .attr('x1', xScale(regStart.x))
+        .attr('y1', yScale(regStart.y))
+        .attr('x2', xScale(regEnd.x))
+        .attr('y2', yScale(regEnd.y));
+
+      // add dots to canvas
+      svgFigureGroup.selectAll('.datapoint')
+      .data(formatData.dataPoints)
+      .enter().append('circle')
+        .attr('class', 'datapoint')
+        .attr('r', 2)
+        .attr('cx', xMap)
+        .attr('cy', yMap)
+        .append('title')
+          .classed('tooltip.measure',true)
+          .text(function(d) {
+
+            return `${formatData.xLabel}: ${d.x}\n${formatData.yLabel}: ${d.y}`;
+          });
+
+    }
   }
 
 }
