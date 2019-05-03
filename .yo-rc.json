@@ -2,8 +2,7 @@
   "generator-phovea": {
     "type": "lib",
     "libraries": [
-      "d3",
-      "jquery"
+      "d3"
     ],
     "libraryAliases": {
       "d3": "d3/d3"
