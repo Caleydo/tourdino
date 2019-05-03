@@ -1,4 +1,4 @@
-# Touring
+# TourDino
 A TypeScript library to calculate and visualize similarity measures.
 
 ## Similarity Measures
