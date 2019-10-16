@@ -1,5 +1,5 @@
 {
-  "main": "build/touring.js",
+  "main": "build/tourdino.js",
   "types": "src/index.d.ts",
   "files": [
     "src",
@@ -29,7 +29,7 @@
     "release:minor": "npm version minor && npm publish && git push --follow-tags",
     "release:patch": "npm version patch && npm publish && git push --follow-tags",
     "predist": "npm run build && npm run docs",
-    "dist": "mkdirp dist && cd build && tar cvzf ../dist/touring.tar.gz *"
+    "dist": "mkdirp dist && cd build && tar cvzf ../dist/tourdino.tar.gz *"
   },
   "devDependencies": {
     "@types/jasmine": "2.8.0",
@@ -77,7 +77,7 @@
     "d3-grubert-boxplot": "gist:366430a0ac8e6e55ce09b040b5b493a6",
     "jStat": "1.7.1"
   },
-  "name": "touring",
+  "name": "tourdino",
   "description": "Calculate and visualize similarity measures.",
   "homepage": "https://phovea.caleydo.org",
   "version": "1.0.0-SNAPSHOT",
@@ -88,10 +88,10 @@
   },
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/caleydo/touring/issues"
+    "url": "https://github.com/caleydo/tourdino/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/caleydo/touring.git"
+    "url": "https://github.com/caleydo/tourdino.git"
   }
 }
