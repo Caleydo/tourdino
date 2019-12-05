@@ -4,10 +4,17 @@
   "homepage": "https://phovea.caleydo.org",
   "version": "1.0.1-SNAPSHOT",
   "author": {
-    "name": "Klaus Eckelt",
-    "email": "Klaus.Eckelt@jku.at",
-    "url": "https://www.jku.at/en/institute-of-computer-graphics/about-us/team/klaus-eckelt/"
+    "name": "The Caleydo Team",
+    "email": "contact@caleydo.org",
+    "url": "https://caleydo.org"
   },
+  "contributors": [
+    {
+      "name": "Klaus Eckelt",
+      "email": "Klaus.Eckelt@jku.at",
+      "url": "https://www.jku.at/en/institute-of-computer-graphics/about-us/team/klaus-eckelt/"
+    }
+  ],
   "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/caleydo/tourdino/issues"
@@ -21,15 +28,17 @@
   "files": [
     "src",
     "index.js",
+    "phovea.js",
+    "phovea_registry.js",
     "build"
   ],
   "engines": {
-    "npm": ">= 3",
-    "node": ">= 6"
+    "npm": ">= 6.12",
+    "node": ">= 12.13"
   },
   "scripts": {
     "compile": "tsc",
-    "lint": "tslint -c tslint.json src/**.ts tests/**.ts",
+    "lint": "tslint -c tslint.json -p . 'src/**/*.ts?(x)' 'tests/**/*.ts?(x)'",
     "docs": "typedoc --options typedoc.json src/**.ts",
     "prebuild": "node -e \"process.exit(process.env.PHOVEA_SKIP_TESTS === undefined?1:0)\" || npm run test",
     "pretest": "npm run compile",
@@ -70,7 +79,7 @@
     "karma-sourcemap-loader": "0.3.7",
     "karma-webpack": "2.0.3",
     "mkdirp": "0.5.1",
-    "node-sass": "^4.10.x",
+    "node-sass": "^4.12.0",
     "null-loader": "0.1.1",
     "raw-loader": "0.5.1",
     "sass-loader": "6.0.7",
@@ -80,16 +89,16 @@
     "tslib": "1.9.0",
     "tslint": "5.9.1",
     "typedoc": "0.11.1",
-    "typescript": "2.7.2",
+    "typescript": "2.8.1",
     "url-loader": "0.5.8",
     "webpack": "2.3.3",
     "webpack-dev-server": "2.4.2",
     "worker-loader": "^2.0.0"
   },
   "dependencies": {
-    "@types/d3": "3.5.36",
+    "@types/d3": "~3.5.36",
     "@types/jquery": "2.0.33",
-    "d3": "3.5.17",
+    "d3": "~3.5.17",
     "d3.parsets": "git+https://github.com/jasondavies/d3-parsets.git#v1.2.4",
     "d3-grubert-boxplot": "gist:366430a0ac8e6e55ce09b040b5b493a6",
     "jStat": "1.7.1"
