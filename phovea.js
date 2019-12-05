@@ -4,11 +4,13 @@
  * Licensed under the new BSD license, available at http://caleydo.org/license
  **************************************************************************** */
 
-// build registry
-require('./phovea_registry.js');
+//register all extensions in the registry following the given pattern
+module.exports = function(registry) {
+  /// #if include('extension-type', 'extension-id')	
+  //registry.push('extension-type', 'extension-id', function() { return import('./src/extension_impl'); }, {});
+  /// #endif
+  // generator-phovea:begin
 
-/**
- * find all tests in the spec directory and load them
- */
-var context = require.context('./tests', true, /\.test\.ts$/); // make sure you have your directory and regex test set correctly!
-context.keys().forEach(context);
+  // generator-phovea:end
+};
+

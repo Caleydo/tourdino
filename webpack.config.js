@@ -66,6 +66,12 @@ const webpackloaders = [
   {test: /\.scss$/, use: 'style-loader!css-loader!sass-loader'},
   {test: /\.css$/, use: 'style-loader!css-loader'},
   {test: /\.tsx?$/, use: tsLoader},
+  {
+    test: /phovea(_registry)?\.js$/, use: [{
+      loader: 'ifdef-loader',
+      options: Object.assign({include: includeFeature}, preCompilerFlags)
+    }]
+  },
   {test: /\.json$/, use: 'json-loader'},
   {
     test: /\.(png|jpg)$/,
@@ -94,12 +100,51 @@ const webpackloaders = [
 ];
 
 /**
+ * tests whether the given phovea module name is matching the requested file and if so convert it to an external lookup
+ * depending on the loading type
+ */
+function testPhoveaModule(moduleName, request) {
+  if (!(new RegExp('^' + moduleName + '/src.*')).test(request)) {
+    return false;
+  }
+  const subModule = request.match(/.*\/src\/?(.*)/)[1];
+  // skip empty modules = root
+  const path = subModule === '' ? [moduleName] : [moduleName, subModule];
+  // phovea_<name> ... phovea.name
+  const rootPath = /phovea_.*/.test(moduleName) ? ['phovea', moduleName.slice(7)].concat(path.slice(1)) : path;
+  return {
+    root: rootPath,
+    commonjs2: path,
+    commonjs: path,
+    amd: request + (subModule === '' ? '/main' : '')
+  };
+}
+
+function testPhoveaModules(modules) {
+  return (context, request, callback) => {
+    for (let i = 0; i < modules.length; ++i) {
+      const r = testPhoveaModule(modules[i], request);
+      if (r) {
+        return callback(null, r);
+      }
+    }
+    callback();
+  };
+}
+
+// use workspace registry file if available
+const isWorkspaceContext = fs.existsSync(resolve(__dirname, '..', 'phovea_registry.js'));
+const registryFile = isWorkspaceContext ? '../phovea_registry.js' : './phovea_registry.js';
+const actMetaData = `file-loader?name=phoveaMetaData.json!${buildInfo.metaDataTmpFile(pkg)}`;
+const actBuildInfoFile = `file-loader?name=buildInfo.json!${buildInfo.tmpFile()}`;
+
+/**
  * inject the registry to be included
  * @param entry
  * @returns {*}
  */
 function injectRegistry(entry) {
-  const extraFiles = [`file-loader?name=buildInfo.json!${buildInfo.tmpFile()}`];
+  const extraFiles = [registryFile, actBuildInfoFile, actMetaData];
   // build also the registry
   if (typeof entry === 'string') {
     return extraFiles.concat(entry);
@@ -129,7 +174,10 @@ function generateWebpack(options) {
       alias: Object.assign({}, options.libs || {}),
       symlinks: false,
       // fallback to the directory above if they are siblings just in the workspace context
-      modules: ['node_modules']
+      modules: isWorkspaceContext ? [
+        resolve(__dirname, '../'),
+        'node_modules'
+      ] : ['node_modules']
     },
     plugins: [
       // define magic constants that are replaced
@@ -212,15 +260,27 @@ function generateWebpack(options) {
     // if we don't bundle don't include external libraries and other phovea modules
     base.externals.push(...(options.externals || Object.keys(options.libs || {})));
 
+    // ignore all phovea modules
+    if (options.modules) {
+      base.externals.push(testPhoveaModules(options.modules));
+    }
+
     // ignore extra modules
     (options.ignore || []).forEach(function (d) {
       base.module.loaders.push({test: new RegExp(d), loader: 'null-loader'}); // use null loader
+    });
+    // ingore phovea module registry calls
+    (options.modules || []).forEach(function (m) {
+      base.module.loaders.push({
+        test: new RegExp('.*[\\\\/]' + m + '[\\\\/]phovea_registry.js'),
+        loader: 'null-loader'
+      }); // use null loader
     });
   }
   if (!options.bundle || options.isApp) {
     // extract the included css file to own file
     const p = new ExtractTextPlugin({
-      filename: (options.isApp || options.moduleBundle ? 'style' : pkg.name) + (options.min && !options.nosuffix ? '.min' : '') + '.css',
+      filename: (options.isApp || options.moduleBundle ? '[name]' : pkg.name) + (options.min && !options.nosuffix ? '.min' : '') + '.css',
       allChunks: true // there seems to be a bug in dynamically loaded chunk styles are not loaded, workaround: extract all styles from all chunks
     });
     base.plugins.push(p);
@@ -256,8 +316,18 @@ function generateWebpack(options) {
       }));
     });
   }
-  // generate source maps
-  base.devtool = 'inline-source-map';
+  if (options.min) {
+    // use a minifier
+    base.plugins.push(
+      new webpack.LoaderOptionsPlugin({
+        minimize: true,
+        debug: false
+      }),
+      new webpack.optimize.UglifyJsPlugin());
+  } else {
+    // generate source maps
+    base.devtool = 'inline-source-map';
+  }
   return base;
 }
 
@@ -298,7 +368,25 @@ function generateWebpackConfig(env) {
     base.library = true;
   }
 
-  return generateWebpack(base);
+  // single generation
+  if (isDev) {
+    return generateWebpack(base);
+  }
+  if (type.startsWith('app')) { // isProduction app
+    return generateWebpack(Object.assign({}, base, {
+      min: true,
+      nosuffix: true
+    }));
+  }
+  // isProduction
+  return [
+    // plain
+    generateWebpack(base),
+    // minified
+    generateWebpack(Object.assign({}, base, {
+      min: true
+    }))
+  ];
 }
 
 module.exports = generateWebpackConfig;

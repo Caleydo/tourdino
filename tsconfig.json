@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "module": "es6",
-    "target": "es6",
+    "target": "es5",
     "importHelpers": true,
     "sourceMap": true,
     "moduleResolution": "node",
@@ -9,7 +9,7 @@
     "experimentalDecorators": true,
     "lib": [
       "dom",
-      "es6",
+      "es2015",
       "es2016.array.include",
       "es2017.object"
     ],
@@ -19,7 +19,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
+    "downlevelIteration": true
   },
   "include": [
     "src/**/*.ts",

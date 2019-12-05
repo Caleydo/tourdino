@@ -4,11 +4,12 @@
  * Licensed under the new BSD license, available at http://caleydo.org/license
  **************************************************************************** */
 
-// build registry
-require('./phovea_registry.js');
+import {register} from 'phovea_core/src/plugin';
 
 /**
- * find all tests in the spec directory and load them
+ * build a registry by registering all phovea modules
  */
-var context = require.context('./tests', true, /\.test\.ts$/); // make sure you have your directory and regex test set correctly!
-context.keys().forEach(context);
+//other modules
+
+//self
+register('tourdino', require('./phovea.js'));
