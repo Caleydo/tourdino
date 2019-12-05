@@ -1,4 +1,21 @@
 {
+  "name": "tourdino",
+  "description": "Calculate and visualize similarity measures.",
+  "homepage": "https://phovea.caleydo.org",
+  "version": "1.0.1-SNAPSHOT",
+  "author": {
+    "name": "Klaus Eckelt",
+    "email": "Klaus.Eckelt@jku.at",
+    "url": "https://www.jku.at/en/institute-of-computer-graphics/about-us/team/klaus-eckelt/"
+  },
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/caleydo/tourdino/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caleydo/tourdino.git"
+  },
   "main": "build/tourdino.js",
   "types": "src/index.d.ts",
   "files": [
@@ -76,22 +93,5 @@
     "d3.parsets": "git+https://github.com/jasondavies/d3-parsets.git#v1.2.4",
     "d3-grubert-boxplot": "gist:366430a0ac8e6e55ce09b040b5b493a6",
     "jStat": "1.7.1"
-  },
-  "name": "tourdino",
-  "description": "Calculate and visualize similarity measures.",
-  "homepage": "https://phovea.caleydo.org",
-  "version": "1.0.0-SNAPSHOT",
-  "author": {
-    "name": "Klaus Eckelt",
-    "email": "Klaus.Eckelt@jku.at",
-    "url": "https://www.jku.at/en/institute-of-computer-graphics/about-us/team/klaus-eckelt/"
-  },
-  "license": "BSD-3-Clause",
-  "bugs": {
-    "url": "https://github.com/caleydo/tourdino/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/caleydo/tourdino.git"
   }
 }
