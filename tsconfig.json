@@ -19,7 +19,9 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "src/**/*.ts",
