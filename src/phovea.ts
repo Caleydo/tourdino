@@ -11,14 +11,12 @@ export default function (registry: IRegistry) {
   //registry.push('extension-type', 'extension-id', function() { return import('./extension_impl'); }, {});
   // generator-phovea:begin
 
-  registry.push('tdpRankingButton', 'openTourdino', function () {
-    return System.import('./InitTourdino');
+  registry.push('tdpLineupPanelTab', 'openTourdino', function () {
+    return System.import('./Tourdino');
   }, {
-      cssClass: 'fa-calculator',
-      factory: 'initTourdino',
-      title: 'Start Touring'
-    });
-
+    cssClass: 'fa-calculator',
+    title: 'Start Touring',
+  });
   // generator-phovea:end
 
 }
