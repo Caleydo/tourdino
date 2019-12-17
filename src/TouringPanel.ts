@@ -27,7 +27,6 @@ class TouringPanel {
   constructor(private readonly node: HTMLElement, protected readonly provider: LocalDataProvider, protected readonly desc: IPluginDesc) {
     this.node.classList.add('touring');
     this.node.innerHTML = touringTemplate;
-
     this.init();
   }
 
@@ -35,18 +34,10 @@ class TouringPanel {
   private init() {
     this.ranking = new RankingAdapter(this.provider);
 
-    // this.columnOverview = <HTMLElement>this.node.querySelector('main')!; // ! = bang operator --> can not be null
-    // this.searchbox = <HTMLElement>this.node.querySelector('.lu-adder')!;
-    // this.itemCounter = <HTMLElement>this.node.querySelector('.lu-stats')!;
-
-    // const buttons = this.node.querySelector('section');
-    // buttons.appendChild(this.createMarkup('Start Touring', 'touring fa fa-calculator', () => {
-    //   this.toggleTouring();
-    // }));
-
     this.initTasks();
     this.insertTasks();
     this.addEventListeners();
+    this.updateTask();
   }
   private initTasks() {
     for (const task of Tasks) {
@@ -76,10 +67,8 @@ class TouringPanel {
     // Click a different task
     d3.select(this.node).selectAll('button.task-btn').on('click', (task) => {
       const taskButtons = d3.select(this.node).selectAll('button.task-btn');
-
       if (this.currentTask && this.currentTask.id !== task.id) { // task changed
         taskButtons.classed('active', (d) => d.id === task.id);
-
         this.currentTask.hide(); // hide old task
         this.updateOutput(); // will show new task
       }
@@ -98,50 +87,7 @@ class TouringPanel {
     this.currentTask = d3.select(this.node).select('button.task-btn.active').datum() as ATouringTask;
     this.currentTask.show();
   }
-
-
-  private toggleTouring(hide?: boolean) {
-    if (!this.node) {
-      return; // the elements are undefined
-    }
-
-    if (hide === undefined) {
-      hide = !this.node.hidden; // if not hidden -> hide
-    }
-    // hide touring -> not hide normal content
-    this.searchbox.hidden = !hide;
-    this.itemCounter.hidden = !hide;
-    this.columnOverview.hidden = !hide;
-
-    this.node.hidden = hide;
-
-    if (!hide) {
-      console.log('Open Touring Panel');
-      this.node.style.flex = '0.33 0.33 auto'; // lineup is 1 1 auto
-      this.collapse = false; //if touring is displayed, ensure the panel is visible
-      this.updateOutput(); //Will also update output
-    } else {
-      this.node.style.flex = null;
-      this.currentTask.abort(); // abort workers
-    }
-
-    const button = d3.select(this.node).select('.lu-side-panel button.touring');
-    button.classed('active', !hide);
-  }
-
-  get collapse() {
-    return this.node.classList.contains('collapsed');
-  }
-
-  set collapse(value: boolean) {
-    this.node.classList.toggle('collapsed', value);
-    if (value) {
-      // panel gets collapsed, Touring is hidden to ensure the default look when the panel is expanded again.
-      this.toggleTouring(true);
-    }
-  }
 }
-
 
 export default function create(parent: HTMLElement, provider: LocalDataProvider, desc: IPluginDesc): void {
   // tslint:disable-next-line:no-unused-expression

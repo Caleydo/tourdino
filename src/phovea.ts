@@ -15,7 +15,10 @@ export default function (registry: IRegistry) {
   }, {
     cssClass: 'fa-calculator',
     title: 'Start Touring',
-    tabWidth: '40em'
+    options: {
+      tabWidth: '40em'
+    }
+
   });
   // generator-phovea:end
 
