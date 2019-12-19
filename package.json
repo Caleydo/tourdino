@@ -94,7 +94,6 @@
     "worker-loader": "^2.0.0"
   },
   "dependencies": {
-    "lineupjs": "github:lineupjs/lineupjs#develop",
     "tdp_core": "github:lineupjs/tdp_core#develop",
     "@types/d3": "~3.5.36",
     "@types/jquery": "2.0.33",
