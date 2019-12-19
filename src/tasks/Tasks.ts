@@ -1,6 +1,5 @@
 import {IServerColumn} from 'tdp_core/src/rest';
 import {RankingAdapter, IAttributeCategory} from '../RankingAdapter';
-import {MethodManager, IMeasureResult, ISimilarityMeasure, IMeasureVisualization, ISetParameters, Type, SCOPE, WorkerManager} from 'tourdino';
 import {IColumnDesc, ICategory, Column, CategoricalColumn, ICategoricalColumnDesc, LocalDataProvider} from 'lineupjs';
 import colCmpHtml from 'html-loader!./ColumnComparison.html'; // webpack imports html to variable
 import colCmpIcon from './colCmp.png';
@@ -10,6 +9,7 @@ import * as $ from 'jquery';
 import * as d3 from 'd3';
 import * as XXH from 'xxhashjs';
 import {isNumber} from 'util';
+import {SCOPE, WorkerManager, IMeasureResult, ISimilarityMeasure, ISetParameters, IMeasureVisualization, MethodManager, Type} from '..';
 
 export const tasks = new Array<ATouringTask>();
 export function TaskDecorator() {
