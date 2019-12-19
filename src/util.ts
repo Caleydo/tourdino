@@ -1,4 +1,5 @@
 import {IMeasureResult} from './interfaces';
+import {IDataRow} from 'lineupjs';
 
 /**
  * Returns:
@@ -124,4 +125,20 @@ export function shuffle(arr: Array<any>): Array<any> {
       arr[rndIndex] = helper;
   }
   return arr;
+}
+
+/**
+ * Checks wether the given function of type IAccessorFunc, i.e. of an AScoreAccessorProxy.
+ * Beware: coding horrors await beyond this function header.
+ * @param accessor
+ */
+export function isProxyAccessor(accessor: any):  accessor is IAccessorFunc<string|number> {
+  if (accessor && typeof(accessor) === 'function' && accessor.length === 1) {
+    return accessor.toString() === '(row) => this.access(row.v)';
+  }
+  return false;
+}
+
+export interface IAccessorFunc<T> {
+  (row: IDataRow) : T;
 }
