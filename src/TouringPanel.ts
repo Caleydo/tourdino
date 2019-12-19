@@ -2,8 +2,7 @@ import {RankingAdapter} from './RankingAdapter';
 import * as d3 from 'd3';
 import {tasks as Tasks, ATouringTask} from './tasks/Tasks';
 import {LocalDataProvider} from 'lineupjs';
-import {IARankingViewOptions} from 'tdp_core/src/lineup';
-import {IPluginDesc} from '../../phovea_core/src/plugin';
+import {IPluginDesc} from 'phovea_core/src/plugin';
 
 
 const touringTemplate = `
