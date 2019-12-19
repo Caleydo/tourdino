@@ -20,7 +20,6 @@ const touringTemplate = `
 
 class TouringPanel {
 
-  private columnOverview: HTMLElement; searchbox: HTMLElement; itemCounter: HTMLElement; // default sidepanel elements
   private ranking: RankingAdapter;
   private currentTask: ATouringTask;
 
@@ -30,10 +29,8 @@ class TouringPanel {
     this.init();
   }
 
-
   private init() {
     this.ranking = new RankingAdapter(this.provider);
-
     this.initTasks();
     this.insertTasks();
     this.addEventListeners();
