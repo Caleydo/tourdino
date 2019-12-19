@@ -1391,7 +1391,7 @@ export class RowComparison extends ATouringTask {
 }
 
 
-interface IScoreCell {
+export interface IScoreCell {
   key?: string;
   label: string;
   type?: string;
@@ -1405,7 +1405,7 @@ interface IScoreCell {
   highlightData?: IHighlightData[];
 }
 
-interface IHighlightData {
+export interface IHighlightData {
   column: string; //attribute.column
   label: string;
   category?: string; // cat.name
