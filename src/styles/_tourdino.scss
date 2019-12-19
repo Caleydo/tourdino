@@ -8,6 +8,9 @@ $highlight-color-2: rgb(207, 230, 207); //greenish
   display: none !important;
 }
 
+.touring.active {
+  display: flex;
+}
 
 .touring-highlight-hover {
   background-color: $highlight-color !important;
@@ -114,7 +117,6 @@ button {
 
 div.touring {
   flex: 1 0 auto; // sidebar uses flexbox
-
   // the touring div itself also uses a flexbox for the children:
   display: flex;
   flex-direction: column;
@@ -140,13 +142,15 @@ div.touring {
 
 
   .input {
+    margin-right: .5em;
+
     // task switcher & task input
     overflow: hidden; // from the bootstrap stuff we get some overflow which introduces scrollbars --> hide it
   }
 
   .output {
     flex: 1;
-
+    position: relative;
     $wide-col-padding: 0.5em;
     $narrow-col-padding: 0.2em;
     $col-min-size: 4.5ch;
@@ -197,6 +201,12 @@ div.touring {
     }*/
 
     .task {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: auto;
 
       .table-container {
         position: relative;
