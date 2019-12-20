@@ -16,7 +16,7 @@ export default function (registry: IRegistry) {
     cssClass: 'fa-calculator',
     title: 'Start Touring',
     options: {
-      tabWidth: '40em'
+      tabWidth: '45em'
     }
 
   });

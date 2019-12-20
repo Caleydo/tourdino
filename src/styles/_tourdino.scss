@@ -120,13 +120,20 @@ div.touring {
   // the touring div itself also uses a flexbox for the children:
   display: flex;
   flex-direction: column;
-
-  padding-top: 1em;
   padding-left: 0.5em;
 
-  .task-btn.active {
-    background-color: $active-color;
+  .input {
+    margin-right: .5em;
+
+    // task switcher & task input
+    overflow: hidden; // from the bootstrap stuff we get some overflow which introduces scrollbars --> hide it
+
+    .task-btn.active {
+      background-color: $active-color;
+    }
   }
+
+
 
   .removeMiniVis-btn {
     float: right !important;
@@ -138,14 +145,6 @@ div.touring {
   label.control-label {
     padding: 0px;
     padding-left: 15px; //bootstrap default
-  }
-
-
-  .input {
-    margin-right: .5em;
-
-    // task switcher & task input
-    overflow: hidden; // from the bootstrap stuff we get some overflow which introduces scrollbars --> hide it
   }
 
   .output {
@@ -226,7 +225,24 @@ div.touring {
           }
         }
       }
+
+      &.rowCmp {
+        .details {
+          overflow-x: scroll;
+        }
+      }
+
+      &.colCmp {
+
+        .form-group {
+          >label {
+            padding-top: 0 !important;
+          }
+        }
+      }
     }
+
+
 
     a:hover,
     a:focus {
