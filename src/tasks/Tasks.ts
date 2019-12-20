@@ -11,6 +11,12 @@ import * as XXH from 'xxhashjs';
 import {isNumber} from 'util';
 import {SCOPE, WorkerManager, IMeasureResult, ISimilarityMeasure, ISetParameters, IMeasureVisualization, MethodManager, Type} from '..';
 
+/**
+ * Used by the highlighting function in order to highlight the right ranking row/column.
+ * Applies only to Ordino
+ */
+const FOCUSED_VIEWRAPPER_CLASS = '.viewWrapper.t-focus';
+
 export const tasks = new Array<ATouringTask>();
 export function TaskDecorator() {
   return function (target: {new(): ATouringTask}) { // only instantiable subtypes of ATouringTask can be passed.
@@ -639,13 +645,15 @@ export abstract class ATouringTask implements ITouringTask {
   }
 
   setLineupHighlight(cellData: IScoreCell, enable: boolean, cssClass: string) {
+    const currentRankingClass = document.querySelector(FOCUSED_VIEWRAPPER_CLASS) ? FOCUSED_VIEWRAPPER_CLASS : '';
+
     if (cellData && cellData.highlightData) {
       if (enable) {
         this.hoverTimerId = window.setTimeout(() => { //highlight after 800ms if mouse is still on cell
           // highlight col headers
           let id;
           for (const attr of cellData.highlightData.filter((data) => data.category === undefined)) {
-            const header = d3.select(`.viewWrapper.t-focus .lineup-engine header  .lu-header[title^="${attr.label}"]`).classed(`${cssClass}`, true); // |= starts with whole word (does not work for selection checkboxes)
+            const header = d3.select(`${currentRankingClass} .lineup-engine header  .lu-header[title^="${attr.label}"]`).classed(`${cssClass}`, true); // |= starts with whole word (does not work for selection checkboxes)
             id = header.attr('data-col-id');
           }
 
@@ -655,14 +663,14 @@ export abstract class ATouringTask implements ITouringTask {
             for (const attr of cellData.highlightData.filter((data) => data.category !== undefined)) {
               const indices = this.ranking.getAttributeDataDisplayed(attr.column).reduce((indices, cat, index) => cat === attr.category ? [...indices, index] : indices, []);
               for (const index of indices) {
-                const elem = d3.select(`.viewWrapper.t-focus .lineup-engine main .lu-row[data-index="${index}"][data-agg="detail"] [data-id="${id}"]`);
+                const elem = d3.select(`${currentRankingClass} .lineup-engine main .lu-row[data-index="${index}"][data-agg="detail"] [data-id="${id}"]`);
                 if (!elem.empty()) {
                   const setDarker = elem.classed(`${cssClass}-1`); //if previous class is already set
                   elem.classed(`${cssClass}-${i}`, true)
                     .classed(`${cssClass}-dark`, setDarker);
 
-                  const catId = d3.select(`.viewWrapper.t-focus .lineup-engine header .lu-header[title^="${attr.label}"]`).attr('data-col-id');
-                  d3.select(`.viewWrapper.t-focus .lineup-engine main .lu-row[data-index="${index}"] [data-id="${catId}"]`).classed(`${cssClass}-border`, true);
+                  const catId = d3.select(`${currentRankingClass} .lineup-engine header .lu-header[title^="${attr.label}"]`).attr('data-col-id');
+                  d3.select(`${currentRankingClass} .lineup-engine main .lu-row[data-index="${index}"] [data-id="${catId}"]`).classed(`${cssClass}-border`, true);
                 }
               }
               i++;
