@@ -165,7 +165,7 @@ export abstract class ATouringTask implements ITouringTask {
     // column of a table was added/removed
     //  causes changes in the available attributes (b)
     //  might cause changes the displayed table / scores
-    this.ranking.getProvider().on(LocalDataProvider.EVENT_ADD_COLUMN + ATouringTask.EVENTTYPE, () => { /*console.log('added column');*/ setTimeout(()=>this.update(false), 100);});
+    this.ranking.getProvider().on(LocalDataProvider.EVENT_ADD_COLUMN + ATouringTask.EVENTTYPE, () => { /*console.log('added column');*/ setTimeout(() => this.update(false), 100);});
     this.ranking.getProvider().on(LocalDataProvider.EVENT_REMOVE_COLUMN + ATouringTask.EVENTTYPE, () => { /*console.log('rem column');*/ this.update(false);});
 
     // for filter changes and grouping changes
@@ -813,8 +813,8 @@ export class ColumnComparison extends ATouringTask {
     d3.select(this.node).attr('data-timestamp', timestamp);
 
 
-    let colData = d3.selectAll('select.attr[name="attr1[]"] option:checked').data();
-    let rowData = d3.selectAll('select.attr[name="attr2[]"]  option:checked').data();
+    let colData = d3.select(this.node).selectAll('select.attr[name="attr1[]"] option:checked').data();
+    let rowData = d3.select(this.node).selectAll('select.attr[name="attr2[]"]  option:checked').data();
     if (colData.length > rowData.length) {
       [rowData, colData] = [colData, rowData]; // avoid having more columns than rows --> flip table
     }
