@@ -155,7 +155,7 @@ export abstract class ATouringTask implements ITouringTask {
     }
   }
 
-  private addEventListeners() {
+  public addEventListeners() {
     // DATA CHANGE LISTENERS
     // -----------------------------------------------
     // change in selection
@@ -165,7 +165,7 @@ export abstract class ATouringTask implements ITouringTask {
     // column of a table was added/removed
     //  causes changes in the available attributes (b)
     //  might cause changes the displayed table / scores
-    this.ranking.getProvider().on(LocalDataProvider.EVENT_ADD_COLUMN + ATouringTask.EVENTTYPE, () => { /*console.log('added column');*/ setTimeout(this.update, 100, false);});
+    this.ranking.getProvider().on(LocalDataProvider.EVENT_ADD_COLUMN + ATouringTask.EVENTTYPE, () => { /*console.log('added column');*/ setTimeout(()=>this.update(false), 100);});
     this.ranking.getProvider().on(LocalDataProvider.EVENT_REMOVE_COLUMN + ATouringTask.EVENTTYPE, () => { /*console.log('rem column');*/ this.update(false);});
 
     // for filter changes and grouping changes
@@ -174,7 +174,7 @@ export abstract class ATouringTask implements ITouringTask {
     this.ranking.getProvider().on(LocalDataProvider.EVENT_ORDER_CHANGED + ATouringTask.EVENTTYPE, () => this.update(true));
   }
 
-  private removeEventListeners() {
+  public removeEventListeners() {
     this.ranking.getProvider().on(LocalDataProvider.EVENT_SELECTION_CHANGED + ATouringTask.EVENTTYPE, null);
     this.ranking.getProvider().on(LocalDataProvider.EVENT_ADD_COLUMN + ATouringTask.EVENTTYPE, null);
     this.ranking.getProvider().on(LocalDataProvider.EVENT_REMOVE_COLUMN + ATouringTask.EVENTTYPE, null);
@@ -356,7 +356,7 @@ export abstract class ATouringTask implements ITouringTask {
 
     // remove saved selection from session storage
     const selCellObj = {task: this.id, colLabel: null, rowLabels: null};
-    console.log('selectionLabels: ', selCellObj);
+    // console.log('selectionLabels: ', selCellObj);
     const selCellObjString = JSON.stringify(selCellObj);
     sessionStorage.setItem('touringSelCell', selCellObjString);
 
@@ -566,7 +566,7 @@ export abstract class ATouringTask implements ITouringTask {
 
   onClick(tableCell) {
     const cellData = d3.select(tableCell).datum();
-    console.log('Cell click - data: ', cellData);
+    // console.log('Cell click - data: ', cellData);
 
     // save data for selected cell in sesisonStorage
     let selCellObj;
@@ -588,7 +588,7 @@ export abstract class ATouringTask implements ITouringTask {
       selCellObj = {task, colLabel: null, rowLabels: null};
     }
 
-    console.log('selectionLabels: ', selCellObj);
+    // console.log('selectionLabels: ', selCellObj);
     const selCellObjString = JSON.stringify(selCellObj);
     sessionStorage.setItem('touringSelCell', selCellObjString);
 
@@ -640,7 +640,7 @@ export abstract class ATouringTask implements ITouringTask {
 
   setLineupHighlight(cellData: IScoreCell, enable: boolean, cssClass: string) {
 
-    const focusedLineupNode = this.node.closest('.lu-taggle');//select the closest lineup node to highlight
+    const focusedLineupNode = this.node.closest('.lu-taggle');//select the closest lineup node to highlight -`lu-taggle` is set in ARankingView
 
     if (cellData && cellData.highlightData) {
       if (enable) {
@@ -939,7 +939,7 @@ export class ColumnComparison extends ATouringTask {
                 hashObject.ids = this.ranking.getDisplayedIds().sort();
               }
 
-              console.log('hashObject: ', hashObject, ' | unsortedSelction: ', this.ranking.getSelectionUnsorted());
+              // console.log('hashObject: ', hashObject, ' | unsortedSelction: ', this.ranking.getSelectionUnsorted());
               const hashObjectString = JSON.stringify(hashObject);
               // console.log('hashObject.srtringify: ', hashObjectString);
               const hashValue = XXH.h32(hashObjectString, 0).toString(16);
@@ -1338,7 +1338,7 @@ export class RowComparison extends ATouringTask {
                   }
 
                 }).catch((err) => {
-                  console.error(err);
+                  // console.error(err);
                   const errorCell = {label: 'err', measure};
                   data[bodyIndex][rowIndex][colIndexOffset + colIndex] = errorCell;
                   if (colIndex4rowGrp[rowIndex] >= 0 && rowIndex4colGrp[colIndex] >= 0) {
