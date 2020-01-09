@@ -47,7 +47,7 @@ export class ParallelSets implements IMeasureVisualization {
     }
 
 
-    const currCategoryParts : any = {
+    const currCategoryParts: any = {
       attributeLabel: setParameters.setBDesc.label,
       categoryLabel: diffLable === '' ? label : diffLable,
       categoryAmount: num,

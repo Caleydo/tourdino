@@ -119,7 +119,7 @@ export class BoxPlot implements IMeasureVisualization {
                                   .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
                                   .attr('class','boxplot');
 
-    	// the x-axis
+    // the x-axis
     const x = d3.scale.ordinal()
     .domain( data.map(function(d) { return d[0]; } ) )
     .rangeRoundBands([0 , width], 0.7, 0.3);

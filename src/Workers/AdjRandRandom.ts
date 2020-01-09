@@ -2,7 +2,7 @@ import {binom2, shuffle} from '../util';
 
 const ctx: Worker = self as any;
 
-function calcAdjRand(arr1: Array<any>, arr2: Array<any>) : number {
+function calcAdjRand(arr1: Array<any>, arr2: Array<any>): number {
     // deduce catgeories from strings, e.g.: ['Cat1', 'Cat3', 'Cat2', 'Cat2', 'Cat1', 'Cat3']
     const A = [...new Set(arr1)]; // The set removes duplicates, and the conversion to array gives the content an order
     const B = [...new Set(arr2)];
