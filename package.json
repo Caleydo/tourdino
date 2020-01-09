@@ -6,7 +6,7 @@
   "author": {
     "name": "The Caleydo Team",
     "email": "contact@caleydo.org",
-    "url": "https://caleydo.org"
+    "url": "https://caleydo.org/"
   },
   "contributors": [
     {
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/caleydo/tourdino.git"
+    "url": "git@github.com:Caleydo/tourdino.git"
   },
   "main": "build/tourdino.js",
   "types": "src/index.d.ts",
