@@ -86,8 +86,7 @@ export class RankingAdapter {
       const databaseData = [];
 
       const scoreCols = this.getScoreColumns();
-      const scoresData = scoreCols.map((col) => this.getScoreData(col.desc));
-
+      const scoresData = [].concat(...scoreCols.map((col) => this.getScoreData(col.desc)));
 
       this.oldOrder = this.getItemOrder(); // [3, 5, 6, 7] -> [[0,3], [1,5], ...]
       const orderMap = new Map<number, number>(); // index, old-order
