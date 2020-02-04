@@ -1,4 +1,4 @@
-/// <reference types="jasmine" />
+/// <reference types="jest" />
 import {AdjustedRandIndex, JaccardSimilarity, ChiSquareTest, ChiSquareIndependenceTest} from '../src/Measures';
 import {PRECISION} from './index.test';
 

@@ -1,4 +1,4 @@
-/// <reference types="jasmine" />
+/// <reference types="jest" />
 import {SpearmanCorrelation, StudentTTest, WilcoxonRankSumTest} from '../src/Measures';
 import {PRECISION} from './index.test';
 
