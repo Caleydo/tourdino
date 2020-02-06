@@ -41,7 +41,7 @@ module.exports = {
     "__VERSION__": "TEST_VERSION",
     "__APP_CONTEXT__": "TEST_CONTEXT"
   },
-  "setupFiles": ["<rootDir>/jest/globals.js"],
+  setupFiles: ["<rootDir>/jest/globals.js"],
   moduleNameMapper: {
     "^.+\\.(css|less|scss|sass)$": "identity-obj-proxy",
     "imports-loader?.*": "imports-loader",
