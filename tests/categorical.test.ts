@@ -1,8 +1,23 @@
 /// <reference types="jest" />
 import {AdjustedRandIndex, JaccardSimilarity, ChiSquareTest, ChiSquareIndependenceTest} from '../src/Measures';
+// import JaccardSimilarity from '../src/common/__mocks__/JaccardSimilarity';
+// import {JaccardRandomizationWorker} from '../src/common/__mocks__/JaccardRandomizationWorker';
 import {PRECISION} from './index.test';
 
+// import 'jsdom-global/register';
+// import 'jsdom-worker';
 
+
+
+// import * as myworker from '../src/Workers/JaccardRandom.worker.js';
+// let worker = new Worker(URL.createObjectURL(new Blob([<string>(<any>myworker).default])));
+
+// // let code = `onmessage = e => postMessage(e.data*2)`;
+// // let worker = new Worker(URL.createObjectURL(new Blob([code])));
+// console.log(worker);
+
+
+// jest.mock('../src/common/__mocks__/JaccardSimilarity');
 
 describe('Jaccard index', () => {
   let jaccard;

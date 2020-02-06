@@ -19,10 +19,12 @@ const pluginsToTransform = [
 module.exports = {
   transform: {
     "^.+\\.tsx?$": "ts-jest",
+    "\\.worker.js$": "jest-raw-loader",
     "\\.xml$": "jest-raw-loader"
   },
   testRegex: "(.*(test|spec))\\.(tsx?)$",
   testURL: "http://localhost/",
+  testEnvironment: "jest-environment-jsdom-sixteen",
   moduleFileExtensions: [
     "ts",
     "tsx",
@@ -47,6 +49,8 @@ module.exports = {
     "imports-loader?.*": "imports-loader",
     "raw-loader?.*": "raw-loader",
     "file-loader?.*": "file-loader",
-    "script-loader?.*": "script-loader"
+    "script-loader?.*": "script-loader",
+    "worker-loader?.*": "worker-loader",
+    "url-loader?.*": "url-loader"
   }
 }

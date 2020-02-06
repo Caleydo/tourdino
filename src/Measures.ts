@@ -169,6 +169,7 @@ export class ChiSquareIndependenceTest extends ChiSquareTest {
 
   // compare: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3900058
   public async calc(arrA: Array<any>, arrB: Array<any>) {
+    console.log('THAT');
     await sleep(0);
 
     if (arrA.length !== arrB.length) {
@@ -251,6 +252,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
 
 
   public async calc(arr1: Array<any>, arr2: Array<any>) {
+    console.log('THERE');
     if (arr1.length !== arr2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
@@ -680,6 +682,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
   public async calc(set1: Array<any>, set2: Array<any>) {
     await sleep(0);
 
+    console.log('WE ARE HERE');
     if (set1.length !== set2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }

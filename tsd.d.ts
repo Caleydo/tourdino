@@ -28,10 +28,15 @@ declare module "*.xml" {
   const content:string;
   export default content;
 }
+declare module "*.worker.js" {
+  const content:string;
+  export default content;
+}
 //allow json dependencies
 declare module "*.json";
 //allow file dependencies
 declare module "file-loader!*";
+//allow file dependencies
 //allow file dependencies
 declare module "raw-loader!*";
 //allow url dependencies
@@ -45,3 +50,11 @@ interface ISystem {
   import(module: string): Promise<any>;
 }
 declare const System: ISystem;
+
+declare module 'worker-loader!*' {
+    class WebpackWorker extends Worker {
+        constructor();
+    }
+
+    export = WebpackWorker;
+}
