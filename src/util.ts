@@ -140,5 +140,5 @@ export function isProxyAccessor(accessor: any):  accessor is IAccessorFunc<strin
 }
 
 export interface IAccessorFunc<T> {
-  (row: IDataRow) : T;
+  (row: IDataRow): T;
 }
