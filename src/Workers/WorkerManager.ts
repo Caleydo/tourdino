@@ -25,7 +25,7 @@ export class WorkerManager {
    * @param tWorker
    */
   public static getSlot(tWorker: ATouringWorker): Promise<Worker> {
-    let resolveF: (value?: Worker) => void, rejectF : (value?: Worker) => void;
+    let resolveF: (value?: Worker) => void, rejectF: (value?: Worker) => void;
     const promise = new Promise<Worker>((resolve, reject) => {
       // we need the resolve/reject function to resolve the promise once another worker has finished
       resolveF = resolve;

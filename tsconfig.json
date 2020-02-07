@@ -21,7 +21,7 @@
     "noFallthroughCasesInSwitch": true,
     "downlevelIteration": true,
     "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "src/**/*.ts",
