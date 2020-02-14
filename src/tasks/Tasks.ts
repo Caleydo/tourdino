@@ -110,7 +110,7 @@ export abstract class ATouringTask implements ITouringTask {
       const $select2 = $(select2).select2({width: '100%', allowClear: true, closeOnSelect: false, placeholder: 'Select one or more columns. '});
       $select2.on('select2:select select2:unselect', updateTable);
       $select2.on('select2:open', () => { // elements are created when select2 is opened, and destroyed when closed
-        setTimeout(() => { // setTimeout so this thing actually works (mouseover listener not registered if done immidiatly)
+        setTimeout(() => { // setTimeout so this thing actually works (mouseover listener not registered if done immediately)
           const optgroups = d3.selectAll('.select2-results__group');
           optgroups.on('click', function () {
             const hoverGrp = d3.select(this).text(); // get text of hovered select2 label
