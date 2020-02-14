@@ -664,7 +664,7 @@ export abstract class ATouringTask implements ITouringTask {
                   elem.classed(`${cssClass}-${i}`, true)
                     .classed(`${cssClass}-dark`, setDarker);
 
-                  const catId = d3.select(` .lineup-engine header .lu-header[title^="${attr.label}"]`).attr('data-col-id');
+                  const catId = focusedLineupNode.select(` .lineup-engine header .lu-header[title^="${attr.label}"]`).attr('data-col-id');
                   focusedLineupNode.select(`.lineup-engine main .lu-row[data-index="${index}"] [data-id="${catId}"]`).classed(`${cssClass}-border`, true);
                 }
               }
