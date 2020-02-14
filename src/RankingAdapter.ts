@@ -95,7 +95,7 @@ export class RankingAdapter {
       const groups = this.getRanking().getGroups();
       const groupIndexArray = groups.map((g) => {
         const groupMap = new Map<number, number>();
-        g.order.forEach((order, i) => {groupMap.set(order, i);});
+        g.order.forEach((order, i) => { groupMap.set(order, i); });
         return groupMap;
       });
 
