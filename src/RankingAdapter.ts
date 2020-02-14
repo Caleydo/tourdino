@@ -1,6 +1,6 @@
-import {LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow} from 'lineupjs';
-import {IServerColumn} from 'tdp_core/src/rest';
-import {isProxyAccessor} from './util';
+import { LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow } from 'lineupjs';
+import { IServerColumn } from 'tdp_core/src/rest';
+import { isProxyAccessor } from './util';
 
 
 export interface IAttributeCategory extends ICategory {
@@ -24,7 +24,7 @@ export class RankingAdapter {
     return indices;
   }
 
-  constructor(protected readonly provider: LocalDataProvider, private rankingIndex = 0) {}
+  constructor(protected readonly provider: LocalDataProvider, private rankingIndex = 0) { }
 
   public getProvider(): LocalDataProvider {
     return this.provider;
@@ -94,9 +94,7 @@ export class RankingAdapter {
 
       const groups = this.getRanking().getGroups();
       const groupIndexArray = groups.map((g) => {
-        const groupMap = new Map<number, number>();
-        g.order.forEach((order, i) => { groupMap.set(order, i); });
-        return groupMap;
+        return g.order.map((order) => order);
       });
 
       this.oldSelection = this.getSelectionUnsorted();
@@ -108,7 +106,7 @@ export class RankingAdapter {
 
         // include wether the row is selected
         item[RankingAdapter.SELECTION_COLUMN_ID] = this.oldSelection.includes(i) ? 'Selected' : 'Unselected';
-        const groupIndex = groupIndexArray.findIndex((map) => map.has(i));
+        const groupIndex = groupIndexArray.findIndex((groupIndex) => groupIndex.includes(i));
         const groupName = groupIndex === -1 ? 'Unknown' : groups[groupIndex].name;
         item[RankingAdapter.GROUP_COLUMN_ID] = groupName; // index of group = category name, find index by looking up i. -1 if not found
         databaseData.push(item);
@@ -162,7 +160,7 @@ export class RankingAdapter {
    */
   public getItemRanks() {
     let i = 0;
-    return this.getItemOrder().map((id) => ({_id: id, rank: i++}));
+    return this.getItemOrder().map((id) => ({ _id: id, rank: i++ }));
   }
 
   public getRanking(): Ranking {
@@ -235,8 +233,8 @@ export class RankingAdapter {
 
     if (desc.column && isProxyAccessor(accessor)) {
       for (const id of ids) {
-        const dataEntry = {id};
-        dataEntry[desc.column] = accessor({v: {id}, i: null} as IDataRow); // i is not used by the accessor function
+        const dataEntry = { id };
+        dataEntry[desc.column] = accessor({ v: { id }, i: null } as IDataRow); // i is not used by the accessor function
         data.push(dataEntry);
       }
     }
@@ -250,11 +248,11 @@ export class RankingAdapter {
     const selCategories = new Array<ICategory>();
     const numberOfRows = this.getItemOrder().length; // get length of groups and sum them up
     if (this.getSelectionUnsorted().length > 0) {
-      selCategories.push({name: 'Selected', label: 'Selected', value: 0, color: '#1f77b4', });
+      selCategories.push({ name: 'Selected', label: 'Selected', value: 0, color: '#1f77b4', });
     } // else: none selected
 
     if (this.getSelectionUnsorted().length < numberOfRows) {
-      selCategories.push({name: 'Unselected', label: 'Unselected', value: 1, color: '#ff7f0e', });
+      selCategories.push({ name: 'Unselected', label: 'Unselected', value: 1, color: '#ff7f0e', });
     } // else: all selected
 
     return {
