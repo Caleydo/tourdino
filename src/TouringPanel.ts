@@ -3,7 +3,8 @@ import * as d3 from 'd3';
 import {tasks as Tasks, ATouringTask} from './tasks/Tasks';
 import {LocalDataProvider} from 'lineupjs';
 import {IPluginDesc} from 'phovea_core/src/plugin';
-import {PanelTabEvents} from 'tdp_core/src/lineup/internal/panel/PanelTab';
+import {PanelTabEvents, IPanelTabDesc} from 'tdp_core/src/lineup/internal/panel/PanelTab';
+import {IPanelTabExtensionDesc} from 'tdp_core/src/extensions';
 
 
 const touringTemplate = `
@@ -24,7 +25,7 @@ class TouringPanel {
   private currentTask: ATouringTask;
   private active: boolean;
 
-  constructor(private readonly node: HTMLElement, protected readonly provider: LocalDataProvider, protected readonly desc: IPluginDesc, private events: PanelTabEvents) {
+  constructor(private readonly node: HTMLElement, protected readonly provider: LocalDataProvider, protected readonly desc: IPanelTabExtensionDesc, private events: PanelTabEvents) {
     this.node.classList.add('touring');
     this.node.innerHTML = touringTemplate;
     this.init();
@@ -95,7 +96,8 @@ class TouringPanel {
   }
 }
 
-export default function create(parent: HTMLElement, provider: LocalDataProvider, desc: IPluginDesc, events: PanelTabEvents): void {
+export default function create(parent: HTMLElement, provider: LocalDataProvider, desc: IPanelTabExtensionDesc, events: PanelTabEvents): void {
+
   // tslint:disable-next-line:no-unused-expression
   new TouringPanel(parent, provider, desc, events);
 }

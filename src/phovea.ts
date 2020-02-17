@@ -4,19 +4,19 @@
  * Licensed under the new BSD license, available at http://caleydo.org/license
  **************************************************************************** */
 import {IRegistry} from 'phovea_core/src/plugin';
-
+import {EP_TDP_CORE_LINEUP_PANEL_TAB, IPanelTabExtensionDesc} from 'tdp_core/src/extensions';
 
 export default function (registry: IRegistry) {
   //registry.push('extension-type', 'extension-id', function() { return import('./extension_impl'); }, {});
   // generator-phovea:begin
 
-  registry.push('tdpLineupPanelTab', 'openTourdino', function () {
+  registry.push(EP_TDP_CORE_LINEUP_PANEL_TAB, 'openTourdino', function () {
     return System.import('./TouringPanel');
-  }, {
-    cssClass: 'fa-calculator',
-    title: 'Start Touring',
-    options: {
-      tabWidth: '45em'
+  }, <IPanelTabExtensionDesc>{
+    headerCssClass: 'fa-calculator',
+    headerTitle: 'Start Touring',
+    tabDesc: {
+      width: '45'
     }
 
   });
