@@ -2,7 +2,6 @@ import {RankingAdapter} from './RankingAdapter';
 import * as d3 from 'd3';
 import {tasks as Tasks, ATouringTask} from './tasks/Tasks';
 import {LocalDataProvider} from 'lineupjs';
-import {IPluginDesc} from 'phovea_core/src/plugin';
 import {PanelTabEvents, IPanelTabDesc} from 'tdp_core/src/lineup/internal/panel/PanelTab';
 import {IPanelTabExtensionDesc} from 'tdp_core/src/extensions';
 
@@ -64,9 +63,18 @@ class TouringPanel {
 
   private addEventListeners() {
     this.events.on(PanelTabEvents.SHOW_PANEL, () => {
+      if (this.active === true) {
+        return; //Don't update tasks when clicking on open touring button and touring panel is already open
+
+      }
+      if (this.active === false) {
+        this.updateOutput(true); //update tasks when panel opens
+      }
+
       this.active = true;
       this.currentTask.addEventListeners();
     });
+
     this.events.on(PanelTabEvents.HIDE_PANEL, () => {
       this.active = false;
       this.currentTask.removeEventListeners();
@@ -82,8 +90,8 @@ class TouringPanel {
     });
   }
 
-  public async updateOutput() {
-    if (this.active) {
+  public async updateOutput(forceUpdate?: boolean) {
+    if (this.active || forceUpdate) {
       await setTimeout(() => this.updateTask(), 0);
     } else {
       console.log('Touring Panel is hidden, skip update.');
