@@ -34,10 +34,13 @@ $highlight-color-2: rgb(207, 230, 207); //greenish
 
 .select2-dropdown {
   //dropdown is seperatly attached to DOM
-  $hover-background-color: darken($color: #ddd, $amount: 20%); // #ddd is default color for selected elements
+  $hover-background-color: darken(
+    $color: #ddd,
+    $amount: 20%
+  ); // #ddd is default color for selected elements
   $hover-color: white;
 
-  .select2-results>.select2-results__options {
+  .select2-results > .select2-results__options {
     max-height: 25vh; //50% of browser window
   }
 
@@ -53,14 +56,13 @@ $highlight-color-2: rgb(207, 230, 207); //greenish
   }
 
   .select2-results__options--nested {
-
     //hover effect for options in optgroups
     .select2-results__option--highlighted {
       // inside the dropdown, which is not inside the .select2
       background-color: transparent; // default hover styling is done by adding a class
       color: $dark-font-color;
 
-      &[aria-selected=true] {
+      &[aria-selected="true"] {
         //reset
         background-color: #ddd;
         color: $dark-font-color;
@@ -84,7 +86,6 @@ $highlight-color-2: rgb(207, 230, 207); //greenish
 }
 
 .select2 {
-
   // the input that is always visible
   .select2-selection__choice {
     background-color: $active-color;
@@ -109,7 +110,7 @@ button {
 }
 
 .tooltip.measure {
-  background-color: #C0C0C0;
+  background-color: #c0c0c0;
   position: absolute;
   padding: 5px;
   opacity: 1;
@@ -123,7 +124,7 @@ div.touring {
   padding-left: 0.5em;
 
   .input {
-    margin-right: .5em;
+    margin-right: 0.5em;
 
     // task switcher & task input
     overflow: hidden; // from the bootstrap stuff we get some overflow which introduces scrollbars --> hide it
@@ -133,14 +134,11 @@ div.touring {
     }
   }
 
-
-
   .removeMiniVis-btn {
     float: right !important;
     padding: 0px 7px !important;
     margin: 2px 1px !important;
   }
-
 
   label.control-label {
     padding: 0px;
@@ -210,7 +208,7 @@ div.touring {
       .table-container {
         position: relative;
         min-height: 100px;
-        border-top: 1px #AAA solid;
+        border-top: 1px #aaa solid;
 
         header {
           z-index: -1; // above td elements
@@ -228,21 +226,18 @@ div.touring {
 
       &.rowCmp {
         .details {
-          overflow-x: scroll;
+            overflow-x: auto;
         }
       }
 
       &.colCmp {
-
         .form-group {
-          >label {
+          > label {
             padding-top: 0 !important;
           }
         }
       }
     }
-
-
 
     a:hover,
     a:focus {
@@ -291,14 +286,13 @@ div.touring {
 
         &:not(.head) {
           // cells of row labels in header
-          min-width: $col-max-size*0.7; //flexible from min to max
+          min-width: $col-max-size * 0.7; //flexible from min to max
           max-width: $col-max-size;
           padding: 0 $wide-col-padding;
           background-color: white;
         }
 
         &.head {
-
           &.rotate {
             // adapted from https://css-tricks.com/rotated-table-column-headers/
             height: 120px;
@@ -313,13 +307,16 @@ div.touring {
               }
             }
 
-            >div {
+            > div {
               transform: translate(12px, 48px) //3. Back to the correct position
                 rotate(-45deg) //2. Rotate to correct angle
-                skew(45deg, 0deg); //1. skew the div, so that the background is correct (text content is unskewed below)
+                skew(
+                  45deg,
+                  0deg
+                ); //1. skew the div, so that the background is correct (text content is unskewed below)
               width: 30px;
 
-              >span {
+              > span {
                 position: relative;
                 display: inline-block; // to set a width
                 min-width: 165px;
@@ -332,7 +329,7 @@ div.touring {
                 border-bottom: 2px solid $table-border-color; //make space between headers non-transparent (removed for last header below)
                 background-color: white;
 
-                >span {
+                > span {
                   transform: skew(-45deg, 0deg); //unskew the text
 
                   max-width: 100%; // just as wide as the parent
@@ -349,13 +346,11 @@ div.touring {
               }
             }
 
-            &:last-child>div>span {
+            &:last-child > div > span {
               border-bottom: none; // no need for a border on last header
             }
           }
         }
-
-
       }
 
       .cross-selection,
@@ -378,7 +373,7 @@ div.touring {
 
         &:not(.score) {
           // row labels
-          min-width: $col-max-size*0.7;
+          min-width: $col-max-size * 0.7;
           max-width: $col-max-size;
           padding: 0 $wide-col-padding;
           overflow: hidden;
@@ -408,7 +403,10 @@ div.touring {
           &:hover,
           &:focus {
             // = td.action:hover
-            background-color: darken($highlight-color, 25%) !important; // important because to overwrite the htmml inline color definition
+            background-color: darken(
+              $highlight-color,
+              25%
+            ) !important; // important because to overwrite the htmml inline color definition
             color: black !important;
             font-weight: bolder;
           }
@@ -433,7 +431,7 @@ div.touring {
     }
 
     .detailVis {
-      border-top: #AAA 1px solid;
+      border-top: #aaa 1px solid;
       padding: 0.5em 0;
 
       .detailDiv {
@@ -484,12 +482,12 @@ div.touring {
       fill-opacity: 0;
     }
 
-    .dimension>rect,
+    .dimension > rect,
     .category-background {
       fill: #fff;
     }
 
-    .dimension>rect {
+    .dimension > rect {
       display: none;
     }
 
@@ -497,7 +495,7 @@ div.touring {
     // .dimension:hover > rect { fill-opacity: .3; }
     svg .parSets .ribbon path {
       stroke-opacity: 0;
-      fill-opacity: .5;
+      fill-opacity: 0.5;
     }
 
     //.ribbon path.active { fill-opacity: .9; }
@@ -507,17 +505,17 @@ div.touring {
     }
 
     .ribbon path.selected {
-      fill-opacity: .9 !important;
+      fill-opacity: 0.9 !important;
     }
 
     //new
     .category rect.selected {
-      fill-opacity: .3;
+      fill-opacity: 0.3;
     }
 
     //new
-    .dimension:hover>rect.selcted {
-      fill-opacity: .3;
+    .dimension:hover > rect.selcted {
+      fill-opacity: 0.3;
     }
 
     //new
@@ -633,8 +631,6 @@ div.touring {
       stroke: #fba74d !important;
     }
 
-
-
     // ------ boxplot with D3
     g.box-element text {
       stroke: none;
@@ -646,7 +642,7 @@ div.touring {
         stroke: black;
         stroke-width: 1;
         stroke-opacity: 0;
-        fill-opacity: .5;
+        fill-opacity: 0.5;
       }
 
       line.center,
@@ -684,7 +680,6 @@ div.touring {
     }
 
     g.scatterplot g.regression {
-
       path,
       line {
         stroke: rgb(194, 194, 194) !important;
@@ -721,11 +716,11 @@ div.touring {
     color: #999; // #515151 is to dark
   }
 
-  [data-type='categorical']::before {
+  [data-type="categorical"]::before {
     content: "\e810";
   }
 
-  [data-type='number']::before {
+  [data-type="number"]::before {
     content: "\e811";
   }
 }
