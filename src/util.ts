@@ -1,5 +1,5 @@
 import {IMeasureResult} from './interfaces';
-import {IDataRow} from 'lineupjs';
+import {IAccessorFunc} from 'tdp_core/src/lineup/internal/utils';
 
 /**
  * Returns:
@@ -139,6 +139,3 @@ export function isProxyAccessor(accessor: any):  accessor is IAccessorFunc<strin
   return false;
 }
 
-export interface IAccessorFunc<T> {
-  (row: IDataRow): T;
-}
