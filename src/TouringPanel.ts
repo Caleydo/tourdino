@@ -104,6 +104,13 @@ class TouringPanel {
   }
 }
 
+/**
+ *
+ * @param parent Parent HTML node
+ * @param provider Instance of the LocalDataProvider that contains all ranking
+ * @param desc Options provided through the extension point i.e `headerCssClass, headerTitle`
+ * @param events Instance PanelTabEvents
+ */
 export default function create(parent: HTMLElement, provider: LocalDataProvider, desc: IPanelTabExtensionDesc, events: PanelTabEvents): void {
 
   // tslint:disable-next-line:no-unused-expression
