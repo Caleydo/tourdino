@@ -10,7 +10,7 @@ export default function (registry: IRegistry) {
   // registry.push('extension-type', 'extension-id', function() { return import('./extension_impl'); }, {});
   // generator-phovea:begin
 
-  registry.push(EP_TDP_CORE_LINEUP_PANEL_TAB, 'Statistical Analysis', function () {
+  registry.push(EP_TDP_CORE_LINEUP_PANEL_TAB, 'statisticalAnalysisPanel', function () {
     return System.import('./TouringPanel');
   }, <IPanelTabExtensionDesc>{
     cssClass: 'fa-calculator',
