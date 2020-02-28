@@ -7,19 +7,19 @@ import {IRegistry} from 'phovea_core/src/plugin';
 import {EP_TDP_CORE_LINEUP_PANEL_TAB, IPanelTabExtensionDesc} from 'tdp_core/src/extensions';
 
 export default function (registry: IRegistry) {
-  //registry.push('extension-type', 'extension-id', function() { return import('./extension_impl'); }, {});
+  // registry.push('extension-type', 'extension-id', function() { return import('./extension_impl'); }, {});
   // generator-phovea:begin
 
-  registry.push(EP_TDP_CORE_LINEUP_PANEL_TAB, 'openTourdino', function () {
+  registry.push(EP_TDP_CORE_LINEUP_PANEL_TAB, 'Statistical Analysis', function () {
     return System.import('./TouringPanel');
   }, <IPanelTabExtensionDesc>{
-    headerCssClass: 'fa-calculator',
-    headerTitle: 'Start Touring',
-    tabDesc: {
-      width: '45'
-    }
-
+    cssClass: 'fa-calculator',
+    title: 'Statistical Analysis',
+    order: 10,
+    width: '45em',
+    shortcut: true
   });
+
   // generator-phovea:end
 
 }
