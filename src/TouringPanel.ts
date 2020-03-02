@@ -1,3 +1,4 @@
+import './style.scss';
 import {RankingAdapter} from './RankingAdapter';
 import * as d3 from 'd3';
 import {tasks as Tasks, ATouringTask} from './tasks/Tasks';
@@ -113,6 +114,7 @@ class TouringPanel {
  */
 export default function create(parent: HTMLElement, provider: LocalDataProvider, desc: IPanelTabExtensionDesc, events: PanelTabEvents): void {
 
+  //parent.ownerDocument.head.appendChild();
   // tslint:disable-next-line:no-unused-expression
   new TouringPanel(parent, provider, desc, events);
 }
