@@ -65,12 +65,10 @@ class TouringPanel {
   private addEventListeners() {
     this.events.on(PanelTabEvents.SHOW_PANEL, () => {
       if (this.active === true) {
-        return; //Don't update tasks when clicking on open touring button and touring panel is already open
+        return; // do not update tasks when clicking on open touring button and touring panel is already open
+      }
 
-      }
-      if (this.active === false) {
-        this.updateOutput(true); //update tasks when panel opens
-      }
+      this.updateOutput(true); // update tasks when panel opens
 
       this.active = true;
       this.currentTask.addEventListeners();
