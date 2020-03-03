@@ -96,11 +96,12 @@
   },
   "dependencies": {
     "@types/d3": "~3.5.36",
-    "@types/jquery": "2.0.33",
+    "@types/jquery": "3.3.33",
+    "@types/node": "^13.7.7",
     "d3": "~3.5.17",
     "d3.parsets": "git+https://github.com/jasondavies/d3-parsets.git#v1.2.4",
     "d3-grubert-boxplot": "gist:366430a0ac8e6e55ce09b040b5b493a6",
-    "jStat": "1.7.1",
+    "jStat": "1.8.6",
     "phovea_core": "github:phovea/phovea_core#update_dependencies_38"
   }
 }
