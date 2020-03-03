@@ -208,7 +208,7 @@ export class ChiSquareIndependenceTest extends ChiSquareTest {
         const amountCatB = arrB.filter((val) => val === catB).length;  // items with cat B -> column marginal
         const observed = indices.map((index) => arrB[index]).filter((val) => val === catB).length; // items with cat A & B
         const expected = (amountCatA * amountCatB) / n;
-        console.log('observed', observed, '\texpected', expected);
+        // console.log('observed', observed, '\texpected', expected);
         const chi = Math.pow(observed - expected, 2)/expected;
 
         score += chi;
@@ -221,7 +221,7 @@ export class ChiSquareIndependenceTest extends ChiSquareTest {
     // Cramer's V
     const t = Math.min(rows-1,columns-1);
     const cramerV = Math.sqrt(score/(n*t));
-    console.log('score', score, 'n', n, 't', t);
+    // console.log('score', score, 'n', n, 't', t);
     score = cramerV;
 
     return measureResultObj(score, pValue, setACategories.length, setBCategories.length, this.scope);

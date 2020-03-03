@@ -1,8 +1,9 @@
-import {RankingAdapter} from './RankingAdapter';
+import { RankingAdapter } from './RankingAdapter';
 import * as d3 from 'd3';
-import {tasks as Tasks, ATouringTask} from './tasks/Tasks';
-import {LocalDataProvider} from 'lineupjs';
-import {IPluginDesc} from 'phovea_core/src/plugin';
+import { tasks as Tasks, ATouringTask } from './tasks/Tasks';
+import { LocalDataProvider } from 'lineupjs';
+import { IPluginDesc } from 'phovea_core/src/plugin';
+import { PanelTabEvents } from 'tdp_core/src/lineup/internal/panel/PanelTab';
 
 
 const touringTemplate = `
@@ -21,8 +22,9 @@ class TouringPanel {
 
   private ranking: RankingAdapter;
   private currentTask: ATouringTask;
+  private active: boolean;
 
-  constructor(private readonly node: HTMLElement, protected readonly provider: LocalDataProvider, protected readonly desc: IPluginDesc) {
+  constructor(private readonly node: HTMLElement, protected readonly provider: LocalDataProvider, protected readonly desc: IPluginDesc, private events: PanelTabEvents) {
     this.node.classList.add('touring');
     this.node.innerHTML = touringTemplate;
     this.init();
@@ -60,6 +62,14 @@ class TouringPanel {
   }
 
   private addEventListeners() {
+    this.events.on(PanelTabEvents.SHOW_PANEL, () => {
+      this.active = true;
+      this.currentTask.addEventListeners();
+    });
+    this.events.on(PanelTabEvents.HIDE_PANEL, () => {
+      this.active = false;
+      this.currentTask.removeEventListeners();
+    });
     // Click a different task
     d3.select(this.node).selectAll('button.task-btn').on('click', (task) => {
       const taskButtons = d3.select(this.node).selectAll('button.task-btn');
@@ -72,7 +82,7 @@ class TouringPanel {
   }
 
   public async updateOutput() {
-    if (!this.node.hidden) {
+    if (this.active) {
       await setTimeout(() => this.updateTask(), 0);
     } else {
       console.log('Touring Panel is hidden, skip update.');
@@ -85,7 +95,7 @@ class TouringPanel {
   }
 }
 
-export default function create(parent: HTMLElement, provider: LocalDataProvider, desc: IPluginDesc): void {
+export default function create(parent: HTMLElement, provider: LocalDataProvider, desc: IPluginDesc, events: PanelTabEvents): void {
   // tslint:disable-next-line:no-unused-expression
-  new TouringPanel(parent, provider, desc);
+  new TouringPanel(parent, provider, desc, events);
 }
