@@ -5,6 +5,7 @@ import {tasks as Tasks, ATouringTask} from './tasks/Tasks';
 import {LocalDataProvider} from 'lineupjs';
 import {IPluginDesc} from 'phovea_core/src/plugin';
 import {PanelTabEvents} from 'tdp_core/src/lineup/internal/panel/PanelTab';
+import {IPanelTabExtensionDesc} from 'tdp_core/src/extensions';
 
 
 const touringTemplate = `
