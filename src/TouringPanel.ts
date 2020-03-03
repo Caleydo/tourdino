@@ -1,10 +1,10 @@
 import './style.scss';
-import { RankingAdapter } from './RankingAdapter';
+import {RankingAdapter} from './RankingAdapter';
 import * as d3 from 'd3';
-import { tasks as Tasks, ATouringTask } from './tasks/Tasks';
-import { LocalDataProvider } from 'lineupjs';
-import { IPluginDesc } from 'phovea_core/src/plugin';
-import { PanelTabEvents } from 'tdp_core/src/lineup/internal/panel/PanelTab';
+import {tasks as Tasks, ATouringTask} from './tasks/Tasks';
+import {LocalDataProvider} from 'lineupjs';
+import {IPluginDesc} from 'phovea_core/src/plugin';
+import {PanelTabEvents} from 'tdp_core/src/lineup/internal/panel/PanelTab';
 
 
 const touringTemplate = `
@@ -50,7 +50,7 @@ class TouringPanel {
     const taskSelectForm = d3.select(this.node).select('.input .type .form-group');
     const taskButtons = taskSelectForm.selectAll('.btn-wrapper').data(Tasks, (task) => task.id);
 
-    taskButtons.enter() //enter: add a button for each task
+    taskButtons.enter() // enter: add a button for each task
       .append('div').attr('class', `btn-wrapper col-sm-${Math.max(Math.floor(8 / Tasks.length), 1)}`)
       .append('button').attr('class', 'task-btn btn btn-default btn-block')
       .classed('active', (d, i) => i === 0) // Activate first task

@@ -1,6 +1,6 @@
-import { LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow } from 'lineupjs';
-import { IServerColumn } from 'tdp_core/src/rest';
-import { isProxyAccessor } from './util';
+import {LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow} from 'lineupjs';
+import {IServerColumn} from 'tdp_core/src/rest';
+import {isProxyAccessor} from './util';
 
 
 export interface IAttributeCategory extends ICategory {
@@ -101,7 +101,7 @@ export class RankingAdapter {
 
       this.provider.data.forEach((item, i) => {
         const index = orderMap.get(i);
-        item[RankingAdapter.RANK_COLUMN_ID] = index >= 0 ? index : Number.NaN; //NaN if not found
+        item[RankingAdapter.RANK_COLUMN_ID] = index >= 0 ? index : Number.NaN; // NaN if not found
 
 
         // include wether the row is selected
@@ -116,7 +116,7 @@ export class RankingAdapter {
       this.data = [...allData
         .reduce((map, curr) => {
           if (!map.has(curr.id)) {
-            map.set(curr.id, {}); //include id in map if not already part of it, initialize with empty object
+            map.set(curr.id, {}); // include id in map if not already part of it, initialize with empty object
           }
 
           const item = map.get(curr.id); // get stored data for this id

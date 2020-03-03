@@ -104,7 +104,7 @@ export class ChiSquareTest extends ASimilarityMeasure {
       const allChiForCategories = table.map((a) => (a.sumChi));
       const chiSquare = allChiForCategories.reduce(this.getSum);
       const rows = 2; // the two sets
-      const columns = table.length; //number of categories in the two sets
+      const columns = table.length; // number of categories in the two sets
       const df = (rows - 1) * (columns - 1);
       // Phi
       // const phi = Math.sqrt(chiSquare/overallSize);
@@ -195,13 +195,13 @@ export class ChiSquareIndependenceTest extends ChiSquareTest {
       return measureResultObj(score, 1, setACategories.length, setBCategories.length);
     }
 
-    for (const catA of setACategories) { //contingency table rows
-      for (const catB of setBCategories) { //contingency table columns
+    for (const catA of setACategories) { // contingency table rows
+      for (const catB of setBCategories) { // contingency table columns
         const indices = [];
         const amountCatA = arrA.filter((val, index) => {  // items with cat A --> row marginal
           const match = val === catA;
           if (match) {
-            indices.push(index); //get indices where val = category
+            indices.push(index); // get indices where val = category
           }
           return match;
         }).length;
@@ -309,9 +309,9 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
       };
     });
 
-    //create array with all values and their affiliation
+    // create array with all values and their affiliation
     const collectiveRankSet = selectionRankObj.concat(categoryRankObj);
-    //sort the set from low to high
+    // sort the set from low to high
     collectiveRankSet.sort((a, b) => {return a.value - b.value;});
 
     // assing rank
@@ -337,7 +337,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
         // calculate rank for the region
         const regionRank = (uniqueRegionRange.reduce((a, b) => a + b, 0) + uniqueRegionRange.length) / uniqueRegionRange.length;
 
-        //cahnge the ranks in the privous items
+        // cahnge the ranks in the privous items
         for (const regionRange of uniqueRegionRange) {
           collectiveRankSet[regionRange].rank = regionRank;
         }
@@ -357,7 +357,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
       // calculate rank for the region
       const regionRank = (uniqueRegionRange.reduce((a, b) => a + b, 0) + uniqueRegionRange.length) / uniqueRegionRange.length;
 
-      //cahnge the ranks in the privous items
+      // cahnge the ranks in the privous items
       for (const regionRange of uniqueRegionRange) {
         collectiveRankSet[regionRange].rank = regionRank;
       }
@@ -452,7 +452,7 @@ export class StudentTTest extends ASimilarityMeasure {
     const muSelection = d3.mean(setAValid);
     const varSelection = d3.variance(setAValid);
 
-    //category
+    // category
     const setBValid = setB.filter((value) => {return (value !== null && value !== undefined && !isNaN(value));});
     const nCategory = setBValid.length;
     const muCategory = d3.mean(setBValid);
@@ -737,7 +737,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
 
       // console.log('combinedSet: ',combinedSet);
       // console.log('validCombinedSet: ',validCombinedSet);
-      //define category sets
+      // define category sets
       const propertyCategories = [];
       for (const currCategory of categories) {
         const numCategory = validCombinedSet.filter((item) => {return item.category === currCategory;}).length;

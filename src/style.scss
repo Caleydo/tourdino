@@ -1,8 +1,8 @@
 $active-color: #eaeaea;
 $dark-font-color: #333;
 $highlight-color: rgb(212, 212, 212);
-$highlight-color-1: rgb(207, 230, 230); //blueish
-$highlight-color-2: rgb(207, 230, 207); //greenish
+$highlight-color-1: rgb(207, 230, 230); // blueish
+$highlight-color-2: rgb(207, 230, 207); // greenish
 
 [hidden] {
   display: none !important;
@@ -33,7 +33,7 @@ $highlight-color-2: rgb(207, 230, 207); //greenish
 }
 
 .select2-dropdown {
-  //dropdown is seperatly attached to DOM
+  // dropdown is seperatly attached to DOM
   $hover-background-color: darken(
     $color: #ddd,
     $amount: 20%
@@ -41,29 +41,29 @@ $highlight-color-2: rgb(207, 230, 207); //greenish
   $hover-color: white;
 
   .select2-results > .select2-results__options {
-    max-height: 25vh; //50% of browser window
+    max-height: 25vh; // 50% of browser window
   }
 
   .select2-results__option {
-    //changes the padding of every option in the dropdown
+    // changes the padding of every option in the dropdown
     padding: 2px 6px;
   }
 
   .select2-results__option--highlighted {
-    //hover effect for non nested options (not in optgroup)
+    // hover effect for non nested options (not in optgroup)
     background-color: $hover-background-color; // do my own hover styling
     color: $hover-color;
   }
 
   .select2-results__options--nested {
-    //hover effect for options in optgroups
+    // hover effect for options in optgroups
     .select2-results__option--highlighted {
       // inside the dropdown, which is not inside the .select2
       background-color: transparent; // default hover styling is done by adding a class
       color: $dark-font-color;
 
       &[aria-selected="true"] {
-        //reset
+        // reset
         background-color: #ddd;
         color: $dark-font-color;
       }
@@ -142,7 +142,7 @@ div.touring {
 
   label.control-label {
     padding: 0px;
-    padding-left: 15px; //bootstrap default
+    padding-left: 15px; // bootstrap default
   }
 
   .output {
@@ -153,24 +153,24 @@ div.touring {
     $col-min-size: 4.5ch;
     $col-max-size: 15em;
 
-    /*.select2-dropdown { //dropdown is seperatly attached to DOM
+    /*.select2-dropdown { // dropdown is seperatly attached to DOM
       $hover-background-color: darken($color: #ddd, $amount: 20%); // #ddd is default color for selected elements
       $hover-color: white;
       .select2-results>.select2-results__options {
-        max-height: 25vh; //50% of browser window
+        max-height: 25vh; // 50% of browser window
       }
-      .select2-results__option { //changes the padding of every option in the dropdown
+      .select2-results__option { // changes the padding of every option in the dropdown
         padding: 2px 6px;
       }
-      .select2-results__option--highlighted { //hover effect for non nested options (not in optgroup)
+      .select2-results__option--highlighted { // hover effect for non nested options (not in optgroup)
         background-color: $hover-background-color; // do my own hover styling
         color: $hover-color;
       }
-      .select2-results__options--nested { //hover effect for options in optgroups
+      .select2-results__options--nested { // hover effect for options in optgroups
         .select2-results__option--highlighted { // inside the dropdown, which is not inside the .select2
           background-color: transparent; // default hover styling is done by adding a class
           color: $dark-font-color;
-          &[aria-selected=true] { //reset
+          &[aria-selected=true] { // reset
             background-color: #ddd;
             color: $dark-font-color;
           }
@@ -286,7 +286,7 @@ div.touring {
 
         &:not(.head) {
           // cells of row labels in header
-          min-width: $col-max-size * 0.7; //flexible from min to max
+          min-width: $col-max-size * 0.7; // flexible from min to max
           max-width: $col-max-size;
           padding: 0 $wide-col-padding;
           background-color: white;
@@ -308,12 +308,12 @@ div.touring {
             }
 
             > div {
-              transform: translate(12px, 48px) //3. Back to the correct position
-                rotate(-45deg) //2. Rotate to correct angle
+              transform: translate(12px, 48px) // 3. Back to the correct position
+                rotate(-45deg) // 2. Rotate to correct angle
                 skew(
                   45deg,
                   0deg
-                ); //1. skew the div, so that the background is correct (text content is unskewed below)
+                ); // 1. skew the div, so that the background is correct (text content is unskewed below)
               width: 30px;
 
               > span {
@@ -325,12 +325,12 @@ div.touring {
 
                 padding-bottom: 0px;
                 padding-top: 1px;
-                line-height: 1.25; //defines height of headers
-                border-bottom: 2px solid $table-border-color; //make space between headers non-transparent (removed for last header below)
+                line-height: 1.25; // defines height of headers
+                border-bottom: 2px solid $table-border-color; // make space between headers non-transparent (removed for last header below)
                 background-color: white;
 
                 > span {
-                  transform: skew(-45deg, 0deg); //unskew the text
+                  transform: skew(-45deg, 0deg); // unskew the text
 
                   max-width: 100%; // just as wide as the parent
                   display: inline-block; // to make width & string truncation work
@@ -498,7 +498,7 @@ div.touring {
       fill-opacity: 0.5;
     }
 
-    //.ribbon path.active { fill-opacity: .9; }
+    // .ribbon path.active { fill-opacity: .9; }
     .ribbon-mouse path {
       fill-opacity: 0;
       stroke: none;
@@ -508,17 +508,17 @@ div.touring {
       fill-opacity: 0.9 !important;
     }
 
-    //new
+    // new
     .category rect.selected {
       fill-opacity: 0.3;
     }
 
-    //new
+    // new
     .dimension:hover > rect.selcted {
       fill-opacity: 0.3;
     }
 
-    //new
+    // new
 
     // predefined colours
     .category-0 {
@@ -711,7 +711,7 @@ div.touring {
 
   [data-type]::before {
     display: inline-block; // so that the width property works
-    width: 1.2em; //to have some space between icon and the text in the td
+    width: 1.2em; // to have some space between icon and the text in the td
     font-family: lu-font; // some icon font
     color: #999; // #515151 is to dark
   }

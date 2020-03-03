@@ -1,6 +1,6 @@
-import { IServerColumn } from 'tdp_core/src/rest';
-import { RankingAdapter, IAttributeCategory } from '../RankingAdapter';
-import { IColumnDesc, ICategory, Column, CategoricalColumn, ICategoricalColumnDesc, LocalDataProvider } from 'lineupjs';
+import {IServerColumn} from 'tdp_core/src/rest';
+import {RankingAdapter, IAttributeCategory} from '../RankingAdapter';
+import {IColumnDesc, ICategory, Column, CategoricalColumn, ICategoricalColumnDesc, LocalDataProvider} from 'lineupjs';
 import colCmpHtml from 'html-loader!./ColumnComparison.html'; // webpack imports html to variable
 import colCmpIcon from './colCmp.png';
 import rowCmpHtml from 'html-loader!./RowComparison.html'; // webpack imports html to variable
@@ -8,14 +8,14 @@ import rowCmpIcon from './rowCmp.png';
 import * as $ from 'jquery';
 import * as d3 from 'd3';
 import * as XXH from 'xxhashjs';
-import { isNumber } from 'util';
-import { SCOPE, WorkerManager, IMeasureResult, ISimilarityMeasure, ISetParameters, IMeasureVisualization, MethodManager, Type } from '..';
+import {isNumber} from 'util';
+import {SCOPE, WorkerManager, IMeasureResult, ISimilarityMeasure, ISetParameters, IMeasureVisualization, MethodManager, Type} from '..';
 
 export const tasks = new Array<ATouringTask>();
 export function TaskDecorator() {
   return function (target: { new(): ATouringTask }) { // only instantiable subtypes of ATouringTask can be passed.
     tasks.push(new target());
-    tasks.sort((a, b) => b.order - a.order); //sort descending
+    tasks.sort((a, b) => b.order - a.order); // sort descending
   };
 }
 
@@ -81,7 +81,7 @@ export abstract class ATouringTask implements ITouringTask {
   public init(ranking: RankingAdapter, node: HTMLElement) {
     this.ranking = ranking;
     this.nodeObject = d3.select(node).append('div').attr('class', `task ${this.id}`);
-    this.hide(); //hide initially
+    this.hide(); // hide initially
     this.initContent();
   }
 
@@ -106,7 +106,7 @@ export abstract class ATouringTask implements ITouringTask {
     const updateTable = this.updateTable.bind(this);
     this.nodeObject.selectAll('select').each(function () { // Convert to select2
       const select2 = this;
-      //console.log('convert', select2.name);
+      // console.log('convert', select2.name);
       const $select2 = $(select2).select2({ width: '100%', allowClear: true, closeOnSelect: false, placeholder: 'Select one or more columns. ' });
       $select2.on('select2:select select2:unselect', updateTable);
       $select2.on('select2:open', () => { // elements are created when select2 is opened, and destroyed when closed
@@ -115,7 +115,7 @@ export abstract class ATouringTask implements ITouringTask {
           optgroups.on('click', function () {
             const hoverGrp = d3.select(this).text(); // get text of hovered select2 label
             // update html in the actual select html element
-            const optGroup = d3.select(select2).select(`optgroup[label="${hoverGrp}"]`); //get optgroup of hovered select2 label
+            const optGroup = d3.select(select2).select(`optgroup[label="${hoverGrp}"]`); // get optgroup of hovered select2 label
             const options = optGroup.selectAll('option');
             const newState = !options.filter(':not(:checked)').empty(); // if not all options are selected --> true = select all, deselect if all options are already selected
             options.each(function () { (this as HTMLOptionElement).selected = newState; }); // set state of all child options
@@ -160,7 +160,7 @@ export abstract class ATouringTask implements ITouringTask {
     // -----------------------------------------------
     // change in selection
     //  might cause changes the displayed table / scores
-    this.ranking.getProvider().on(LocalDataProvider.EVENT_SELECTION_CHANGED + ATouringTask.EVENTTYPE, () => this.update(true)); //fat arrow to preserve scope in called function (this)
+    this.ranking.getProvider().on(LocalDataProvider.EVENT_SELECTION_CHANGED + ATouringTask.EVENTTYPE, () => this.update(true)); // fat arrow to preserve scope in called function (this)
 
     // column of a table was added/removed
     //  causes changes in the available attributes (b)
@@ -199,8 +199,8 @@ export abstract class ATouringTask implements ITouringTask {
     const validTypes = ['categorical', 'number'];
     descriptions = descriptions.filter((desc) => validTypes.includes(desc.type)); // filter attributes by type
     const groupDesc = this.ranking.getGroupDesc();
-    const reallyGrouped = groupDesc.categories.length > 1; //grouping is only the "default group"
-    const groupingHierarchy = reallyGrouped && groupDesc.categories.some((cat) => cat.label.indexOf('∩') >= 0); //not grouping hierachy if intersection symbol is not in label (https://github.com/lineupjs/lineupjs/blob/60bffa3b8c665bd7fa28c1ab577ba24dba84913c/src/model/internal.ts#L31)
+    const reallyGrouped = groupDesc.categories.length > 1; // grouping is only the "default group"
+    const groupingHierarchy = reallyGrouped && groupDesc.categories.some((cat) => cat.label.indexOf('∩') >= 0); // not grouping hierachy if intersection symbol is not in label (https://github.com/lineupjs/lineupjs/blob/60bffa3b8c665bd7fa28c1ab577ba24dba84913c/src/model/internal.ts#L31)
     if (groupingHierarchy) {
       descriptions.unshift(groupDesc);
     }
@@ -216,15 +216,15 @@ export abstract class ATouringTask implements ITouringTask {
     cellLabel = cellLabel.startsWith('0') ? cellLabel.substring(1) : score.pValue.toFixed(2); // [0,1) --> .123, 1 --> 1.00
     if (score.pValue > 0.1) {
       color = {
-        background: '#ffffff', //white
-        foreground: '#ffffff', //white
+        background: '#ffffff', // white
+        foreground: '#ffffff', // white
       };
     }
     if (score.pValue === -1) {
       cellLabel = '-';
       color = {
-        background: '#ffffff', //white
-        foreground: '#ffffff', //white
+        background: '#ffffff', // white
+        foreground: '#ffffff', // white
       };
     }
     return {
@@ -370,7 +370,7 @@ export abstract class ATouringTask implements ITouringTask {
     const divDetailInfoContainer = miniVisualisation.append('div')
       .classed('detailVisContainer', true);
 
-    //button for mini visualization removal
+    // button for mini visualization removal
     const that = this;
     const detailRemoveButton = divDetailInfoContainer.append('button');
     detailRemoveButton.attr('class', 'btn btn-default removeMiniVis-btn');
@@ -529,7 +529,7 @@ export abstract class ATouringTask implements ITouringTask {
     // remove bg highlighting from all tds
     this.nodeObject.selectAll('td').classed('selectedCell', false);
 
-    if (cellData.score) { //Currenlty only cells with a score are calculated (no category or attribute label cells)
+    if (cellData.score) { // Currenlty only cells with a score are calculated (no category or attribute label cells)
       // Color table cell
       d3.select(tableCell).classed('selectedCell', true); // add bg highlighting
     }
@@ -541,14 +541,14 @@ export abstract class ATouringTask implements ITouringTask {
     const details = this.nodeObject.select('div.details');
     details.selectAll('*').remove(); // avada kedavra outdated details!
 
-    if (cellData.score) { //Currenlty only cells with a score are calculated (no category or attribute label cells)
+    if (cellData.score) { // Currenlty only cells with a score are calculated (no category or attribute label cells)
 
       const resultScore: IMeasureResult = cellData.score;
       const measure: ISimilarityMeasure = cellData.measure;
 
       // Display details
       if (measure) {
-        this.generateVisualDetails(details, measure, resultScore, cellData.setParameters); //generate description into details div
+        this.generateVisualDetails(details, measure, resultScore, cellData.setParameters); // generate description into details div
       } else {
         details.append('p').text('There are no details for the selected table cell.');
       }
@@ -599,9 +599,9 @@ export abstract class ATouringTask implements ITouringTask {
   onMouseOver(tableCell, state: boolean) {
     if (d3.select(tableCell).classed('score')) {
 
-      const tr = tableCell.parentNode; //current row
-      const tbody = tr.parentNode;     //current body
-      const table = tbody.parentNode;  //current table
+      const tr = tableCell.parentNode; // current row
+      const tbody = tr.parentNode;     // current body
+      const table = tbody.parentNode;  // current table
 
       const allTds = d3.select(tr).selectAll('td');
       // console.log('allTds', allTds[0]);
@@ -640,11 +640,11 @@ export abstract class ATouringTask implements ITouringTask {
 
   setLineupHighlight(cellData: IScoreCell, enable: boolean, cssClass: string) {
 
-    const focusedLineupNode = d3.select((<HTMLDivElement>this.nodeObject.node()).closest('.lu-taggle'));//select the closest lineup node to highlight -`lu-taggle` is set in ARankingView
+    const focusedLineupNode = d3.select((<HTMLDivElement>this.nodeObject.node()).closest('.lu-taggle'));// select the closest lineup node to highlight -`lu-taggle` is set in ARankingView
 
     if (cellData && cellData.highlightData) {
       if (enable) {
-        this.hoverTimerId = window.setTimeout(() => { //highlight after 800ms if mouse is still on cell
+        this.hoverTimerId = window.setTimeout(() => { // highlight after 800ms if mouse is still on cell
           // highlight col headers
           let id;
           for (const attr of cellData.highlightData.filter((data) => data.category === undefined)) {
@@ -660,7 +660,7 @@ export abstract class ATouringTask implements ITouringTask {
               for (const index of indices) {
                 const elem = focusedLineupNode.select(` .lineup-engine main .lu-row[data-index="${index}"][data-agg="detail"] [data-id="${id}"]`);
                 if (!elem.empty()) {
-                  const setDarker = elem.classed(`${cssClass}-1`); //if previous class is already set
+                  const setDarker = elem.classed(`${cssClass}-1`); // if previous class is already set
                   elem.classed(`${cssClass}-${i}`, true)
                     .classed(`${cssClass}-dark`, setDarker);
 
@@ -681,9 +681,9 @@ export abstract class ATouringTask implements ITouringTask {
 
   createToolTip(tableCell): String {
     if (d3.select(tableCell).classed('score') && d3.select(tableCell).classed('action')) {
-      const tr = tableCell.parentNode; //current row
-      const tbody = tr.parentNode;     //current body
-      const table = tbody.parentNode;  //current table
+      const tr = tableCell.parentNode; // current row
+      const tbody = tr.parentNode;     // current body
+      const table = tbody.parentNode;  // current table
 
       const allTds = d3.select(tr).selectAll('td');
       // console.log('allTds', allTds[0]);
@@ -782,7 +782,7 @@ export class ColumnComparison extends ATouringTask {
     const options = attrSelectors.selectAll('option').data(descriptions, (desc) => desc.label); // duplicates are filtered automatically
     options.enter().append('option').text((desc) => desc.label);
 
-    let tableChanged = !options.exit().filter(':checked').empty(); //if checked attributes are removed, the table has to update
+    let tableChanged = !options.exit().filter(':checked').empty(); // if checked attributes are removed, the table has to update
 
     const attrSelect1 = this.nodeObject.select('select.attr[name="attr1[]"]');
     if (attrSelect1.selectAll('option:checked').empty()) { // make a default selection
@@ -820,7 +820,7 @@ export class ColumnComparison extends ATouringTask {
 
     const colHeads = this.nodeObject.select('thead tr').selectAll('th.head').data(colData, (d) => d.column); // column is key
     const colHeadsSpan = colHeads.enter().append('th')
-      .attr('class', 'head rotate').append('div').append('span').append('span'); //th.head are the column headers
+      .attr('class', 'head rotate').append('div').append('span').append('span'); // th.head are the column headers
 
     const that = this; // for the function below
     function updateTableBody(bodyData: Array<Array<Array<IScoreCell>>>) {
@@ -833,7 +833,7 @@ export class ColumnComparison extends ATouringTask {
 
       // create a table body for every column
       const bodies = that.nodeObject.select('table').selectAll('tbody').data(bodyData, (d) => d[0][0].label); // the data of each body is of type: Array<Array<IScoreCell>>
-      bodies.enter().append('tbody'); //For each IColumnTableData, create a tbody
+      bodies.enter().append('tbody'); // For each IColumnTableData, create a tbody
 
       // the data of each row is of type: Array<IScoreCell>
       const trs = bodies.selectAll('tr').data((d) => d, (d) => d[0].label); // had to specify the function to derive the data (d -> d)
@@ -869,7 +869,7 @@ export class ColumnComparison extends ATouringTask {
       const svgWidth = 120 + 33 * colData.length; // calculated width for the svg and polygon
 
       that.nodeObject.select('th.head.rotate svg').remove();
-      that.nodeObject.select('th.head.rotate') //select first
+      that.nodeObject.select('th.head.rotate') // select first
         .insert('svg', ':first-child')
         .attr('width', svgWidth)
         .attr('height', 120)
@@ -900,7 +900,7 @@ export class ColumnComparison extends ATouringTask {
           const rowIndexInCols = colAttributes.indexOf(row);
 
           if (row.label === col.label) {
-            //identical attributes
+            // identical attributes
             data[rowIndex][0][colIndex + 1] = { label: '<span class="circle"/>', measure: null };
           } else if (rowIndexInCols >= 0 && colIndexInRows >= 0 && colIndexInRows < rowIndex) {
             // the row is also part of the column array, and the column is one of the previous rows
@@ -908,7 +908,7 @@ export class ColumnComparison extends ATouringTask {
             const measures = MethodManager.getMeasuresByType(Type.get(row.type), Type.get(col.type), SCOPE.ATTRIBUTES);
             if (measures.length > 0) { // start at
               const measure = measures[0]; // Always the first
-              const data1 = this.ranking.getAttributeDataDisplayed((col as IServerColumn).column); //minus one because the first column is headers
+              const data1 = this.ranking.getAttributeDataDisplayed((col as IServerColumn).column); // minus one because the first column is headers
               const data2 = this.ranking.getAttributeDataDisplayed((row as IServerColumn).column);
               const setParameters = {
                 setA: data1,
@@ -921,7 +921,7 @@ export class ColumnComparison extends ATouringTask {
                 { column: (row as IServerColumn).column, label: row.label },
                 { column: (col as IServerColumn).column, label: col.label }];
 
-              //generate HashObject and hash value
+              // generate HashObject and hash value
               const hashObject = {
                 ids: this.ranking.getDisplayedIds(),
                 selection: this.ranking.getSelection(),
@@ -944,11 +944,11 @@ export class ColumnComparison extends ATouringTask {
               const hashValue = XXH.h32(hashObjectString, 0).toString(16);
               // console.log('Hash: ', hashValue);
 
-              let isStoredScoreAvailable = false; //flag for the availability of a stored score
+              let isStoredScoreAvailable = false; // flag for the availability of a stored score
 
               rowPromises.push(new Promise<IMeasureResult>((resolve, reject) => {
 
-                //get score from sessionStorage
+                // get score from sessionStorage
                 const sessionScore = sessionStorage.getItem(hashValue);
                 // console.log('sessionScore: ', sessionScore);
                 // score for the measure
@@ -983,7 +983,7 @@ export class ColumnComparison extends ATouringTask {
                 data[rowIndex][0][colIndex + 1] = this.toScoreCell(score, measure, setParameters, highlight);
 
                 if (rowIndexInCols >= 0 && colIndexInRows >= 0) {
-                  //invert A and B so that the axis labels are conistent
+                  // invert A and B so that the axis labels are conistent
                   const setParametersInverted = {
                     setA: setParameters.setB,
                     setADesc: setParameters.setBDesc,
@@ -1011,7 +1011,7 @@ export class ColumnComparison extends ATouringTask {
         Promise.all(rowPromises).then(() => { update(data); this.updateSelectionAndVisuallization(row); });
       }
 
-      await Promise.all(promises); //rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
+      await Promise.all(promises); // rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
       return data; // then return the data
     }
   }
@@ -1022,7 +1022,7 @@ export class ColumnComparison extends ATouringTask {
     }
     const data = new Array(rowAttributes.length); // n2 arrays (bodies)
     for (const i of data.keys()) {
-      data[i] = new Array(1); //currently just one row per attribute
+      data[i] = new Array(1); // currently just one row per attribute
       data[i][0] = new Array(colAttributes.length + 1).fill({ label: '<i class="fa fa-circle-o-notch fa-spin"></i>', measure: null } as IScoreCell); // containing n1+1 elements (header + n1 vlaues)
       data[i][0][0] = { label: `<b>${rowAttributes[i].label}</b>`, type: rowAttributes[i].type };
     }
@@ -1086,7 +1086,7 @@ export class RowComparison extends ATouringTask {
     const rowOptions = optGroups.selectAll('option').data((d: ICategoricalColumnDesc) => d.categories, (cat: ICategory) => cat.label);
     rowOptions.enter().append('option').text((cat: ICategory) => cat.label);
 
-    let tableChanged = !rowOptions.exit().filter(':checked').empty(); //if checked categories are removed, the table has to update
+    let tableChanged = !rowOptions.exit().filter(':checked').empty(); // if checked categories are removed, the table has to update
 
     // Remove atribtues and categories that were removed and order the html elements
     rowOptions.exit().remove();
@@ -1107,7 +1107,7 @@ export class RowComparison extends ATouringTask {
     const attrOptions = attrSelector.selectAll('option').data(descriptions, (desc) => desc.label); // duplicates are filtered automatically
     attrOptions.enter().append('option').text((desc) => desc.label);
 
-    tableChanged = tableChanged || !attrOptions.exit().filter(':checked').empty(); //if checked attributes are removed, the table has to update
+    tableChanged = tableChanged || !attrOptions.exit().filter(':checked').empty(); // if checked attributes are removed, the table has to update
 
     if (attrSelector.selectAll('option:checked').empty()) { // make a default selection
       attrSelector.selectAll('option').each(function () { (this as HTMLOptionElement).selected = true; }); // by default, select all columns.
@@ -1139,7 +1139,7 @@ export class RowComparison extends ATouringTask {
     const rowAttrData = this.nodeObject.selectAll('select.attr[name="attr[]"]  option:checked').data();
     const colHeadsCat = this.nodeObject.select('thead tr').selectAll('th.head').data(colGrpData, (cat) => cat.attribute.column + ':' + cat.name); // cat.name != label; add column to handle identical category names
     const colHeadsCatSpan = colHeadsCat.enter().append('th')
-      .attr('class', 'head rotate').append('div').append('span').append('span'); //th.head are the column headers
+      .attr('class', 'head rotate').append('div').append('span').append('span'); // th.head are the column headers
 
     const that = this; // for the function below
     function updateTableBody(bodyData: Array<Array<Array<IScoreCell>>>, timestamp: string) {
@@ -1151,7 +1151,7 @@ export class RowComparison extends ATouringTask {
 
       // create a table body for every column
       const bodies = that.nodeObject.select('table').selectAll('tbody').data(bodyData, (d) => d[0][0].label); // the data of each body is of type: Array<Array<IScoreCell>>
-      bodies.enter().append('tbody').classed('bottom-margin', true); //For each IColumnTableData, create a tbody
+      bodies.enter().append('tbody').classed('bottom-margin', true); // For each IColumnTableData, create a tbody
 
       // the data of each row is of type: Array<IScoreCell>
       const trs = bodies.selectAll('tr').data((d) => d, (d) => d[0].key); // had to specify the function to derive the data (d -> d)
@@ -1162,10 +1162,10 @@ export class RowComparison extends ATouringTask {
       // Set colheads in thead
       colHeadsCatSpan.text((d) => `${d.label} (${d.attribute.label})`);
       colHeadsCatSpan.each(function (d) {
-        const parent = d3.select(this).node().parentNode; //parent span-element
+        const parent = d3.select(this).node().parentNode; // parent span-element
         d3.select(parent).style('background-color', (d) => d && d.color ? d.color : '#FFF');
         let color = '#333333';
-        if (d && d.color && 'transparent' !== d.color && d3.hsl(d.color).l < 0.5) { //transparent has lightness of zero
+        if (d && d.color && 'transparent' !== d.color && d3.hsl(d.color).l < 0.5) { // transparent has lightness of zero
           color = 'white';
         }
         d3.select(parent.parentNode).style('color', color)
@@ -1197,7 +1197,7 @@ export class RowComparison extends ATouringTask {
       const svgWidth = 120 + 33 * colGrpData.length; // 120 height with 45° widht also 120, calculated width for the svg and polygon
 
       that.nodeObject.select('th.head.rotate svg').remove();
-      that.nodeObject.select('th.head.rotate') //select first
+      that.nodeObject.select('th.head.rotate') // select first
         .insert('svg', ':first-child')
         .attr('width', svgWidth)
         .attr('height', 120)
@@ -1237,7 +1237,7 @@ export class RowComparison extends ATouringTask {
 
       for (const [bodyIndex, attr] of rowAttributes.entries()) {
         const attrPromises = [];
-        const attrData = this.ranking.getAttributeDataDisplayed((attr as IServerColumn).column); //minus one because the first column is headers
+        const attrData = this.ranking.getAttributeDataDisplayed((attr as IServerColumn).column); // minus one because the first column is headers
         const measures = MethodManager.getMeasuresByType(Type.get(attr.type), Type.get(attr.type), SCOPE.SETS); // Always compare selected elements with a group of elements of the same column
         if (measures.length > 0) {
           const measure = measures[0];
@@ -1269,7 +1269,7 @@ export class RowComparison extends ATouringTask {
                   { column: colGrp.attribute.column, label: colGrp.attribute.label, category: colGrp.name, color: colGrp.color }];
 
 
-                //generate HashObject and hash value
+                // generate HashObject and hash value
                 const hashObject = {
                   ids: this.ranking.getDisplayedIds(),
                   selection: this.ranking.getSelection(),
@@ -1295,10 +1295,10 @@ export class RowComparison extends ATouringTask {
                 const hashValue = XXH.h32(hashObjectString, 0).toString(16);
                 // console.log('Hash: ', hash);
 
-                let isStoredScoreAvailable = false; //flag for the availability of a stored score
+                let isStoredScoreAvailable = false; // flag for the availability of a stored score
 
                 attrPromises.push(new Promise<IMeasureResult>((resolve, reject) => {
-                  //get score from sessionStorage
+                  // get score from sessionStorage
                   const sessionScore = sessionStorage.getItem(hashValue);
                   // console.log('sessionScore: ', sessionScore);
                   // score for the measure
@@ -1355,14 +1355,14 @@ export class RowComparison extends ATouringTask {
         promises.concat(attrPromises);
       }
 
-      await Promise.all(promises); //rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
+      await Promise.all(promises); // rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
       return data; // then return the data
     }
   }
 
   prepareDataArray(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[]) {
     if (colGroups.length === 0 || rowGroups.length === 0 || rowAttributes.length === 0) {
-      return []; //return empty array, will cause an empty table
+      return []; // return empty array, will cause an empty table
     }
     const data = new Array(rowAttributes.length); // one array per attribute (number of table bodies)
 
@@ -1408,7 +1408,7 @@ export interface IScoreCell {
 }
 
 export interface IHighlightData {
-  column: string; //attribute.column
+  column: string; // attribute.column
   label: string;
   category?: string; // cat.name
   color?: string;
@@ -1416,8 +1416,8 @@ export interface IHighlightData {
 
 
 export function score2color(score: number): { background: string, foreground: string } {
-  let background = '#ffffff'; //white
-  let foreground = '#333333'; //kinda black
+  let background = '#ffffff'; // white
+  let foreground = '#333333'; // kinda black
 
 
   if (score <= 0.05) {
@@ -1434,7 +1434,7 @@ export function score2color(score: number): { background: string, foreground: st
 
 export function textColor4Background(backgroundColor: string) {
   let color = '#333333';
-  if ('transparent' !== backgroundColor && d3.hsl(backgroundColor).l < 0.5) { //transparent has lightness of zero
+  if ('transparent' !== backgroundColor && d3.hsl(backgroundColor).l < 0.5) { // transparent has lightness of zero
     color = 'white';
   }
 
