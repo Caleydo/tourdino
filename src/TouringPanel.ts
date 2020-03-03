@@ -1,10 +1,9 @@
-import './style.scss';
-import {RankingAdapter} from './RankingAdapter';
+import { RankingAdapter } from './RankingAdapter';
 import * as d3 from 'd3';
-import {tasks as Tasks, ATouringTask} from './tasks/Tasks';
-import {LocalDataProvider} from 'lineupjs';
-import {PanelTabEvents, IPanelTabDesc} from 'tdp_core/src/lineup/internal/panel/PanelTab';
-import {IPanelTabExtensionDesc} from 'tdp_core/src/extensions';
+import { tasks as Tasks, ATouringTask } from './tasks/Tasks';
+import { LocalDataProvider } from 'lineupjs';
+import { IPluginDesc } from 'phovea_core/src/plugin';
+import { PanelTabEvents } from 'tdp_core/src/lineup/internal/panel/PanelTab';
 
 
 const touringTemplate = `
