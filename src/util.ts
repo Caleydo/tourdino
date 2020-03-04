@@ -1,5 +1,5 @@
 import {IMeasureResult} from './interfaces';
-import {IDataRow} from 'lineupjs';
+import {IAccessorFunc} from 'tdp_core/src/lineup/internal/utils';
 
 /**
  * Returns:
@@ -94,9 +94,9 @@ export function getRandomUniqueIntegers(n, max) {
   }
 
   if (n > max/4) {
-    const integers = [...Array(max+1)].map((_,i) => i); //start with all integers between 0 and max
+    const integers = [...Array(max+1)].map((_,i) => i); // start with all integers between 0 and max
 
-    while (integers.length !== n) { //skipped if n = max+1  --> all integers between 0 and max
+    while (integers.length !== n) { // skipped if n = max+1  --> all integers between 0 and max
       integers.splice(getRandomInt(0, integers.length), 1); // definetly one hit per iteration
     }
     return integers;
@@ -139,6 +139,3 @@ export function isProxyAccessor(accessor: any):  accessor is IAccessorFunc<strin
   return false;
 }
 
-export interface IAccessorFunc<T> {
-  (row: IDataRow): T;
-}

@@ -24,7 +24,7 @@ export class RankingAdapter {
     return indices;
   }
 
-  constructor(protected readonly provider: LocalDataProvider, private rankingIndex = 0) {}
+  constructor(protected readonly provider: LocalDataProvider, private rankingIndex = 0) { }
 
   public getProvider(): LocalDataProvider {
     return this.provider;
@@ -63,11 +63,13 @@ export class RankingAdapter {
   public getItems(): Array<Object> {
     // if the attributes are the same, we can reuse the data array
     // if the selection
-
+    const displayedAttributes = this.getDisplayedAttributes();
+    const selectionUnsorted = this.getSelectionUnsorted();
+    const itemOrder = this.getItemOrder();
     // TODO events may be better?
-    const sameAttr = this.oldAttributes.length === this.getDisplayedAttributes().length && this.oldAttributes.filter((attr) => /*note the negation*/ !this.getDisplayedAttributes().some((attr2) => attr2.desc.label === attr.desc.label)).length === 0;
-    const sameSel = this.oldSelection.length === this.getSelectionUnsorted().length && this.oldSelection.every((val, i) => this.getSelectionUnsorted()[i] === val);
-    const sameOrder = this.oldOrder.length === this.getItemOrder().length && this.oldOrder.every((val, i) => this.getItemOrder()[i] === val);
+    const sameAttr = this.oldAttributes.length === displayedAttributes.length && this.oldAttributes.filter((attr) => /*note the negation*/ !displayedAttributes.some((attr2) => attr2.desc.label === attr.desc.label)).length === 0;
+    const sameSel = this.oldSelection.length === selectionUnsorted.length && this.oldSelection.every((val, i) => selectionUnsorted[i] === val);
+    const sameOrder = this.oldOrder.length === itemOrder.length && this.oldOrder.every((val, i) => itemOrder[i] === val);
 
     if (sameAttr && sameSel && sameOrder) {
       // NOOP
@@ -77,36 +79,44 @@ export class RankingAdapter {
 
       // console.log('reuse the data array')
     } else {
-      // console.log('update the data array');
       // refresh the data array
       this.data = null;
       this.oldAttributes = this.getDisplayedAttributes();
 
-      const databaseData = new Array();
+      const databaseData = [];
 
       const scoreCols = this.getScoreColumns();
       const scoresData = [].concat(...scoreCols.map((col) => this.getScoreData(col.desc)));
 
-      this.oldOrder = this.getItemOrder();
+      this.oldOrder = this.getItemOrder(); // [3, 5, 6, 7] -> [[0,3], [1,5], ...]
+      const orderMap = new Map<number, number>(); // index, old-order
+      this.oldOrder.forEach((order, i) => orderMap.set(order, i));
+
+      const groups = this.getRanking().getGroups();
+      const groupIndexArray = groups.map((g) => {
+        return g.order.map((order) => order);
+      });
+
       this.oldSelection = this.getSelectionUnsorted();
 
       this.provider.data.forEach((item, i) => {
-        const index = this.oldOrder.indexOf(i);
-        item[RankingAdapter.RANK_COLUMN_ID] = index >= 0 ? index : Number.NaN; //NaN if not found
+        const index = orderMap.get(i);
+        item[RankingAdapter.RANK_COLUMN_ID] = index >= 0 ? index : Number.NaN; // NaN if not found
+
 
         // include wether the row is selected
-        item[RankingAdapter.SELECTION_COLUMN_ID] = this.oldSelection.includes(i) ? 'Selected' : 'Unselected'; // TODO compare perfomance with assiging all Unselected and then only set those from the selection array
-        const groupIndex = this.getRanking().getGroups().findIndex((grp) => grp.order.indexOf(i) >= 0);
-        const groupName = groupIndex === -1 ? 'Unknown' : this.getRanking().getGroups()[groupIndex].name;
+        item[RankingAdapter.SELECTION_COLUMN_ID] = this.oldSelection.includes(i) ? 'Selected' : 'Unselected';
+        const groupIndex = groupIndexArray.findIndex((groupIndex) => groupIndex.includes(i));
+        const groupName = groupIndex === -1 ? 'Unknown' : groups[groupIndex].name;
         item[RankingAdapter.GROUP_COLUMN_ID] = groupName; // index of group = category name, find index by looking up i. -1 if not found
         databaseData.push(item);
       });
 
-      // merge score and database data
-      this.data = [...databaseData.concat(scoresData)
+      const allData = [...databaseData, ...scoresData];
+      this.data = [...allData
         .reduce((map, curr) => {
           if (!map.has(curr.id)) {
-            map.set(curr.id, {}); //include id in map if not already part of it, initialize with empty object
+            map.set(curr.id, {}); // include id in map if not already part of it, initialize with empty object
           }
 
           const item = map.get(curr.id); // get stored data for this id
@@ -116,7 +126,6 @@ export class RankingAdapter {
           return map;
         }, new Map()).values()]; // give map as input and return it's value
     }
-
     return this.data;
   }
 
@@ -151,7 +160,7 @@ export class RankingAdapter {
    */
   public getItemRanks() {
     let i = 0;
-    return this.getItemOrder().map((id) => ({_id: id, rank: i++}));
+    return this.getItemOrder().map((id) => ({ _id: id, rank: i++ }));
   }
 
   public getRanking(): Ranking {
@@ -224,8 +233,8 @@ export class RankingAdapter {
 
     if (desc.column && isProxyAccessor(accessor)) {
       for (const id of ids) {
-        const dataEntry = {id};
-        dataEntry[desc.column] = accessor({v: {id}, i: null} as IDataRow); // i is not used by the accessor function
+        const dataEntry = { id };
+        dataEntry[desc.column] = accessor({ v: { id }, i: null } as IDataRow); // i is not used by the accessor function
         data.push(dataEntry);
       }
     }
@@ -239,11 +248,11 @@ export class RankingAdapter {
     const selCategories = new Array<ICategory>();
     const numberOfRows = this.getItemOrder().length; // get length of groups and sum them up
     if (this.getSelectionUnsorted().length > 0) {
-      selCategories.push({name: 'Selected', label: 'Selected', value: 0, color: '#1f77b4', });
+      selCategories.push({ name: 'Selected', label: 'Selected', value: 0, color: '#1f77b4', });
     } // else: none selected
 
     if (this.getSelectionUnsorted().length < numberOfRows) {
-      selCategories.push({name: 'Unselected', label: 'Unselected', value: 1, color: '#ff7f0e', });
+      selCategories.push({ name: 'Unselected', label: 'Unselected', value: 1, color: '#ff7f0e', });
     } // else: all selected
 
     return {

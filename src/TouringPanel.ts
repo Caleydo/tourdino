@@ -1,9 +1,11 @@
-import { RankingAdapter } from './RankingAdapter';
+import './style.scss';
+import {RankingAdapter} from './RankingAdapter';
 import * as d3 from 'd3';
-import { tasks as Tasks, ATouringTask } from './tasks/Tasks';
-import { LocalDataProvider } from 'lineupjs';
-import { IPluginDesc } from 'phovea_core/src/plugin';
-import { PanelTabEvents } from 'tdp_core/src/lineup/internal/panel/PanelTab';
+import {tasks as Tasks, ATouringTask} from './tasks/Tasks';
+import {LocalDataProvider} from 'lineupjs';
+import {IPluginDesc} from 'phovea_core/src/plugin';
+import {PanelTabEvents} from 'tdp_core/src/lineup/internal/panel/PanelTab';
+import {IPanelTabExtensionDesc} from 'tdp_core/src/extensions';
 
 
 const touringTemplate = `
@@ -24,7 +26,7 @@ class TouringPanel {
   private currentTask: ATouringTask;
   private active: boolean;
 
-  constructor(private readonly node: HTMLElement, protected readonly provider: LocalDataProvider, protected readonly desc: IPluginDesc, private events: PanelTabEvents) {
+  constructor(private readonly node: HTMLElement, protected readonly provider: LocalDataProvider, protected readonly desc: IPanelTabExtensionDesc, private events: PanelTabEvents) {
     this.node.classList.add('touring');
     this.node.innerHTML = touringTemplate;
     this.init();
@@ -49,7 +51,7 @@ class TouringPanel {
     const taskSelectForm = d3.select(this.node).select('.input .type .form-group');
     const taskButtons = taskSelectForm.selectAll('.btn-wrapper').data(Tasks, (task) => task.id);
 
-    taskButtons.enter() //enter: add a button for each task
+    taskButtons.enter() // enter: add a button for each task
       .append('div').attr('class', `btn-wrapper col-sm-${Math.max(Math.floor(8 / Tasks.length), 1)}`)
       .append('button').attr('class', 'task-btn btn btn-default btn-block')
       .classed('active', (d, i) => i === 0) // Activate first task
@@ -63,9 +65,16 @@ class TouringPanel {
 
   private addEventListeners() {
     this.events.on(PanelTabEvents.SHOW_PANEL, () => {
+      if (this.active === true) {
+        return; // do not update tasks when clicking on open touring button and touring panel is already open
+      }
+
+      this.updateOutput(true); // update tasks when panel opens
+
       this.active = true;
       this.currentTask.addEventListeners();
     });
+
     this.events.on(PanelTabEvents.HIDE_PANEL, () => {
       this.active = false;
       this.currentTask.removeEventListeners();
@@ -81,8 +90,8 @@ class TouringPanel {
     });
   }
 
-  public async updateOutput() {
-    if (this.active) {
+  public async updateOutput(forceUpdate?: boolean) {
+    if (this.active || forceUpdate) {
       await setTimeout(() => this.updateTask(), 0);
     } else {
       console.log('Touring Panel is hidden, skip update.');
@@ -95,7 +104,14 @@ class TouringPanel {
   }
 }
 
-export default function create(parent: HTMLElement, provider: LocalDataProvider, desc: IPluginDesc, events: PanelTabEvents): void {
+/**
+ *
+ * @param parent Parent HTML node
+ * @param provider Instance of the LocalDataProvider that contains all ranking
+ * @param desc Options provided through the extension point i.e `headerCssClass, headerTitle`
+ * @param events Instance PanelTabEvents
+ */
+export default function create(parent: HTMLElement, provider: LocalDataProvider, desc: IPanelTabExtensionDesc, events: PanelTabEvents): void {
   // tslint:disable-next-line:no-unused-expression
   new TouringPanel(parent, provider, desc, events);
 }

@@ -28,7 +28,7 @@ ctx.onmessage = (event) => {
 
       for (const scoreIndex of rndScores.keys()) {
         const rndIndices = getRandomUniqueIntegers(drawSize, allData.length-1);
-        const rndSet = rndIndices.map((index) => allData[index]); //get elments with the random indices
+        const rndSet = rndIndices.map((index) => allData[index]); // get elments with the random indices
         rndScores[scoreIndex] = calc(rndSet, setB);
       }
 
