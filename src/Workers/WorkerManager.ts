@@ -52,7 +52,7 @@ export class WorkerManager {
     if (entry) {
       entry[1].resolve(entry[0].getWorker()); // resolve the next workerpromise
     } else { // else: map is empty / no more workers
-      this.terminateAll(); //get rid of workers
+      this.terminateAll(); // get rid of workers
     }
   }
 
@@ -63,7 +63,7 @@ export class WorkerManager {
     for (const [tWorker, workerPromise] of WorkerManager.workers) {
       // abort promise, as we can't tell wether it was already resolved
       workerPromise.reject(); // abort waiting for slot
-      //abort all workers of that worker type
+      // abort all workers of that worker type
       tWorker.terminate();
     }
 
@@ -82,10 +82,10 @@ export abstract class ATouringWorker {
     const workers = this.getWorkers();
 
     if (workers.length < WorkerManager.MAX_WORKERS) {
-      workers.unshift(this.getWorkerInstance()); //add new worker to the beginning of the list
+      workers.unshift(this.getWorkerInstance()); // add new worker to the beginning of the list
     }
 
-    const worker = workers.shift(); //remove first element of array...
+    const worker = workers.shift(); // remove first element of array...
     workers.push(worker); // ... append it to the end ...
     return worker; // ... and use it for some task
   }
@@ -121,7 +121,7 @@ export abstract class ATouringWorker {
   }
 }
 
-/// NOTE: We need a Class for every type of worker, as webpack doesn't inlcude the compiled worker files if the worker-loader path is not specified fully (i.e. you can set the filename with variables)
+// / NOTE: We need a Class for every type of worker, as webpack doesn't inlcude the compiled worker files if the worker-loader path is not specified fully (i.e. you can set the filename with variables)
 
 /**
  * A wrapper for the Jaccard Randomization worker.

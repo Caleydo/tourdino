@@ -38,7 +38,7 @@ export class LineChart implements IMeasureVisualization {
     validCombinedSet.sort((a,b) => { return b.value - a.value;});
     const amountItems = validCombinedSet.length;
     // console.log('properties: ', {validCombinedSet, categories, defCategories});
-    //define category sets
+    // define category sets
     for(const category of categories) {
       const currCategory = category.name;
 
@@ -89,7 +89,7 @@ export class LineChart implements IMeasureVisualization {
           // extra value so that the line starts and ends with the value 0
           temp.values.push({y: 0,
                             x: i+1});
-          //calculated value
+          // calculated value
           temp.values.push({y: currValue,
                             x: i+1});
           dataLines.push(temp);
@@ -133,7 +133,7 @@ export class LineChart implements IMeasureVisualization {
 
     dataLines = filteredDataLines;
 
-    const minMaxValues = []; //for domains
+    const minMaxValues = []; // for domains
 
     for(const dataLine of dataLines) {
       const min = Math.min(...dataLine.values.map((item) => (item.y)));
@@ -150,7 +150,7 @@ export class LineChart implements IMeasureVisualization {
     // sort data lines from hight to low (-> allows better hover capabilities)
     dataLines.sort((a,b) => { return Math.abs(b.enrichmentScore) - Math.abs(a.enrichmentScore); });
 
-    const domainSpace = 0.01; //add space to domain so that the data points are not on the axis
+    const domainSpace = 0.01; // add space to domain so that the data points are not on the axis
     const xValue = validCombinedSet.map(((item) => (item.value)));
     // const xDomain = [Math.min(...xValue),Math.max(...xValue)];
     const xDomain = [1,validCombinedSet.length];
@@ -168,7 +168,7 @@ export class LineChart implements IMeasureVisualization {
     // yDomain[0] = yDomain[0]-Math.abs(yDomain[1]*domainSpace);
     // yDomain[1] = yDomain[1]+Math.abs(yDomain[1]*domainSpace);
 
-    //switch min <--> max
+    // switch min <--> max
     // let tmp = xDomain[0];
     // xDomain[0] = xDomain[1];
     // xDomain[1] = tmp;
@@ -203,7 +203,7 @@ export class LineChart implements IMeasureVisualization {
     if(formatData.dataLines.length > 1) {
 
       // get size of space and calculate scatter plot size
-      const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
+      const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; // -25 because of the scroll bar
 
       const labelOffsetAxisX = 35;
       const labelOffsetAxisY = 15;

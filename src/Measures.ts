@@ -29,8 +29,8 @@ export abstract class ASimilarityMeasure implements ISimilarityMeasure {
 
   public abstract calc(setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<IMeasureResult>;
 
-  protected pValueAvailability (original: number, valid: number, threshold = 0.1): boolean {
-    const ratio = valid/original;
+  protected pValueAvailability(original: number, valid: number, threshold = 0.1): boolean {
+    const ratio = valid / original;
     return (ratio >= threshold);
   }
 }
@@ -73,18 +73,18 @@ export class ChiSquareTest extends ASimilarityMeasure {
     if (allCategories.length > 1) {
       const setASize = setA.length;
       const setBSize = setB.length;
-      const overallSize = setASize+setBSize;
+      const overallSize = setASize + setBSize;
 
       const table = [];
-      for(const currCat of allCategories) {
-        const amountSetA = setA.filter((item) => (item===currCat)).length;
-        const amountSetB = setB.filter((item) => (item===currCat)).length;
-        const sum = amountSetA+amountSetB;
+      for (const currCat of allCategories) {
+        const amountSetA = setA.filter((item) => (item === currCat)).length;
+        const amountSetB = setB.filter((item) => (item === currCat)).length;
+        const sum = amountSetA + amountSetB;
         const setAExp = (setASize * sum) / overallSize;
-        const setAChi = Math.pow(amountSetA - setAExp,2)/setAExp;
+        const setAChi = Math.pow(amountSetA - setAExp, 2) / setAExp;
 
         const setBExp = (setBSize * sum) / overallSize;
-        const setBChi = Math.pow(amountSetB - setBExp,2)/setBExp;
+        const setBChi = Math.pow(amountSetB - setBExp, 2) / setBExp;
         const sumChi = setAChi + setBChi;
         const currCell = {
           category: currCat,
@@ -104,16 +104,16 @@ export class ChiSquareTest extends ASimilarityMeasure {
       const allChiForCategories = table.map((a) => (a.sumChi));
       const chiSquare = allChiForCategories.reduce(this.getSum);
       const rows = 2; // the two sets
-      const columns = table.length; //number of categories in the two sets
-      const df = (rows-1)*(columns-1);
+      const columns = table.length; // number of categories in the two sets
+      const df = (rows - 1) * (columns - 1);
       // Phi
       // const phi = Math.sqrt(chiSquare/overallSize);
       // Cramer's V
-      const t = Math.min(rows-1,columns-1);
-      const cramerV = Math.sqrt(chiSquare/(overallSize*t));
+      const t = Math.min(rows - 1, columns - 1);
+      const cramerV = Math.sqrt(chiSquare / (overallSize * t));
 
       score = cramerV;
-      pValue = 1- jStat.jStat.chisquare.cdf(chiSquare,df);
+      pValue = 1 - jStat.jStat.chisquare.cdf(chiSquare, df);
       // console.log('ChiSquare - table: ', {setA,setB,allCategories,table,chiSquare,df,pValue});
     }
 
@@ -121,7 +121,7 @@ export class ChiSquareTest extends ASimilarityMeasure {
   }
 
   public getSum(total: number, numb: number) {
-    return total+numb;
+    return total + numb;
   }
 
 }
@@ -192,36 +192,36 @@ export class ChiSquareIndependenceTest extends ChiSquareTest {
     if (rows <= 1 || columns <= 1) {
       // chi2 is 0, because observed === expected value, and chi2 = (obs - expect)²/expect
       // chi2 is really 0, so we can set p to 1s
-      return measureResultObj(score, 1 , setACategories.length, setBCategories.length);
+      return measureResultObj(score, 1, setACategories.length, setBCategories.length);
     }
 
-    for (const catA of setACategories) { //contingency table rows
-      for (const catB of setBCategories) { //contingency table columns
+    for (const catA of setACategories) { // contingency table rows
+      for (const catB of setBCategories) { // contingency table columns
         const indices = [];
         const amountCatA = arrA.filter((val, index) => {  // items with cat A --> row marginal
           const match = val === catA;
           if (match) {
-            indices.push(index); //get indices where val = category
+            indices.push(index); // get indices where val = category
           }
           return match;
         }).length;
         const amountCatB = arrB.filter((val) => val === catB).length;  // items with cat B -> column marginal
         const observed = indices.map((index) => arrB[index]).filter((val) => val === catB).length; // items with cat A & B
         const expected = (amountCatA * amountCatB) / n;
-        console.log('observed', observed, '\texpected', expected);
-        const chi = Math.pow(observed - expected, 2)/expected;
+        // console.log('observed', observed, '\texpected', expected);
+        const chi = Math.pow(observed - expected, 2) / expected;
 
         score += chi;
       }
     }
 
-    const df = (rows-1)*(columns-1);
-    pValue = 1- jStat.jStat.chisquare.cdf(score, df);
+    const df = (rows - 1) * (columns - 1);
+    pValue = 1 - jStat.jStat.chisquare.cdf(score, df);
 
     // Cramer's V
-    const t = Math.min(rows-1,columns-1);
-    const cramerV = Math.sqrt(score/(n*t));
-    console.log('score', score, 'n', n, 't', t);
+    const t = Math.min(rows - 1, columns - 1);
+    const cramerV = Math.sqrt(score / (n * t));
+    // console.log('score', score, 'n', n, 't', t);
     score = cramerV;
 
     return measureResultObj(score, pValue, setACategories.length, setBCategories.length, this.scope);
@@ -295,49 +295,49 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
     await sleep(0);
     const setAValid = setA.filter((value) => {return (value !== null && value !== undefined && !isNaN(value));});
     const selectionRankObj: IRankObJ[] = setAValid.map((a) => {
-        return {
-          set: 'selection',
-          value: a
-        };
-      });
+      return {
+        set: 'selection',
+        value: a
+      };
+    });
 
-      const setBValid: IRankObJ[] = setB.filter((value) => {return (value !== null && value !== undefined && !isNaN(value));});
-      const categoryRankObj = setBValid.map((b) => {
-        return {
-          set: 'category',
-          value: b
-        };
-      });
+    const setBValid: IRankObJ[] = setB.filter((value) => {return (value !== null && value !== undefined && !isNaN(value));});
+    const categoryRankObj = setBValid.map((b) => {
+      return {
+        set: 'category',
+        value: b
+      };
+    });
 
-    //create array with all values and their affiliation
+    // create array with all values and their affiliation
     const collectiveRankSet = selectionRankObj.concat(categoryRankObj);
-    //sort the set from low to high
-    collectiveRankSet.sort((a,b) => { return a.value - b.value;});
+    // sort the set from low to high
+    collectiveRankSet.sort((a, b) => {return a.value - b.value;});
 
     // assing rank
     // array for the idecies of the redion with the same values
     let regionRange = [];
     // flag to indicate a two or more values are equal
     let region = false;
-    for (let i=0;i< collectiveRankSet.length; i++) {
+    for (let i = 0; i < collectiveRankSet.length; i++) {
       // check if previous and current values are equal
-      if (i>=1 && collectiveRankSet[i-1].value === collectiveRankSet[i].value) {
+      if (i >= 1 && collectiveRankSet[i - 1].value === collectiveRankSet[i].value) {
         // if previous === current
         // set region flag = ture and save indicies in regionRange array
         region = true;
-        regionRange.push(i-1);
+        regionRange.push(i - 1);
         regionRange.push(i);
       }
 
       // check if a region exists (flag = true) and the previous != current values
-      if (region && collectiveRankSet[i-1].value !== collectiveRankSet[i].value && regionRange.length > 1) {
+      if (region && collectiveRankSet[i - 1].value !== collectiveRankSet[i].value && regionRange.length > 1) {
         // region = true and previous != current -> region over
         // remove duplicate idex values
-        const uniqueRegionRange = regionRange.filter((v,i) => {return regionRange.indexOf(v) === i;});
+        const uniqueRegionRange = regionRange.filter((v, i) => {return regionRange.indexOf(v) === i;});
         // calculate rank for the region
         const regionRank = (uniqueRegionRange.reduce((a, b) => a + b, 0) + uniqueRegionRange.length) / uniqueRegionRange.length;
 
-        //cahnge the ranks in the privous items
+        // cahnge the ranks in the privous items
         for (const regionRange of uniqueRegionRange) {
           collectiveRankSet[regionRange].rank = regionRank;
         }
@@ -346,18 +346,18 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
       }
 
       // set rank = index + 1
-      collectiveRankSet[i].rank = i+1;
+      collectiveRankSet[i].rank = i + 1;
     }
 
     // check if the last values where in a region
     if (region && regionRange.length > 1) {
       // region = true and previous != current -> region over
       // remove duplicate idex values
-      const uniqueRegionRange = regionRange.filter((v,i) => {return regionRange.indexOf(v) === i;});
+      const uniqueRegionRange = regionRange.filter((v, i) => {return regionRange.indexOf(v) === i;});
       // calculate rank for the region
       const regionRank = (uniqueRegionRange.reduce((a, b) => a + b, 0) + uniqueRegionRange.length) / uniqueRegionRange.length;
 
-      //cahnge the ranks in the privous items
+      // cahnge the ranks in the privous items
       for (const regionRange of uniqueRegionRange) {
         collectiveRankSet[regionRange].rank = regionRank;
       }
@@ -370,7 +370,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
       .filter((item) => (item.set === 'selection'))
       .map((a) => {return a.rank;});
 
-      const categoryRanks = collectiveRankSet
+    const categoryRanks = collectiveRankSet
       .filter((item) => (item.set === 'category'))
       .map((a) => {return a.rank;});
 
@@ -384,20 +384,20 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
 
 
     // calculate the test statistic U
-    const selectionU = nSelection * nCategroy + ( nSelection*(nSelection+1)/2) - selectionRankSum;
-    const categoryU = nSelection * nCategroy + ( nCategroy*(nCategroy+1)/2) - categoryRankSum;
+    const selectionU = nSelection * nCategroy + (nSelection * (nSelection + 1) / 2) - selectionRankSum;
+    const categoryU = nSelection * nCategroy + (nCategroy * (nCategroy + 1) / 2) - categoryRankSum;
 
-    const minU = Math.min(selectionU,categoryU);
+    const minU = Math.min(selectionU, categoryU);
 
     // calculate z-value -> for big sample sizes each more than 10 use normal distribution (z-value)
-    let score = (minU - (nSelection * nCategroy)/2) / Math.sqrt((nSelection * nCategroy * (nSelection + nCategroy +1))/12);  // without tie correction: see https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test#Normal_approximation_and_tie_correction
+    let score = (minU - (nSelection * nCategroy) / 2) / Math.sqrt((nSelection * nCategroy * (nSelection + nCategroy + 1)) / 12);  // without tie correction: see https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test#Normal_approximation_and_tie_correction
     score = Math.abs(score);
 
-    const availA = this.pValueAvailability(setA.length,setAValid.length);
-    const availB = this.pValueAvailability(setB.length,setBValid.length);
+    const availA = this.pValueAvailability(setA.length, setAValid.length);
+    const availB = this.pValueAvailability(setB.length, setBValid.length);
     let pValue = -1;
 
-    if(availA && availB) {
+    if (availA && availB) {
       if (score === 0) {
         pValue = 1;
       } else if (score === Infinity || score === -Infinity) {
@@ -408,7 +408,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
       }
     }
 
-    return measureResultObj(score,pValue, setAValid.length, setBValid.length);
+    return measureResultObj(score, pValue, setAValid.length, setBValid.length);
   }
 }
 
@@ -452,7 +452,7 @@ export class StudentTTest extends ASimilarityMeasure {
     const muSelection = d3.mean(setAValid);
     const varSelection = d3.variance(setAValid);
 
-    //category
+    // category
     const setBValid = setB.filter((value) => {return (value !== null && value !== undefined && !isNaN(value));});
     const nCategory = setBValid.length;
     const muCategory = d3.mean(setBValid);
@@ -462,11 +462,11 @@ export class StudentTTest extends ASimilarityMeasure {
     const scoreP2 = (muSelection - muCategory) / Math.sqrt((nSelection - 1) * varSelection + (nCategory - 1) * varCategory);
     const score = scoreP1 * scoreP2;
 
-    const availA = this.pValueAvailability(setA.length,setAValid.length);
-    const availB = this.pValueAvailability(setB.length,setBValid.length);
+    const availA = this.pValueAvailability(setA.length, setAValid.length);
+    const availB = this.pValueAvailability(setB.length, setBValid.length);
     let pValue = -1;
 
-    if(availA && availB) {
+    if (availA && availB) {
       if (score === 0) {
         pValue = 1; // in the middle of the t-distribution
       } else if (score === Infinity || score === -Infinity) {
@@ -477,7 +477,7 @@ export class StudentTTest extends ASimilarityMeasure {
       }
     }
 
-    return measureResultObj(score,pValue,setAValid.length,setBValid.length);
+    return measureResultObj(score, pValue, setAValid.length, setBValid.length);
   }
 }
 
@@ -490,8 +490,8 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
 
     this.id = 'spearmanCor';
     this.label = 'Spearman\'s Rank Correlation Coefficient';
-    this.description = 'The Spearman\'s rank correlation coefficient is a nonparametic measure for statistical dependence between rankings of two sets. '+
-    'The p-value describes the probability that the Spearmann correlation between the two sets happend by chance, for the null hypothesis of a Spearmann correlation of 0 (no correlation).';
+    this.description = 'The Spearman\'s rank correlation coefficient is a nonparametic measure for statistical dependence between rankings of two sets. ' +
+      'The p-value describes the probability that the Spearmann correlation between the two sets happend by chance, for the null hypothesis of a Spearmann correlation of 0 (no correlation).';
     this.visualization = new ScatterPlot();
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
@@ -508,9 +508,11 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
     }
 
     const points = [];
-    for (let i=0; i<set1.length; i++) {
-      points.push({x: set1[i],
-                   y: set2[i]});
+    for (let i = 0; i < set1.length; i++) {
+      points.push({
+        x: set1[i],
+        y: set2[i]
+      });
     }
 
     const validPoints = points.filter((item) => {
@@ -537,7 +539,7 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
     }
     // console.log('spearman rho', spearmanCorr);
 
-    const avail = this.pValueAvailability(points.length,validPoints.length);
+    const avail = this.pValueAvailability(points.length, validPoints.length);
     let pValue = -1;
 
     // calc p-value (Recommended for n >= 19)
@@ -562,7 +564,7 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
     return measureResultObj(spearmanCorr, pValue, validPoints.length, validPoints.length); // async function --> returns promise
   }
 
-  protected pValueAvailability (original: number, valid: number, threshold = 0.1): boolean {
+  protected pValueAvailability(original: number, valid: number, threshold = 0.1): boolean {
     // (Determining the significance via t-distribution is recommended for n >= 19), source: https://ncss-wpengine.netdna-ssl.com/wp-content/themes/ncss/pdf/Procedures/PASS/Spearmans_Rank_Correlation_Tests-Simulation.pdf
     return valid >= 19 && super.pValueAvailability(original, valid, threshold);
   }
@@ -577,8 +579,8 @@ export class PearsonCorrelation extends ASimilarityMeasure {
 
     this.id = 'pearsonCor';
     this.label = 'Pearson Correlation Coefficient';
-    this.description = 'The Pearson correlation coefficient is a measure for the linear correlation between two data sets. '+
-    'The p-value describes the probability that the Pearson correlation between the two sets happend by chance, for the null hypothesis of a Pearson correlation of 0 (no correlation).';
+    this.description = 'The Pearson correlation coefficient is a measure for the linear correlation between two data sets. ' +
+      'The p-value describes the probability that the Pearson correlation between the two sets happend by chance, for the null hypothesis of a Pearson correlation of 0 (no correlation).';
     this.visualization = new ScatterPlot();
 
     this.type = Comparison.get(Type.NUMERICAL, Type.NUMERICAL);
@@ -593,9 +595,11 @@ export class PearsonCorrelation extends ASimilarityMeasure {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
     }
     const points = [];
-    for (let i=0; i<set1.length; i++) {
-      points.push({x: set1[i],
-                   y: set2[i]});
+    for (let i = 0; i < set1.length; i++) {
+      points.push({
+        x: set1[i],
+        y: set2[i]
+      });
     }
 
     const validPoints = points.filter((item) => {
@@ -618,15 +622,15 @@ export class PearsonCorrelation extends ASimilarityMeasure {
     const seqX = jStat.jStat.seq(validPoints.map((item) => item.x));
     const seqY = jStat.jStat.seq(validPoints.map((item) => item.y));
 
-    const pearsonCorr = jStat.jStat.corrcoeff(seqX,seqY);
+    const pearsonCorr = jStat.jStat.corrcoeff(seqX, seqY);
 
 
-    const avail = this.pValueAvailability(points.length,validPoints.length);
+    const avail = this.pValueAvailability(points.length, validPoints.length);
     let pValue = -1;
 
     // calc p-value
-    if(avail) {
-      const tValue = (pearsonCorr * Math.sqrt(n-2)) / Math.sqrt(1 - pearsonCorr * pearsonCorr);
+    if (avail) {
+      const tValue = (pearsonCorr * Math.sqrt(n - 2)) / Math.sqrt(1 - pearsonCorr * pearsonCorr);
 
       if (tValue === 0) {
         pValue = 1; // in the middle of the t-distribution
@@ -671,7 +675,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
 
   isArrayOfNumbers(arr: any): arr is number[] {
     if (Array.isArray(arr)) {
-        return arr.every((item) => item === null || typeof item === 'number');
+      return arr.every((item) => item === null || typeof item === 'number' || isNaN(item));
     }
     return false;
   }
@@ -711,32 +715,32 @@ export class EnrichmentScore extends ASimilarityMeasure {
     }
 
     let overallScore = 0;
-    let properties  = [];
+    let properties = [];
     let p = -1;
     let validCombinedSet = null;
 
     // only calculate if more than 1 category exists
-    if(categories.length>1) {
+    if (categories.length > 1) {
 
       // combine both sets
       const combinedSet = [];
-      for (let i=0; i<set1.length; i++) {
+      for (let i = 0; i < set1.length; i++) {
         combinedSet.push({
           category: categorySet[i],
           value: numericSet[i]
         });
       }
 
-      validCombinedSet = combinedSet.filter((item) => { return (item.value !== undefined) && (item.value !== null) && (!Number.isNaN(item.value)); });
+      validCombinedSet = combinedSet.filter((item) => {return (item.value !== undefined) && (item.value !== null) && (!Number.isNaN(item.value));});
       // sort the combined set
-      validCombinedSet.sort((a,b) => { return a.value - b.value;});
+      validCombinedSet.sort((a, b) => {return a.value - b.value;});
 
       // console.log('combinedSet: ',combinedSet);
       // console.log('validCombinedSet: ',validCombinedSet);
-      //define category sets
+      // define category sets
       const propertyCategories = [];
       for (const currCategory of categories) {
-        const numCategory = validCombinedSet.filter((item) => { return item.category === currCategory; }).length;
+        const numCategory = validCombinedSet.filter((item) => {return item.category === currCategory;}).length;
         propertyCategories.push({
           name: currCategory,
           amount: numCategory
@@ -765,7 +769,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
       // console.timeEnd('enrichment-'+id+'-time');
       // console.groupEnd();
 
-      const avail = this.pValueAvailability(combinedSet.length,validCombinedSet.length);
+      const avail = this.pValueAvailability(combinedSet.length, validCombinedSet.length);
 
       // calc p-value
       properties = await this.calcPValuePermutation(numericSet, categorySet, enrichmentScoreCategories);
@@ -775,26 +779,28 @@ export class EnrichmentScore extends ASimilarityMeasure {
 
     }
     const calculatedLength = validCombinedSet === null ? set1.length : validCombinedSet.length;
-    return measureResultObj(overallScore,p,calculatedLength,calculatedLength,properties); // async function --> returns promise
+    return measureResultObj(overallScore, p, calculatedLength, calculatedLength, properties); // async function --> returns promise
   }
 
-  async calcPValuePermutation(numericSet: Array<any>, categorySet: Array<any>, actualScores: Array<any>): Promise<Array<{category: string,pvalue: number}>> {
+  async calcPValuePermutation(numericSet: Array<any>, categorySet: Array<any>, actualScores: Array<any>): Promise<Array<{category: string, pvalue: number}>> {
     return new EnrichmentRandomizationWorker().calculate({setNumber: numericSet, setCategory: categorySet, actualScores});
   }
 
   // function to calculate enrichment score for one category
   calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: string, amountCategory: number): {
     category: string,
-    enrichmentScore: number} {
+    enrichmentScore: number
+  } {
 
     const propertiesCategory = {
       category: currCategory,
       values: [],
-      enrichmentScore: 0};
+      enrichmentScore: 0
+    };
 
     const amountItems = setCombined.length;
-    const termPlus = Math.sqrt((amountItems-amountCategory)/amountCategory);
-    const termMinus = Math.sqrt(amountCategory/(amountItems-amountCategory));
+    const termPlus = Math.sqrt((amountItems - amountCategory) / amountCategory);
+    const termMinus = Math.sqrt(amountCategory / (amountItems - amountCategory));
     let currValue = 0;
 
     // go through all items
@@ -829,4 +835,4 @@ interface IRankObJ {
   set: string;
   value: any;
   rank?: number;
- }
+}

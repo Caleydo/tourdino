@@ -21,7 +21,7 @@ export class ParallelSets implements IMeasureVisualization {
     if(isAttr) {
       data = this.formatDataAttribute(setParameters, dimension1, dimension2);
     } else {
-      dimension2 += '\uFEFF'; //append ZERO WIDTH NO-BREAK SPACE, so that both dimension can have the same label
+      dimension2 += '\uFEFF'; // append ZERO WIDTH NO-BREAK SPACE, so that both dimension can have the same label
       data = this.formatDataSelectionAgainstCatOrGroup(setParameters, dimension1, dimension2);
     }
 
@@ -193,7 +193,7 @@ export class ParallelSets implements IMeasureVisualization {
 
     console.log('Parallel Sets - generateVisualization',{setParameters, score, formatData, isAttr});
 
-    const width = Number(miniVisualisation.style('width').slice(0, -2)); //-25 because the scroll bar (15px) on the left is dynamically added
+    const width = Number(miniVisualisation.style('width').slice(0, -2)); // -25 because the scroll bar (15px) on the left is dynamically added
     const svgWidth = width - 25;
     const svgHeight = 175;
     const svg2DimLabelHeight = 45;
@@ -205,7 +205,7 @@ export class ParallelSets implements IMeasureVisualization {
 
     // console.log('SVG Conatiner - width: ',width);
     const chart = (<any>d3).parsets()
-      .tension(0.5) //[0 .. 1] -> 1 = straight line
+      .tension(0.5) // [0 .. 1] -> 1 = straight line
       .dimensions([formatData.dimension1, formatData.dimension2])
       .value(function (d) {return d.value;})
       .width(svgWidth)
@@ -255,7 +255,7 @@ export class ParallelSets implements IMeasureVisualization {
       this.highlightAndColorRibbons(setParameters, svgRibbons, formatData.dimension1);
     }
 
-    //add tooltip for categories
+    // add tooltip for categories
     svgDimensions.each(function (d) {
       const categories = d3.select(this).selectAll('g.category');
 
@@ -302,19 +302,19 @@ export class ParallelSets implements IMeasureVisualization {
     const columnTable = setParameters.setADesc.categories.filter((item) => (item.name === setParameters.setACategory.label))[0];
     const columnLabel = (columnTable === undefined || columnTable === null) ? setParameters.setACategory.label : columnTable.label;
 
-    //highlight and color paths
+    // highlight and color paths
     svgRibbons.selectAll('path')
       .each(function (d) {
         d3.select(this).classed('selected', false);
 
-        //the path between the selected row and column will be marked as selected (higher opacity)
+        // the path between the selected row and column will be marked as selected (higher opacity)
         if ((d.parent.name === categoryLabel && d.node.name === columnLabel) || (d.parent.name === columnLabel && d.node.name === categoryLabel)) {
           d3.select(this).classed('selected', true);
         }
 
         if (setParameters.setBDesc.categories && setParameters.setBDesc.categories.filter((a) => (a.name===setParameters.setBCategory.label)).length === 1 ) {
 
-          //all paths connected to the category of the dimension will be coloured in category's color
+          // all paths connected to the category of the dimension will be coloured in category's color
           if((d.parent.dimension === dimensionName && d.parent.name === categoryLabel) || (d.node.dimension === dimensionName && d.node.name === categoryLabel)) {
             const color = setParameters.setBDesc.categories.filter((a) => (a.name===setParameters.setBCategory.label))[0].color;
             if (color !== null) {
@@ -334,9 +334,9 @@ export class ParallelSets implements IMeasureVisualization {
               d3.select(this).classed('category-gray',true);
             }
           } else {
-          d3.select(this).classed('category-selected',true); //make all selected
+          d3.select(this).classed('category-selected',true); // make all selected
             if((d.parent.name === 'Others' && d.node.name !== categoryLabel) || (d.node.name === 'Others' && d.parent.name !== categoryLabel)) {
-              //only the path between others and not the current category are coloured gray
+              // only the path between others and not the current category are coloured gray
               d3.select(this).classed('category-selected',false);
               d3.select(this).classed('category-gray',true);
             }
@@ -386,7 +386,7 @@ export class ParallelSets implements IMeasureVisualization {
       // console.log('dim.d: ',d);
       // console.log('dim.this: ',d3.select(this));
 
-      //identifiy the current dimension
+      // identifiy the current dimension
       if(d.y === 45) {
         index = 0;
       } else {
@@ -396,11 +396,11 @@ export class ParallelSets implements IMeasureVisualization {
       const currTransform = d3.select(this).attr('transform').split(',');
       const currTransformX = Number(currTransform[0].split('(')[1]);
 
-      // //dimension label
+      // // dimension label
       d3.select(this).select('rect').attr('transform',`translate(${currTransformX},${dimensionTranslate[index]})`);
       d3.select(this).select('text').attr('transform',`translate(${currTransformX},${dimensionTranslate[index]})`);
 
-      // //category labels
+      // // category labels
       const categoryLabel = d3.select(this).selectAll('g');
       categoryLabel.selectAll('rect').attr('transform',`translate(${currTransformX},${categoryTranslate[index]})`);
       categoryLabel.selectAll('text').attr('transform',`translate(${currTransformX},${categoryTranslate[index]})`);
