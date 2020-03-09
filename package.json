@@ -8,13 +8,11 @@
     "email": "contact@caleydo.org",
     "url": "https://caleydo.org/"
   },
-  "contributors": [
-    {
-      "name": "Klaus Eckelt",
-      "email": "Klaus.Eckelt@jku.at",
-      "url": "https://www.jku.at/en/institute-of-computer-graphics/about-us/team/klaus-eckelt/"
-    }
-  ],
+  "contributors": [{
+    "name": "Klaus Eckelt",
+    "email": "Klaus.Eckelt@jku.at",
+    "url": "https://www.jku.at/en/institute-of-computer-graphics/about-us/team/klaus-eckelt/"
+  }],
   "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/caleydo/tourdino/issues"
@@ -92,9 +90,11 @@
     "url-loader": "0.5.8",
     "webpack": "2.3.3",
     "webpack-dev-server": "2.4.2",
-    "worker-loader": "^2.0.0"
+    "worker-loader": "^2.0.0",
+    "@types/node": "^13.7.7"
   },
   "dependencies": {
+    "tdp_core": "github:datavisyn/tdp_core#ochampari/10_tourdino-lineup-panel-button",
     "@types/d3": "~3.5.36",
     "@types/jquery": "3.3.33",
     "@types/node": "^13.7.7",
@@ -102,6 +102,7 @@
     "d3.parsets": "git+https://github.com/jasondavies/d3-parsets.git#v1.2.4",
     "d3-grubert-boxplot": "gist:366430a0ac8e6e55ce09b040b5b493a6",
     "jStat": "1.8.6",
-    "phovea_core": "github:phovea/phovea_core#update_dependencies_38"
+    "phovea_core": "github:phovea/phovea_core#update_dep_req",
+    "xxhashjs": "^0.2.2"
   }
 }

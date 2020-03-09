@@ -17,7 +17,7 @@ function calc(setNumber: Array<any>, setCategory: Array<any>) {
   // sort the combined set
   validCombinedSet.sort((a,b) => { return b.value - a.value;});
 
-  //define category sets
+  // define category sets
   const propertyCategories = [];
   for (const currCategory of categories) {
     const numCategory = validCombinedSet.filter((item) => { return item.category === currCategory; }).length;
