@@ -94,7 +94,9 @@ export class RankingAdapter {
 
       const groups = this.getRanking().getGroups();
       const groupIndexArray = groups.map((g) => {
-        return g.order.map((order) => order);
+        const groupMap = new Map<number, number>();
+        g.order.forEach((order, i) => {groupMap.set(order, i);});
+        return groupMap;
       });
 
       this.oldSelection = this.getSelectionUnsorted();
@@ -106,7 +108,7 @@ export class RankingAdapter {
 
         // include wether the row is selected
         item[RankingAdapter.SELECTION_COLUMN_ID] = this.oldSelection.includes(i) ? 'Selected' : 'Unselected';
-        const groupIndex = groupIndexArray.findIndex((groupIndex) => groupIndex.includes(i));
+        const groupIndex = groupIndexArray.findIndex((map) => map.has(i));
         const groupName = groupIndex === -1 ? 'Unknown' : groups[groupIndex].name;
         item[RankingAdapter.GROUP_COLUMN_ID] = groupName; // index of group = category name, find index by looking up i. -1 if not found
         databaseData.push(item);
