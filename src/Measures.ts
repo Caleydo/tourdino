@@ -675,7 +675,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
 
   isArrayOfNumbers(arr: any): arr is number[] {
     if (Array.isArray(arr)) {
-      return arr.every((item) => item === null || typeof item === 'number' || isNaN(item));
+      return arr.every((item) => item === null || typeof item === 'number');
     }
     return false;
   }
