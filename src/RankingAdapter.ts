@@ -1,10 +1,15 @@
 import {LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow} from 'lineupjs';
 import {IServerColumn} from 'tdp_core/src/rest';
 import {isProxyAccessor} from './util';
+import {IAccessorFunc} from 'tdp_core/src/lineup/internal/utils';
 
 
 export interface IAttributeCategory extends ICategory {
   attribute: IServerColumn;
+}
+
+export interface IAccessorColumn extends Column {
+  accessor: IAccessorFunc<any>;
 }
 
 export class RankingAdapter {
@@ -30,11 +35,12 @@ export class RankingAdapter {
     return this.provider;
   }
 
-
+  /**
+   * Identify scores through their accessor function.
+   */
   private getScoreColumns() {
-    return this.getDisplayedAttributes().filter((attr) => (attr.desc as any)._score);
+    return this.getDisplayedAttributes().filter((attr) => isProxyAccessor((<IAccessorColumn>attr).accessor));
   }
-
 
   private oldOrder: Array<number> = new Array();
   private oldSelection: Array<number> = new Array();
