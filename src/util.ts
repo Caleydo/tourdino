@@ -135,6 +135,7 @@ export function shuffle(arr: Array<any>): Array<any> {
 export function isProxyAccessor(accessor: any):  accessor is IAccessorFunc<string|number> {
   if (accessor && typeof(accessor) === 'function' && accessor.length === 1) {
     // test for ES5 accessor string first and then for ES6 accessor string
+    // the accessor function is defined in `AScoreAccessorProxy` in tdp_core
     return accessor.toString() === 'function (row) { return _this.access(row.v); }' || accessor.toString() === '(row) => this.access(row.v)';
   }
   return false;
