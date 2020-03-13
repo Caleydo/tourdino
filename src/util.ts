@@ -1,5 +1,5 @@
 import {IMeasureResult} from './interfaces';
-import {IAccessorFunc} from 'tdp_core/src/lineup/internal/utils';
+import {IColumnDesc} from 'lineupjs';
 
 /**
  * Returns:
@@ -128,14 +128,11 @@ export function shuffle(arr: Array<any>): Array<any> {
 }
 
 /**
- * Checks wether the given function of type IAccessorFunc, i.e. of an AScoreAccessorProxy.
- * Beware: coding horrors await beyond this function header.
- * @param accessor
+ * Identify scores through their `lazyLoaded` attribute.
+ * The `lazyLoaded` property is set in `addLazyColumn()` in in tdp_core\src\lineup\internal\column.ts
+ * @param column Column description
  */
-export function isProxyAccessor(accessor: any):  accessor is IAccessorFunc<string|number> {
-  if (accessor && typeof(accessor) === 'function' && accessor.length === 1) {
-    return accessor.toString() === '(row) => this.access(row.v)';
-  }
-  return false;
+export function isScoreColumn(colDesc: IColumnDesc) {
+  return colDesc.hasOwnProperty('lazyLoaded');
 }
 
