@@ -1,6 +1,5 @@
 import {IMeasureResult} from './interfaces';
-import {IAccessorFunc} from 'tdp_core/src/lineup/internal/utils';
-import {IColumnDesc, Column} from 'lineupjs';
+import {IColumnDesc} from 'lineupjs';
 
 /**
  * Returns:
