@@ -3,8 +3,7 @@ import {RankingAdapter} from './RankingAdapter';
 import * as d3 from 'd3';
 import {tasks as Tasks, ATouringTask} from './tasks/Tasks';
 import {LocalDataProvider} from 'lineupjs';
-import {IPluginDesc} from 'phovea_core/src/plugin';
-import {PanelTabEvents} from 'tdp_core/src/lineup/internal/panel/PanelTab';
+import {PanelTab} from 'tdp_core/src/lineup/internal/panel/PanelTab';
 import {IPanelTabExtensionDesc} from 'tdp_core/src/extensions';
 
 
@@ -22,11 +21,13 @@ const touringTemplate = `
 
 class TouringPanel {
 
+  private readonly node: HTMLElement;
   private ranking: RankingAdapter;
   private currentTask: ATouringTask;
   private active: boolean;
 
-  constructor(private readonly node: HTMLElement, protected readonly provider: LocalDataProvider, protected readonly desc: IPanelTabExtensionDesc, private events: PanelTabEvents) {
+  constructor(private readonly _desc: IPanelTabExtensionDesc, private readonly tab: PanelTab, private readonly provider: LocalDataProvider) {
+    this.node = tab.node;
     this.node.classList.add('touring');
     this.node.innerHTML = touringTemplate;
     this.init();
@@ -64,7 +65,7 @@ class TouringPanel {
   }
 
   private addEventListeners() {
-    this.events.on(PanelTabEvents.SHOW_PANEL, () => {
+    this.tab.on(PanelTab.SHOW_PANEL, () => {
       if (this.active === true) {
         return; // do not update tasks when clicking on open touring button and touring panel is already open
       }
@@ -75,10 +76,11 @@ class TouringPanel {
       this.currentTask.addEventListeners();
     });
 
-    this.events.on(PanelTabEvents.HIDE_PANEL, () => {
+    this.tab.on(PanelTab.HIDE_PANEL, () => {
       this.active = false;
       this.currentTask.removeEventListeners();
     });
+
     // Click a different task
     d3.select(this.node).selectAll('button.task-btn').on('click', (task) => {
       const taskButtons = d3.select(this.node).selectAll('button.task-btn');
@@ -106,12 +108,11 @@ class TouringPanel {
 
 /**
  *
- * @param parent Parent HTML node
+ * @param tab PanelTab
  * @param provider Instance of the LocalDataProvider that contains all ranking
  * @param desc Options provided through the extension point i.e `headerCssClass, headerTitle`
- * @param events Instance PanelTabEvents
  */
-export default function create(parent: HTMLElement, provider: LocalDataProvider, desc: IPanelTabExtensionDesc, events: PanelTabEvents): void {
+export default function create(desc: IPanelTabExtensionDesc, tab: PanelTab, provider: LocalDataProvider): void {
   // tslint:disable-next-line:no-unused-expression
-  new TouringPanel(parent, provider, desc, events);
+  new TouringPanel(desc, tab, provider);
 }
