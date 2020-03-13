@@ -1,6 +1,6 @@
 import {LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow} from 'lineupjs';
 import {IServerColumn} from 'tdp_core/src/rest';
-import {isProxyAccessor} from './util';
+import {isScoreColumn} from './util';
 import {IAccessorFunc} from 'tdp_core/src/lineup/internal/utils';
 
 
@@ -36,10 +36,10 @@ export class RankingAdapter {
   }
 
   /**
-   * Identify scores through their accessor function.
+   * Identify scores through their `lazyLoaded` attribute.
    */
   private getScoreColumns() {
-    return this.getDisplayedAttributes().filter((attr) => isProxyAccessor((<IAccessorColumn>attr).accessor));
+    return this.getDisplayedAttributes().filter((attr) => isScoreColumn(attr.desc));
   }
 
   private oldOrder: Array<number> = new Array();
@@ -168,7 +168,7 @@ export class RankingAdapter {
    */
   public getItemRanks() {
     let i = 0;
-    return this.getItemOrder().map((id) => ({ _id: id, rank: i++ }));
+    return this.getItemOrder().map((id) => ({_id: id, rank: i++}));
   }
 
   public getRanking(): Ranking {
@@ -239,7 +239,7 @@ export class RankingAdapter {
     const ids = this.getDisplayedIds();
     const data = [];
 
-    if (desc.column && isProxyAccessor(accessor)) {
+    if (desc.column && isScoreColumn(desc)) {
       for (const id of ids) {
         const dataEntry = { id };
         dataEntry[desc.column] = accessor({ v: { id }, i: null } as IDataRow); // i is not used by the accessor function
