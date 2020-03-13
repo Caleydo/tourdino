@@ -1,10 +1,15 @@
 import {LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow} from 'lineupjs';
 import {IServerColumn} from 'tdp_core/src/rest';
 import {isProxyAccessor} from './util';
+import {IAccessorFunc} from 'tdp_core/src/lineup/internal/utils';
 
 
 export interface IAttributeCategory extends ICategory {
   attribute: IServerColumn;
+}
+
+export interface IAccessorColumn extends Column {
+  accessor: IAccessorFunc<any>;
 }
 
 export class RankingAdapter {
@@ -30,11 +35,12 @@ export class RankingAdapter {
     return this.provider;
   }
 
-
+  /**
+   * Identify scores through their accessor function.
+   */
   private getScoreColumns() {
-    return this.getDisplayedAttributes().filter((attr) => (attr.desc as any)._score);
+    return this.getDisplayedAttributes().filter((attr) => isProxyAccessor((<IAccessorColumn>attr).accessor));
   }
-
 
   private oldOrder: Array<number> = new Array();
   private oldSelection: Array<number> = new Array();
@@ -94,7 +100,9 @@ export class RankingAdapter {
 
       const groups = this.getRanking().getGroups();
       const groupIndexArray = groups.map((g) => {
-        return g.order.map((order) => order);
+        const groupMap = new Map<number, number>();
+        g.order.forEach((order, i) => {groupMap.set(order, i);});
+        return groupMap;
       });
 
       this.oldSelection = this.getSelectionUnsorted();
@@ -106,7 +114,7 @@ export class RankingAdapter {
 
         // include wether the row is selected
         item[RankingAdapter.SELECTION_COLUMN_ID] = this.oldSelection.includes(i) ? 'Selected' : 'Unselected';
-        const groupIndex = groupIndexArray.findIndex((groupIndex) => groupIndex.includes(i));
+        const groupIndex = groupIndexArray.findIndex((map) => map.has(i));
         const groupName = groupIndex === -1 ? 'Unknown' : groups[groupIndex].name;
         item[RankingAdapter.GROUP_COLUMN_ID] = groupName; // index of group = category name, find index by looking up i. -1 if not found
         databaseData.push(item);
