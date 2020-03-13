@@ -134,7 +134,8 @@ export function shuffle(arr: Array<any>): Array<any> {
  */
 export function isProxyAccessor(accessor: any):  accessor is IAccessorFunc<string|number> {
   if (accessor && typeof(accessor) === 'function' && accessor.length === 1) {
-    return accessor.toString() === '(row) => this.access(row.v)';
+    // test for ES5 accessor string first and then for ES6 accessor string
+    return accessor.toString() === 'function (row) { return _this.access(row.v); }' || accessor.toString() === '(row) => this.access(row.v)';
   }
   return false;
 }
