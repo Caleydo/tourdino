@@ -94,7 +94,7 @@
     "@types/node": "^13.7.7"
   },
   "dependencies": {
-    "tdp_core": "github:datavisyn/tdp_core#ochampari/10_tourdino-lineup-panel-button",
+    "tdp_core": "github:datavisyn/tdp_core#thinkh/refactor-paneltab-extension-point",
     "@types/d3": "~3.5.36",
     "@types/jquery": "3.3.33",
     "@types/node": "^13.7.7",
