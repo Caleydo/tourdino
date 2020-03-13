@@ -130,6 +130,7 @@ export function shuffle(arr: Array<any>): Array<any> {
 
 /**
  * Identify scores through their `lazyLoaded` attribute.
+ * The `lazyLoaded` property is set in `addLazyColumn()` in in tdp_core\src\lineup\internal\column.ts
  * @param column Column description
  */
 export function isScoreColumn(colDesc: IColumnDesc) {
