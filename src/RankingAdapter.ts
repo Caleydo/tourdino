@@ -140,10 +140,9 @@ export class RankingAdapter {
   /**
    * Returns an array of indices for the providers data array
    */
-  private getItemOrder() {
+  private getItemOrder(): number[] {
     // order is always defined for groups (rows (data) only if there is a grouping)
-    return [].concat(...this.getRanking().getGroups().map((grp) => grp.order)); // Map groups to order arrays and concat those
-
+    return [].concat(...this.getRanking().getGroups().map((grp) => Array.from(grp.order))); // Map groups to order arrays and concat those
   }
 
   public getDisplayedIds() {
