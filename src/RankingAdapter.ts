@@ -1,4 +1,4 @@
-import {LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow} from 'lineupjs';
+import {LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow, IOrderedGroup} from 'lineupjs';
 import {IServerColumn} from 'tdp_core/src/rest';
 import {isScoreColumn} from './util';
 import {IAccessorFunc} from 'tdp_core/src/lineup/internal/utils';
@@ -181,19 +181,15 @@ export class RankingAdapter {
     // console.time('get data (getGroupedData) time')
     const data = this.getItems();
     // console.timeEnd('get data (getGroupedData) time')
-    const groups = [];
-
-    for (const grp of this.getRanking().getGroups()) {
-      groups.push({
+    return this.getRanking().getGroups().map((grp: IOrderedGroup) => {
+      return {
         name: grp.name,
         label: grp.name,
         color: grp.color,
-        rows: grp.order.map((index) => data[index]).filter((item) => item !== undefined)
-      });
-    }
-    return groups;
+        rows: Array.from(grp.order).map((index) => data[index]).filter((item) => item !== undefined)
+      };
+    });
   }
-
 
   /**
    * returns the data for the given attribute
