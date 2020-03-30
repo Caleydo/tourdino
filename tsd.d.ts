@@ -16,6 +16,7 @@ declare module "*.css" {
 declare module "*.png";
 declare module "*.gif";
 declare module "*.jpg";
+declare module "*.webp";
 //allow html dependencies
 declare module "*.html" {
   const content:string;
