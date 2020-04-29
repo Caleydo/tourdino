@@ -96,7 +96,7 @@
   "dependencies": {
     "tdp_core": "github:datavisyn/tdp_core#develop",
     "@types/d3": "~3.5.36",
-    "@types/jquery": "3.3.33",
+    "@types/jquery": "~3.3.33",
     "@types/node": "^13.7.7",
     "d3": "~3.5.17",
     "d3.parsets": "git+https://github.com/jasondavies/d3-parsets.git#v1.2.4",
