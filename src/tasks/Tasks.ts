@@ -120,7 +120,7 @@ export abstract class ATouringTask implements ITouringTask {
             const newState = !options.filter(':not(:checked)').empty(); // if not all options are selected --> true = select all, deselect if all options are already selected
             options.each(function () { (this as HTMLOptionElement).selected = newState; }); // set state of all child options
             // update styles in open dropdown
-            $(this).next().find('li').attr('aria-selected', newState.toString()); // accesability and styling
+            $(this).next().find<HTMLElement>('li').attr('aria-selected', newState.toString()); // accesability and styling
 
             $select2.trigger('change').trigger(newState ? 'select2:select' : 'select2:unselect'); // notify select2 of these updates
           });
