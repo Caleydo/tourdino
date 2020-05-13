@@ -8,6 +8,11 @@ import {IPanelTabExtensionDesc} from 'tdp_core/src/extensions';
 
 
 const touringTemplate = `
+<div class="alert alert-warning" role="alert">
+This panel allows you to perform basic statistical analyses. You can either compare multiple columns (e.g., are the values of column A correlated with the values of column B)
+ or compare sets of rows (e.g., does row set 1 differ from row set 2 with respect to the values in column C).
+<br><br>Please note: This panel is still under development. Please report any problems you might observe. Furthermore, there is currently no multiple-testing correction being performed.
+</div>
 <div class="input">
   <div class="type form-horizontal"> <!-- https://getbootstrap.com/docs/3.3/css/#forms-horizontal -->
     <div class="form-group">
