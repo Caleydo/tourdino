@@ -97,8 +97,25 @@ export abstract class ATouringTask implements ITouringTask {
   }
 
   initContent() {
+    this.addFilterCheckbox()
     // add legend for the p-values
     this.createLegend(this.nodeObject.select('div.legend'));
+  }
+
+  /**
+   * Add a checkbox to filter missing values from the compared columns/rows data
+   */
+  addFilterCheckbox() {
+    const updateTable = this.updateTable.bind(this);
+    const uniqueID = Math.floor(Math.random() * 100000)
+    this.nodeObject.select('.form-horizontal').append('div').attr('class', `form-group filter-missing`)
+      .html(`
+      <label class="col-sm-4 control-label" for="${uniqueID}">
+      Do you want to filter out missing values for the compared columns?
+      </label>
+    <div class="col-sm-8">
+          <input type="checkbox" checked id="${uniqueID}">
+    </div>`).select('input[type="checkbox"]').on('change', updateTable)
   }
 
   createSelect2(): void {
@@ -814,6 +831,7 @@ export class ColumnComparison extends ATouringTask {
 
     let colData = this.nodeObject.selectAll('select.attr[name="attr1[]"] option:checked').data();
     let rowData = this.nodeObject.selectAll('select.attr[name="attr2[]"]  option:checked').data();
+    const filterMissingValues = !this.nodeObject.select('input[type="checkbox"]:checked').empty() // check if checkbox to filter missing values is checked
     if (colData.length > rowData.length) {
       [rowData, colData] = [colData, rowData]; // avoid having more columns than rows --> flip table
     }
@@ -876,8 +894,8 @@ export class ColumnComparison extends ATouringTask {
         .append('polygon').attr('points', '0,0 ' + svgWidth + ',0 0,120'); // 120 is thead height, 45° rotation --> 120 is also width
     }
 
-    this.getAttrTableBody(colData, rowData, true, null).then(updateTableBody); // initialize
-    this.getAttrTableBody(colData, rowData, false, updateTableBody).then(updateTableBody); // set values
+    this.getAttrTableBody(colData, rowData, filterMissingValues, true, null).then(updateTableBody); // initialize
+    this.getAttrTableBody(colData, rowData, filterMissingValues, false, updateTableBody).then(updateTableBody); // set values
   }
 
   /**
@@ -886,7 +904,7 @@ export class ColumnComparison extends ATouringTask {
    * @param arr2 rows
    * @param scaffold only create the matrix with row headers, but no value calculation
    */
-  private async getAttrTableBody(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[], scaffold: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<Array<Array<Array<IScoreCell>>>> {
+  private async getAttrTableBody(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, scaffold: boolean, update: (bodyData: IScoreCell[][][]) => void, ): Promise<Array<Array<Array<IScoreCell>>>> {
     const data = this.prepareDataArray(colAttributes, rowAttributes);
 
     if (scaffold) {
@@ -908,8 +926,9 @@ export class ColumnComparison extends ATouringTask {
             const measures = MethodManager.getMeasuresByType(Type.get(row.type), Type.get(col.type), SCOPE.ATTRIBUTES);
             if (measures.length > 0) { // start at
               const measure = measures[0]; // Always the first
-              const data1 = this.ranking.getAttributeDataDisplayed((col as IServerColumn).column); // minus one because the first column is headers
-              const data2 = this.ranking.getAttributeDataDisplayed((row as IServerColumn).column);
+              const first = this.ranking.getAttributeDataDisplayed((col as IServerColumn).column); // minus one because the first column is headers
+              const second = this.ranking.getAttributeDataDisplayed((row as IServerColumn).column);
+              const [data1, data2] = filterMissingValues ? removeMissingValues(first, second) : [first, second];
               const setParameters = {
                 setA: data1,
                 setADesc: col,
@@ -1131,6 +1150,7 @@ export class RowComparison extends ATouringTask {
 
     let colGrpData = this.nodeObject.selectAll('select.rowGrp[name="row1[]"] option:checked').data();
     let rowGrpData = this.nodeObject.selectAll('select.rowGrp[name="row2[]"]  option:checked').data();
+    const filterMissingValues = !this.nodeObject.select('input[type="checkbox"]:checked').empty() // check if checkbox to filter missing values is checked
 
     if (colGrpData.length > rowGrpData.length) {
       [rowGrpData, colGrpData] = [colGrpData, rowGrpData]; // avoid having more columns than rows --> flip table
@@ -1204,8 +1224,8 @@ export class RowComparison extends ATouringTask {
         .append('polygon').attr('points', '0,0 ' + svgWidth + ',0 0,120'); // 120 is thead height
     }
 
-    this.getAttrTableBody(colGrpData, rowGrpData, rowAttrData, true, null).then((data) => updateTableBody(data, timestamp)); // initialize
-    this.getAttrTableBody(colGrpData, rowGrpData, rowAttrData, false, (data) => updateTableBody(data, timestamp)).then((data) => updateTableBody(data, timestamp)); // set values
+    this.getAttrTableBody(colGrpData, rowGrpData, rowAttrData, filterMissingValues, true, null).then((data) => updateTableBody(data, timestamp)); // initialize
+    this.getAttrTableBody(colGrpData, rowGrpData, rowAttrData, filterMissingValues, false, (data) => updateTableBody(data, timestamp)).then((data) => updateTableBody(data, timestamp)); // set values
   }
 
   /**
@@ -1220,7 +1240,7 @@ export class RowComparison extends ATouringTask {
    * @param scaffold only create the matrix with row headers, but no value calculation
    * @param update
    */
-  async getAttrTableBody(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[], scaffold: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<Array<Array<Array<IScoreCell>>>> {
+  async getAttrTableBody(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, scaffold: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<Array<Array<Array<IScoreCell>>>> {
     const data = this.prepareDataArray(colGroups, rowGroups, rowAttributes);
 
     if (scaffold) {

@@ -1,5 +1,5 @@
 import {IMeasureResult} from './interfaces';
-import {IColumnDesc} from 'lineupjs';
+import {IColumnDesc, isMissingValue} from 'lineupjs';
 
 /**
  * Returns:
@@ -23,6 +23,28 @@ export function intersection(arr1: Array<any>, arr2: Array<any>) {
   return {'intersection': intersection, 'arr1': filtered1, 'arr2': filtered2};
 }
 // const union = selectionSet.concat(categorySet).sort().filter((item, i, arr) => !i || item != arr[i-1]) // !i => if first elemnt, or if unqueal to previous item (item != arr[i-1]) include in arr
+
+/**
+ * Remove missing values from both arrays. If a value is missing in the first array, remove it.
+ * Remove the item in the second array with the same index. 
+ * @param arr1 First array
+ * @param arr2 Second array
+ * @returns An array containing two same length arrays with no null/missing values
+ */
+export function removeMissingValues(arr1: Array<any>, arr2: Array<any>) {
+  const filterBoth = (item: any, index: number, secondArray: Array<any>) => {
+    if (isMissingValue(item)) {
+      secondArray.splice(index, 1)
+      return false;
+    }
+
+    return true
+  }
+
+  const filtered1 = arr1.filter((item, index) => filterBoth(item, index, arr2));
+  const filtered2 = arr2.filter((item, index) => filterBoth(item, index, filtered1));
+  return [filtered1, filtered2];
+}
 
 export function binom2(n: number): number {
   return n*(n-1)/2;
