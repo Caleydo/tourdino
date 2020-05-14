@@ -123,6 +123,12 @@ div.touring {
   flex-direction: column;
   padding-left: 0.5em;
 
+  .touring-intro-text {
+    margin-top: 5px;
+    margin-bottom: 15px;
+    padding: 0 0.5em;
+  }
+
   .input {
     margin-right: 0.5em;
 
