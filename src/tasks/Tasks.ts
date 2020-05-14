@@ -97,7 +97,7 @@ export abstract class ATouringTask implements ITouringTask {
   }
 
   initContent() {
-    this.addFilterCheckbox()
+    this.addFilterCheckbox();
     // add legend for the p-values
     this.createLegend(this.nodeObject.select('div.legend'));
   }
@@ -108,14 +108,18 @@ export abstract class ATouringTask implements ITouringTask {
   addFilterCheckbox() {
     const updateTable = this.updateTable.bind(this);
     const uniqueID = Math.floor(Math.random() * 100000)
-    this.nodeObject.select('.form-horizontal').append('div').attr('class', `form-group filter-missing`)
+    this.nodeObject.select('.form-horizontal').append('div')
+      .attr('class', `form-group filter-missing`)
       .html(`
-      <label class="col-sm-4 control-label" for="${uniqueID}">
-      Do you want to filter out missing values for the compared columns?
-      </label>
-    <div class="col-sm-8">
+        <label class="col-sm-4 control-label" for="${uniqueID}">
+          Do you want to filter out missing values for the compared columns?
+        </label>
+        <div class="col-sm-8">
           <input type="checkbox" checked id="${uniqueID}">
-    </div>`).select('input[type="checkbox"]').on('change', updateTable)
+        </div>
+      `)
+      .select('input[type="checkbox"]')
+      .on('change', updateTable);
   }
 
   createSelect2(): void {
@@ -831,7 +835,8 @@ export class ColumnComparison extends ATouringTask {
 
     let colData = this.nodeObject.selectAll('select.attr[name="attr1[]"] option:checked').data();
     let rowData = this.nodeObject.selectAll('select.attr[name="attr2[]"]  option:checked').data();
-    const filterMissingValues = !this.nodeObject.select('input[type="checkbox"]:checked').empty() // check if checkbox to filter missing values is checked
+    const filterMissingValues = !this.nodeObject.select('input[type="checkbox"]:checked').empty(); // check if checkbox to filter missing values is checked
+
     if (colData.length > rowData.length) {
       [rowData, colData] = [colData, rowData]; // avoid having more columns than rows --> flip table
     }
@@ -906,6 +911,7 @@ export class ColumnComparison extends ATouringTask {
    */
   private async getAttrTableBody(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, scaffold: boolean, update: (bodyData: IScoreCell[][][]) => void, ): Promise<Array<Array<Array<IScoreCell>>>> {
     const data = this.prepareDataArray(colAttributes, rowAttributes);
+    console.log(data);
 
     if (scaffold) {
       return data;
