@@ -32,17 +32,15 @@ export function intersection(arr1: Array<any>, arr2: Array<any>) {
  * @returns An array containing two same length arrays with no null/missing values
  */
 export function removeMissingValues(arr1: Array<any>, arr2: Array<any>) {
-  const filterBoth = (item: any, index: number, secondArray: Array<any>) => {
-    if (isMissingValue(item)) {
-      secondArray.splice(index, 1)
-      return false;
+  let filtered1 = [];
+  let filtered2 = [];
+  arr1.forEach((item, index) => {
+    if (isMissingValue(item) || isMissingValue(arr2[index])) {
+      return
     }
-
-    return true
-  }
-
-  const filtered1 = arr1.filter((item, index) => filterBoth(item, index, arr2));
-  const filtered2 = arr2.filter((item, index) => filterBoth(item, index, filtered1));
+    filtered1.push(item);
+    filtered2.push(arr2[index])
+  })
   return [filtered1, filtered2];
 }
 

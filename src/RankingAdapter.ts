@@ -1,4 +1,4 @@
-import {LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow} from 'lineupjs';
+import {LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow, isMissingValue, CategoricalColumn} from 'lineupjs';
 import {IServerColumn} from 'tdp_core/src/rest';
 import {isScoreColumn} from './util';
 import {IAccessorFunc} from 'tdp_core/src/lineup/internal/utils';
@@ -174,6 +174,14 @@ export class RankingAdapter {
   public getRanking(): Ranking {
     return this.provider.getRankings()[this.rankingIndex];
   }
+
+  // public getRanking(col1,col2,filter): Ranking {
+  //   const col = <CategoricalColumn>this.provider.getRankings()[this.rankingIndex].children.find((col) => (<IServerColumn>col.desc).column === 'organ')
+  //   const col2 = <CategoricalColumn>this.provider.getRankings()[this.rankingIndex].children[6]
+  //   col.setFilter({filter: null, filterMissing: true})
+  //   col2.setFilter({filter: null, filterMissing: true})
+  //   return this.provider.getRankings()[this.rankingIndex];
+  // }
 
   /**
    * Contains  selection, rank and score data.
