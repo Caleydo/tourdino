@@ -186,8 +186,12 @@ export class RowComparison extends ATouringTask {
         .append('polygon').attr('points', '0,0 ' + svgWidth + ',0 0,120'); // 120 is thead height
     }
 
-    this.getAttrTableBody(colGrpData, rowGrpData, rowAttrData, filterMissingValues, true, null).then((data) => updateTableBody(data, timestamp)); // initialize
-    this.getAttrTableBody(colGrpData, rowGrpData, rowAttrData, filterMissingValues, false, (data) => updateTableBody(data, timestamp)).then((data) => updateTableBody(data, timestamp)); // set values
+    // initialize
+    const data = this.prepareDataArray(colGrpData, rowGrpData, rowAttrData);
+    updateTableBody(data, timestamp);
+
+    // set values
+    this.getAttrTableBody(colGrpData, rowGrpData, rowAttrData, filterMissingValues, (data) => updateTableBody(data, timestamp)).then((data) => updateTableBody(data, timestamp));
   }
 
   /**
@@ -202,144 +206,140 @@ export class RowComparison extends ATouringTask {
    * @param scaffold only create the matrix with row headers, but no value calculation
    * @param update
    */
-  async getAttrTableBody(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, scaffold: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<Array<Array<Array<IScoreCell>>>> {
+  async getAttrTableBody(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<Array<Array<Array<IScoreCell>>>> {
     const data = this.prepareDataArray(colGroups, rowGroups, rowAttributes);
 
-    if (scaffold) {
-      return data;
-    } else {
-      const promises = [];
+    const promises = [];
 
-      // the row and column indices stay the same, only the data changes ->  we want to retrieve these indices only once.
-      const rowGrpsIndices = rowGroups.map((rowGrp) => this.ranking.getRowsWithCategory(rowGrp));
-      const colGrpsIndices = colGroups.map((colGrp) => this.ranking.getRowsWithCategory(colGrp));
-      // if a group is part of the column and row item groups, we use these array to get the correct index (so we can avoid duplicate calculations)
-      const rowIndex4colGrp = colGroups.map((colGrp) => rowGroups.indexOf(colGrp));
-      const colIndex4rowGrp = rowGroups.map((rowGrp) => colGroups.indexOf(rowGrp));
+    // the row and column indices stay the same, only the data changes ->  we want to retrieve these indices only once.
+    const rowGrpsIndices = rowGroups.map((rowGrp) => this.ranking.getRowsWithCategory(rowGrp));
+    const colGrpsIndices = colGroups.map((colGrp) => this.ranking.getRowsWithCategory(colGrp));
+    // if a group is part of the column and row item groups, we use these array to get the correct index (so we can avoid duplicate calculations)
+    const rowIndex4colGrp = colGroups.map((colGrp) => rowGroups.indexOf(colGrp));
+    const colIndex4rowGrp = rowGroups.map((rowGrp) => colGroups.indexOf(rowGrp));
 
-      for (const [bodyIndex, attr] of rowAttributes.entries()) {
-        const attrPromises = [];
-        const attrData = this.ranking.getAttributeDataDisplayed((attr as IServerColumn).column); // minus one because the first column is headers
-        const measures = MethodManager.getMeasuresByType(Type.get(attr.type), Type.get(attr.type), SCOPE.SETS); // Always compare selected elements with a group of elements of the same column
-        if (measures.length > 0) {
-          const measure = measures[0];
+    for (const [bodyIndex, attr] of rowAttributes.entries()) {
+      const attrPromises = [];
+      const attrData = this.ranking.getAttributeDataDisplayed((attr as IServerColumn).column); // minus one because the first column is headers
+      const measures = MethodManager.getMeasuresByType(Type.get(attr.type), Type.get(attr.type), SCOPE.SETS); // Always compare selected elements with a group of elements of the same column
+      if (measures.length > 0) {
+        const measure = measures[0];
 
-          for (const [rowIndex, rowGrp] of rowGroups.entries()) {
-            // Get the data of 'attr' for the rows inside 'rowGrp'
-            const rowData = rowGrpsIndices[rowIndex].map((i) => attrData[i]);
-            for (const [colIndex, colGrp] of colGroups.entries()) {
-              const colIndexOffset = rowIndex === 0 ? 2 : 1; // Two columns if the attribute label is in the same line, (otherwise 1 (because rowspan))
+        for (const [rowIndex, rowGrp] of rowGroups.entries()) {
+          // Get the data of 'attr' for the rows inside 'rowGrp'
+          const rowData = rowGrpsIndices[rowIndex].map((i) => attrData[i]);
+          for (const [colIndex, colGrp] of colGroups.entries()) {
+            const colIndexOffset = rowIndex === 0 ? 2 : 1; // Two columns if the attribute label is in the same line, (otherwise 1 (because rowspan))
 
-              if (rowGrp.label === colGrp.label) { // identical groups
-                data[bodyIndex][rowIndex][colIndexOffset + colIndex] = { label: '<span class="circle"/>', measure };
-              } else if (colIndex4rowGrp[rowIndex] >= 0 && rowIndex4colGrp[colIndex] >= 0 && rowIndex4colGrp[colIndex] < rowIndex) {
-                // the rowGrp is also part of the colGroups array, and the colGrp is one of the previous rowGroups --> i.e. already calculated in a table row above the current one
-              } else {
-                const colData = colGrpsIndices[colIndex].map((i) => attrData[i]);
-                const setParameters = {
-                  setA: rowData,
-                  setADesc: attr,
-                  setACategory: { label: `${rowGrp.label} (${rowGrp.attribute.label})`, color: rowGrp.color },
-                  setB: colData,
-                  setBDesc: attr,
-                  setBCategory: { label: `${colGrp.label} (${colGrp.attribute.label})`, color: colGrp.color }
-                };
+            if (rowGrp.label === colGrp.label) { // identical groups
+              data[bodyIndex][rowIndex][colIndexOffset + colIndex] = { label: '<span class="circle"/>', measure };
+            } else if (colIndex4rowGrp[rowIndex] >= 0 && rowIndex4colGrp[colIndex] >= 0 && rowIndex4colGrp[colIndex] < rowIndex) {
+              // the rowGrp is also part of the colGroups array, and the colGrp is one of the previous rowGroups --> i.e. already calculated in a table row above the current one
+            } else {
+              const colData = colGrpsIndices[colIndex].map((i) => attrData[i]);
+              const setParameters = {
+                setA: rowData,
+                setADesc: attr,
+                setACategory: { label: `${rowGrp.label} (${rowGrp.attribute.label})`, color: rowGrp.color },
+                setB: colData,
+                setBDesc: attr,
+                setBCategory: { label: `${colGrp.label} (${colGrp.attribute.label})`, color: colGrp.color }
+              };
 
-                const highlight: IHighlightData[] = [
-                  { column: (attr as IServerColumn).column, label: attr.label },
-                  { column: rowGrp.attribute.column, label: rowGrp.attribute.label, category: rowGrp.name, color: rowGrp.color },
-                  { column: colGrp.attribute.column, label: colGrp.attribute.label, category: colGrp.name, color: colGrp.color }];
+              const highlight: IHighlightData[] = [
+                { column: (attr as IServerColumn).column, label: attr.label },
+                { column: rowGrp.attribute.column, label: rowGrp.attribute.label, category: rowGrp.name, color: rowGrp.color },
+                { column: colGrp.attribute.column, label: colGrp.attribute.label, category: colGrp.name, color: colGrp.color }];
 
 
-                // generate HashObject and hash value
-                const hashObject = {
-                  ids: this.ranking.getDisplayedIds(),
-                  selection: this.ranking.getSelection(),
-                  attribute: { label: (attr as IServerColumn).label, column: (attr as IServerColumn).column },
-                  setACategory: rowGrp.label,
-                  setBCategory: colGrp.label
-                };
+              // generate HashObject and hash value
+              const hashObject = {
+                ids: this.ranking.getDisplayedIds(),
+                selection: this.ranking.getSelection(),
+                attribute: { label: (attr as IServerColumn).label, column: (attr as IServerColumn).column },
+                setACategory: rowGrp.label,
+                setBCategory: colGrp.label
+              };
 
-                // remove selection ids, if both categories and the data column are not selection
-                if (hashObject.attribute.label !== 'Selection' &&
-                  hashObject.setACategory !== 'Unselected' && hashObject.setACategory !== 'Selected' &&
-                  hashObject.setBCategory !== 'Unselected' && hashObject.setBCategory !== 'Selected') {
-                  delete hashObject.selection;
-                }
-                // sort the ids, if the data column is not 'Rank'
-                if (hashObject.attribute.label !== 'Rank') {
-                  hashObject.ids = this.ranking.getDisplayedIds().sort();
-                }
-
-                // console.log('hashObject: ', hashObject);
-                const hashObjectString = JSON.stringify(hashObject);
-                // console.log('hashObject.srtringify: ', hashObjectString);
-                const hashValue = XXH.h32(hashObjectString, 0).toString(16);
-                // console.log('Hash: ', hash);
-
-                let isStoredScoreAvailable = false; // flag for the availability of a stored score
-
-                attrPromises.push(new Promise<IMeasureResult>((resolve, reject) => {
-                  // get score from sessionStorage
-                  const sessionScore = sessionStorage.getItem(hashValue);
-                  // console.log('sessionScore: ', sessionScore);
-                  // score for the measure
-                  let score: Promise<IMeasureResult> = null;
-
-                  if (sessionScore === null || sessionScore === undefined) {
-                    score = measure.calc(rowData, colData, attrData);
-                  } else if (sessionScore !== null || sessionScore !== undefined) {
-                    score = Promise.resolve(JSON.parse(sessionScore)) as Promise<IMeasureResult>;
-                    isStoredScoreAvailable = true;
-                  }
-
-                  // check if all values are NaN
-                  const uniqueDataRow = rowData.filter((item) => Number.isNaN(item));
-                  const uniqueDataCol = colData.filter((item) => Number.isNaN(item));
-                  if (rowData.length === uniqueDataRow.length || colData.length === uniqueDataCol.length) {
-                    isStoredScoreAvailable = true;
-                  }
-
-                  // return score;
-                  resolve(score);
-
-                }).then((score) => {
-
-                  if (!isStoredScoreAvailable) {
-                    const scoreString = JSON.stringify(score);
-                    // console.log('new score: ', score);
-                    // console.log('new scoreString: ', scoreString);
-                    sessionStorage.setItem(hashValue, scoreString);
-                  }
-
-                  data[bodyIndex][rowIndex][colIndexOffset + colIndex] = this.toScoreCell(score, measure, setParameters, highlight);
-                  if (colIndex4rowGrp[rowIndex] >= 0 && rowIndex4colGrp[colIndex] >= 0) {
-                    const colIndexOffset4Duplicate = rowIndex4colGrp[colIndex] === 0 ? 2 : 1; // Currenlty, we can't have duplicates in the first line, so this will always be 1
-                    data[bodyIndex][rowIndex4colGrp[colIndex]][colIndexOffset4Duplicate + colIndex4rowGrp[rowIndex]] = this.toScoreCell(score, measure, setParameters, highlight);
-                  }
-
-                }).catch((err) => {
-                  // console.error(err);
-                  const errorCell = { label: 'err', measure };
-                  data[bodyIndex][rowIndex][colIndexOffset + colIndex] = errorCell;
-                  if (colIndex4rowGrp[rowIndex] >= 0 && rowIndex4colGrp[colIndex] >= 0) {
-                    const colIndexOffset4Duplicate = rowIndex4colGrp[colIndex] === 0 ? 2 : 1;
-                    data[bodyIndex][rowIndex4colGrp[colIndex]][colIndexOffset4Duplicate + colIndex4rowGrp[rowIndex]] = errorCell;
-                  }
-                }));
-
-
+              // remove selection ids, if both categories and the data column are not selection
+              if (hashObject.attribute.label !== 'Selection' &&
+                hashObject.setACategory !== 'Unselected' && hashObject.setACategory !== 'Selected' &&
+                hashObject.setBCategory !== 'Unselected' && hashObject.setBCategory !== 'Selected') {
+                delete hashObject.selection;
               }
+              // sort the ids, if the data column is not 'Rank'
+              if (hashObject.attribute.label !== 'Rank') {
+                hashObject.ids = this.ranking.getDisplayedIds().sort();
+              }
+
+              // console.log('hashObject: ', hashObject);
+              const hashObjectString = JSON.stringify(hashObject);
+              // console.log('hashObject.srtringify: ', hashObjectString);
+              const hashValue = XXH.h32(hashObjectString, 0).toString(16);
+              // console.log('Hash: ', hash);
+
+              let isStoredScoreAvailable = false; // flag for the availability of a stored score
+
+              attrPromises.push(new Promise<IMeasureResult>((resolve, reject) => {
+                // get score from sessionStorage
+                const sessionScore = sessionStorage.getItem(hashValue);
+                // console.log('sessionScore: ', sessionScore);
+                // score for the measure
+                let score: Promise<IMeasureResult> = null;
+
+                if (sessionScore === null || sessionScore === undefined) {
+                  score = measure.calc(rowData, colData, attrData);
+                } else if (sessionScore !== null || sessionScore !== undefined) {
+                  score = Promise.resolve(JSON.parse(sessionScore)) as Promise<IMeasureResult>;
+                  isStoredScoreAvailable = true;
+                }
+
+                // check if all values are NaN
+                const uniqueDataRow = rowData.filter((item) => Number.isNaN(item));
+                const uniqueDataCol = colData.filter((item) => Number.isNaN(item));
+                if (rowData.length === uniqueDataRow.length || colData.length === uniqueDataCol.length) {
+                  isStoredScoreAvailable = true;
+                }
+
+                // return score;
+                resolve(score);
+
+              }).then((score) => {
+
+                if (!isStoredScoreAvailable) {
+                  const scoreString = JSON.stringify(score);
+                  // console.log('new score: ', score);
+                  // console.log('new scoreString: ', scoreString);
+                  sessionStorage.setItem(hashValue, scoreString);
+                }
+
+                data[bodyIndex][rowIndex][colIndexOffset + colIndex] = this.toScoreCell(score, measure, setParameters, highlight);
+                if (colIndex4rowGrp[rowIndex] >= 0 && rowIndex4colGrp[colIndex] >= 0) {
+                  const colIndexOffset4Duplicate = rowIndex4colGrp[colIndex] === 0 ? 2 : 1; // Currenlty, we can't have duplicates in the first line, so this will always be 1
+                  data[bodyIndex][rowIndex4colGrp[colIndex]][colIndexOffset4Duplicate + colIndex4rowGrp[rowIndex]] = this.toScoreCell(score, measure, setParameters, highlight);
+                }
+
+              }).catch((err) => {
+                // console.error(err);
+                const errorCell = { label: 'err', measure };
+                data[bodyIndex][rowIndex][colIndexOffset + colIndex] = errorCell;
+                if (colIndex4rowGrp[rowIndex] >= 0 && rowIndex4colGrp[colIndex] >= 0) {
+                  const colIndexOffset4Duplicate = rowIndex4colGrp[colIndex] === 0 ? 2 : 1;
+                  data[bodyIndex][rowIndex4colGrp[colIndex]][colIndexOffset4Duplicate + colIndex4rowGrp[rowIndex]] = errorCell;
+                }
+              }));
+
+
             }
           }
         }
-        Promise.all(attrPromises).then(() => { update(data); this.updateSelectionAndVisuallization(attr); });
-        promises.concat(attrPromises);
       }
-
-      await Promise.all(promises); // rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
-      return data; // then return the data
+      Promise.all(attrPromises).then(() => { update(data); this.updateSelectionAndVisuallization(attr); });
+      promises.concat(attrPromises);
     }
+
+    await Promise.all(promises); // rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
+    return data; // then return the data
   }
 
   prepareDataArray(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[]) {

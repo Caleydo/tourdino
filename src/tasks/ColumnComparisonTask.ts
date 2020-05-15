@@ -142,8 +142,12 @@ export class ColumnComparison extends ATouringTask {
         .append('polygon').attr('points', '0,0 ' + svgWidth + ',0 0,120'); // 120 is thead height, 45° rotation --> 120 is also width
     }
 
-    this.getAttrTableBody(colData, rowData, filterMissingValues, true, null).then(updateTableBody); // initialize
-    this.getAttrTableBody(colData, rowData, filterMissingValues, false, updateTableBody).then(updateTableBody); // set values
+    // initialize
+    const data = this.prepareDataArray(colData, rowData);
+    updateTableBody(data);
+
+    // set values
+    this.getAttrTableBody(colData, rowData, filterMissingValues, updateTableBody).then(updateTableBody);
   }
 
   /**
@@ -152,140 +156,136 @@ export class ColumnComparison extends ATouringTask {
    * @param arr2 rows
    * @param scaffold only create the matrix with row headers, but no value calculation
    */
-  private async getAttrTableBody(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, scaffold: boolean, update: (bodyData: IScoreCell[][][]) => void, ): Promise<Array<Array<Array<IScoreCell>>>> {
+  private async getAttrTableBody(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<Array<Array<Array<IScoreCell>>>> {
     const data = this.prepareDataArray(colAttributes, rowAttributes);
     console.log(data);
 
-    if (scaffold) {
-      return data;
-    } else {
-      const promises = [];
-      for (const [rowIndex, row] of rowAttributes.entries()) {
-        const rowPromises = [];
-        for (const [colIndex, col] of colAttributes.entries()) {
-          const colIndexInRows = rowAttributes.indexOf(col);
-          const rowIndexInCols = colAttributes.indexOf(row);
+    const promises = [];
+    for (const [rowIndex, row] of rowAttributes.entries()) {
+      const rowPromises = [];
+      for (const [colIndex, col] of colAttributes.entries()) {
+        const colIndexInRows = rowAttributes.indexOf(col);
+        const rowIndexInCols = colAttributes.indexOf(row);
 
-          if (row.label === col.label) {
-            // identical attributes
-            data[rowIndex][0][colIndex + 1] = { label: '<span class="circle"/>', measure: null };
-          } else if (rowIndexInCols >= 0 && colIndexInRows >= 0 && colIndexInRows < rowIndex) {
-            // the row is also part of the column array, and the column is one of the previous rows
-          } else {
-            const measures = MethodManager.getMeasuresByType(Type.get(row.type), Type.get(col.type), SCOPE.ATTRIBUTES);
-            if (measures.length > 0) { // start at
-              const measure = measures[0]; // Always the first
-              const first = this.ranking.getAttributeDataDisplayed((col as IServerColumn).column); // minus one because the first column is headers
-              const second = this.ranking.getAttributeDataDisplayed((row as IServerColumn).column);
+        if (row.label === col.label) {
+          // identical attributes
+          data[rowIndex][0][colIndex + 1] = { label: '<span class="circle"/>', measure: null };
+        } else if (rowIndexInCols >= 0 && colIndexInRows >= 0 && colIndexInRows < rowIndex) {
+          // the row is also part of the column array, and the column is one of the previous rows
+        } else {
+          const measures = MethodManager.getMeasuresByType(Type.get(row.type), Type.get(col.type), SCOPE.ATTRIBUTES);
+          if (measures.length > 0) { // start at
+            const measure = measures[0]; // Always the first
+            const first = this.ranking.getAttributeDataDisplayed((col as IServerColumn).column); // minus one because the first column is headers
+            const second = this.ranking.getAttributeDataDisplayed((row as IServerColumn).column);
 
-              // const [data1, data2] = filterMissingValues ? removeMissingValues(first, second) : [first, second];
-              const [data1, data2] = [first, second];
-              console.log(data1, data2);
+            const [data1, data2] = filterMissingValues ? removeMissingValues(first, second) : [first, second];
+            // const [data1, data2] = [first, second];
+            // console.log(data1, data2);
 
-              const setParameters = {
-                setA: data1,
-                setADesc: col,
-                setB: data2,
-                setBDesc: row
-              };
+            const setParameters = {
+              setA: data1,
+              setADesc: col,
+              setB: data2,
+              setBDesc: row
+            };
 
-              const highlight: IHighlightData[] = [
-                { column: (row as IServerColumn).column, label: row.label },
-                { column: (col as IServerColumn).column, label: col.label }];
+            const highlight: IHighlightData[] = [
+              { column: (row as IServerColumn).column, label: row.label },
+              { column: (col as IServerColumn).column, label: col.label }];
 
-              // generate HashObject and hash value
-              const hashObject = {
-                ids: this.ranking.getDisplayedIds(),
-                selection: this.ranking.getSelection(),
-                row: { label: (row as IServerColumn).label, column: (row as IServerColumn).column },
-                column: { label: (col as IServerColumn).label, column: (col as IServerColumn).column },
-              };
+            // generate HashObject and hash value
+            const hashObject = {
+              ids: this.ranking.getDisplayedIds(),
+              selection: this.ranking.getSelection(),
+              row: { label: (row as IServerColumn).label, column: (row as IServerColumn).column },
+              column: { label: (col as IServerColumn).label, column: (col as IServerColumn).column },
+            };
 
-              // remove selection ids, if both row and column are not 'Selection'
-              if (hashObject.row.label !== 'Selection' && hashObject.column.label !== 'Selection') {
-                delete hashObject.selection;
-              }
-              // sort the ids, if both row and column are not 'Rank'
-              if (hashObject.row.label !== 'Rank' && hashObject.column.label !== 'Rank') {
-                hashObject.ids = this.ranking.getDisplayedIds().sort();
-              }
-
-              // console.log('hashObject: ', hashObject, ' | unsortedSelction: ', this.ranking.getSelectionUnsorted());
-              const hashObjectString = JSON.stringify(hashObject);
-              // console.log('hashObject.srtringify: ', hashObjectString);
-              const hashValue = XXH.h32(hashObjectString, 0).toString(16);
-              // console.log('Hash: ', hashValue);
-
-              let isStoredScoreAvailable = false; // flag for the availability of a stored score
-
-              rowPromises.push(new Promise<IMeasureResult>((resolve, reject) => {
-
-                // get score from sessionStorage
-                const sessionScore = sessionStorage.getItem(hashValue);
-                // console.log('sessionScore: ', sessionScore);
-                // score for the measure
-                let score: Promise<IMeasureResult> = null;
-
-                if (sessionScore === null || sessionScore === undefined || sessionScore.length === 2) {
-                  score = measure.calc(data1, data2, null);
-                } else if (sessionScore !== null || sessionScore !== undefined) {
-                  score = Promise.resolve(JSON.parse(sessionScore)) as Promise<IMeasureResult>;
-                  isStoredScoreAvailable = true;
-                }
-
-                // check if all values are NaN
-                const uniqueData1 = data1.filter((item) => Number.isNaN(item));
-                const uniqueData2 = data2.filter((item) => Number.isNaN(item));
-                if (data1.length === uniqueData1.length || data2.length === uniqueData2.length) {
-                  isStoredScoreAvailable = true;
-                }
-
-                // return score
-                resolve(score);
-
-              }).then((score) => {
-
-                if (!isStoredScoreAvailable) {
-                  const scoreString = JSON.stringify(score);
-                  // console.log('new score: ', score);
-                  // console.log('new scoreString: ', scoreString);
-                  sessionStorage.setItem(hashValue, scoreString);
-                }
-
-                data[rowIndex][0][colIndex + 1] = this.toScoreCell(score, measure, setParameters, highlight);
-
-                if (rowIndexInCols >= 0 && colIndexInRows >= 0) {
-                  // invert A and B so that the axis labels are conistent
-                  const setParametersInverted = {
-                    setA: setParameters.setB,
-                    setADesc: setParameters.setBDesc,
-                    setB: setParameters.setA,
-                    setBDesc: setParameters.setADesc
-                  };
-                  data[colIndexInRows][0][rowIndexInCols + 1] = this.toScoreCell(score, measure, setParametersInverted, highlight);
-                }
-              }).catch((err) => {
-                console.error(err);
-                const errorCell = { label: 'err', measure };
-                data[rowIndex][0][colIndex + 1] = errorCell;
-                if (rowIndexInCols >= 0 && colIndexInRows >= 0) {
-                  data[colIndexInRows][0][rowIndexInCols + 1] = errorCell;
-                }
-              })
-              );
-
-
+            // remove selection ids, if both row and column are not 'Selection'
+            if (hashObject.row.label !== 'Selection' && hashObject.column.label !== 'Selection') {
+              delete hashObject.selection;
             }
+            // sort the ids, if both row and column are not 'Rank'
+            if (hashObject.row.label !== 'Rank' && hashObject.column.label !== 'Rank') {
+              hashObject.ids = this.ranking.getDisplayedIds().sort();
+            }
+
+            // console.log('hashObject: ', hashObject, ' | unsortedSelction: ', this.ranking.getSelectionUnsorted());
+            const hashObjectString = JSON.stringify(hashObject);
+            // console.log('hashObject.srtringify: ', hashObjectString);
+            const hashValue = XXH.h32(hashObjectString, 0).toString(16);
+            // console.log('Hash: ', hashValue);
+
+            let isStoredScoreAvailable = false; // flag for the availability of a stored score
+
+            rowPromises.push(new Promise<IMeasureResult>((resolve, reject) => {
+
+              // get score from sessionStorage
+              const sessionScore = sessionStorage.getItem(hashValue);
+              // console.log('sessionScore: ', sessionScore);
+              // score for the measure
+              let score: Promise<IMeasureResult> = null;
+
+              if (sessionScore === null || sessionScore === undefined || sessionScore.length === 2) {
+                score = measure.calc(data1, data2, null);
+              } else if (sessionScore !== null || sessionScore !== undefined) {
+                score = Promise.resolve(JSON.parse(sessionScore)) as Promise<IMeasureResult>;
+                isStoredScoreAvailable = true;
+              }
+
+              // check if all values are NaN
+              const uniqueData1 = data1.filter((item) => Number.isNaN(item));
+              const uniqueData2 = data2.filter((item) => Number.isNaN(item));
+              if (data1.length === uniqueData1.length || data2.length === uniqueData2.length) {
+                isStoredScoreAvailable = true;
+              }
+
+              // return score
+              resolve(score);
+
+            }).then((score) => {
+
+              if (!isStoredScoreAvailable) {
+                const scoreString = JSON.stringify(score);
+                // console.log('new score: ', score);
+                // console.log('new scoreString: ', scoreString);
+                sessionStorage.setItem(hashValue, scoreString);
+              }
+
+              data[rowIndex][0][colIndex + 1] = this.toScoreCell(score, measure, setParameters, highlight);
+
+              if (rowIndexInCols >= 0 && colIndexInRows >= 0) {
+                // invert A and B so that the axis labels are conistent
+                const setParametersInverted = {
+                  setA: setParameters.setB,
+                  setADesc: setParameters.setBDesc,
+                  setB: setParameters.setA,
+                  setBDesc: setParameters.setADesc
+                };
+                data[colIndexInRows][0][rowIndexInCols + 1] = this.toScoreCell(score, measure, setParametersInverted, highlight);
+              }
+            }).catch((err) => {
+              console.error(err);
+              const errorCell = { label: 'err', measure };
+              data[rowIndex][0][colIndex + 1] = errorCell;
+              if (rowIndexInCols >= 0 && colIndexInRows >= 0) {
+                data[colIndexInRows][0][rowIndexInCols + 1] = errorCell;
+              }
+            })
+            );
+
+
           }
         }
-
-        promises.concat(rowPromises);
-        Promise.all(rowPromises).then(() => { update(data); this.updateSelectionAndVisuallization(row); });
       }
 
-      await Promise.all(promises); // rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
-      return data; // then return the data
+      promises.concat(rowPromises);
+      Promise.all(rowPromises).then(() => { update(data); this.updateSelectionAndVisuallization(row); });
     }
+
+    await Promise.all(promises); // rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
+    return data; // then return the data
   }
 
   prepareDataArray(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[]) {
