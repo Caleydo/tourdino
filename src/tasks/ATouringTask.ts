@@ -436,7 +436,7 @@ export abstract class ATouringTask implements ITouringTask {
       .text(measure.description);
   }
 
-  protected updateSelectionAndVisuallization(row) {
+  protected updateSelectionAndVisualization(row) {
 
     // current task
     const currTask = this.nodeObject.attr('class');

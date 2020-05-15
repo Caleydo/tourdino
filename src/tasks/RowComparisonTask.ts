@@ -334,7 +334,7 @@ export class RowComparison extends ATouringTask {
           }
         }
       }
-      Promise.all(attrPromises).then(() => { update(data); this.updateSelectionAndVisuallization(attr); });
+      Promise.all(attrPromises).then(() => { update(data); this.updateSelectionAndVisualization(attr); });
       promises.concat(attrPromises);
     }
 

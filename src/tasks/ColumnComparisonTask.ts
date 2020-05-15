@@ -281,7 +281,7 @@ export class ColumnComparison extends ATouringTask {
       }
 
       promises.concat(rowPromises);
-      Promise.all(rowPromises).then(() => { update(data); this.updateSelectionAndVisuallization(row); });
+      Promise.all(rowPromises).then(() => { update(data); this.updateSelectionAndVisualization(row); });
     }
 
     await Promise.all(promises); // rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
