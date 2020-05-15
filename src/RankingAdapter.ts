@@ -38,7 +38,7 @@ export class RankingAdapter {
   /**
    * Identify scores through their `lazyLoaded` attribute.
    */
-  private getScoreColumns() {
+  public getScoreColumns() {
     return this.getDisplayedAttributes().filter((attr) => isScoreColumn(attr.desc));
   }
 
