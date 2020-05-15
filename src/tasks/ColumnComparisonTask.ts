@@ -143,11 +143,11 @@ export class ColumnComparison extends ATouringTask {
     }
 
     // initialize
-    const data = this.prepareDataArray(colData, rowData);
+    const data = prepareDataArray(colData, rowData);
     updateTableBody(data);
 
     // set values
-    //this.getAttrTableBody(colData, rowData, filterMissingValues, updateTableBody).then(updateTableBody);
+    this.getAttrTableBody(colData, rowData, filterMissingValues, updateTableBody).then(updateTableBody);
   }
 
   /**
@@ -157,7 +157,7 @@ export class ColumnComparison extends ATouringTask {
    * @param scaffold only create the matrix with row headers, but no value calculation
    */
   private async getAttrTableBody(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<IScoreCell[][][]> {
-    const data = this.prepareDataArray(colAttributes, rowAttributes);
+    const data = prepareDataArray(colAttributes, rowAttributes);
     console.log(data);
 
     const promises = [];
@@ -192,7 +192,8 @@ export class ColumnComparison extends ATouringTask {
 
             const highlight: IHighlightData[] = [
               { column: (row as IServerColumn).column, label: row.label },
-              { column: (col as IServerColumn).column, label: col.label }];
+              { column: (col as IServerColumn).column, label: col.label }
+            ];
 
             // generate HashObject and hash value
             const hashObject = {
@@ -206,6 +207,7 @@ export class ColumnComparison extends ATouringTask {
             if (hashObject.row.label !== 'Selection' && hashObject.column.label !== 'Selection') {
               delete hashObject.selection;
             }
+
             // sort the ids, if both row and column are not 'Rank'
             if (hashObject.row.label !== 'Rank' && hashObject.column.label !== 'Rank') {
               hashObject.ids = this.ranking.getDisplayedIds().sort();
@@ -287,18 +289,22 @@ export class ColumnComparison extends ATouringTask {
     await Promise.all(promises); // rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
     return data; // then return the data
   }
+}
 
-  prepareDataArray(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[]) {
-    if (rowAttributes.length === 0 || colAttributes.length === 0) {
-      return [];
-    }
-    const data = new Array(rowAttributes.length); // n2 arrays (bodies)
-    for (const i of data.keys()) {
-      data[i] = new Array(1); // currently just one row per attribute
-      data[i][0] = new Array(colAttributes.length + 1).fill({ label: '<i class="fa fa-circle-o-notch fa-spin"></i>', measure: null } as IScoreCell); // containing n1+1 elements (header + n1 vlaues)
-      data[i][0][0] = { label: `<b>${rowAttributes[i].label}</b>`, type: rowAttributes[i].type };
-    }
 
-    return data;
+function prepareDataArray(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[]): any[] {
+  if (rowAttributes.length === 0 || colAttributes.length === 0) {
+    return [];
   }
+
+  const data = rowAttributes.map((rowAttribute) => {
+    return [[ // n2 arrays (bodies)
+      { label: `<b>${rowAttribute.label}</b>`, type: rowAttribute.type },
+      ...colAttributes.map((_) => {
+        return { label: '<i class="fa fa-circle-o-notch fa-spin"></i>', measure: null } as IScoreCell; // containing n1+1 elements (header + n1 values)
+      })
+    ]];
+  });
+
+  return data;
 }
