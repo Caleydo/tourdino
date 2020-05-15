@@ -26,7 +26,7 @@ export function intersection(arr1: Array<any>, arr2: Array<any>) {
 
 /**
  * Remove missing values from both arrays. If a value is missing in the first array, remove it.
- * Remove the item in the second array with the same index. 
+ * Remove the item in the second array with the same index.
  * @param arr1 First array
  * @param arr2 Second array
  * @returns An array containing two same length arrays with no null/missing values
@@ -96,7 +96,7 @@ export function sleep(millis: number) {
  * See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
  * See: https://stackoverflow.com/a/1527820/2549748
  */
-export function getRandomInt(min, max) {
+function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
