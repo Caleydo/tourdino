@@ -14,7 +14,7 @@ function getRandomInt(min, max) {
 }
 
 // function to calculate enrichment score for one attribute
-function calc(setNumber: Array<any>, setCategory: Array<any>) {
+function calc(setNumber: any[], setCategory: any[]) {
   const categories = setCategory.filter((item, index, self) => self.indexOf(item) === index);
 
   // combine both sets
@@ -51,7 +51,7 @@ function calc(setNumber: Array<any>, setCategory: Array<any>) {
 }
 
 // function to calculate enrichment score for one category
-function calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: string, amountCategory: number): {
+function calcEnrichmentScoreCategory(setCombined: any[], currCategory: string, amountCategory: number): {
   category: string,
   enrichmentScore: number} {
 
@@ -93,9 +93,9 @@ const ctx: Worker = self as any;
 
 ctx.onmessage = function (event) {
   try {
-    const setNumber: Array<any> = event.data.setNumber;
-    const setCategory: Array<any> = event.data.setCategory;
-    const actualScores: Array<any> = event.data.actualScores;
+    const setNumber: any[] = event.data.setNumber;
+    const setCategory: any[] = event.data.setCategory;
+    const actualScores: any[] = event.data.actualScores;
 
     const n = setCategory.length;
     const categories = setCategory.filter((item, index, self) => self.indexOf(item) === index);

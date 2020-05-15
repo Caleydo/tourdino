@@ -7,7 +7,7 @@ import {IColumnDesc, isMissingValue} from 'lineupjs';
  *  arr1: eleents only in arr1
  *  arr2: eleents only in arr2
  */
-export function intersection(arr1: Array<any>, arr2: Array<any>) {
+export function intersection(arr1: any[], arr2: any[]) {
   const intersection = [];
   const filtered2 = arr2.slice(0); // Slice is fastest (internally optimized) method on blink browsers (e.g. chrome) to copy an array
   const filtered1 = arr1.filter((itemA) => {
@@ -31,7 +31,7 @@ export function intersection(arr1: Array<any>, arr2: Array<any>) {
  * @param arr2 Second array
  * @returns An array containing two same length arrays with no null/missing values
  */
-export function removeMissingValues(arr1: Array<any>, arr2: Array<any>) {
+export function removeMissingValues(arr1: any[], arr2: any[]) {
   let filtered1 = [];
   let filtered2 = [];
   arr1.forEach((item, index) => {
@@ -136,7 +136,7 @@ export function getRandomUniqueIntegers(n, max) {
  * Shuffles array in place. From: https://stackoverflow.com/a/6274381/2549748
  * @param {Array} arr An array containing the items.
  */
-export function shuffle(arr: Array<any>): Array<any> {
+export function shuffle(arr: any[]): any[] {
   let index, rndIndex, helper;
   for (index = arr.length - 1; index > 0; index--) {
       rndIndex = Math.floor(Math.random() * (index + 1));

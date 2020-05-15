@@ -89,7 +89,7 @@ export class ColumnComparison extends ATouringTask {
       .attr('class', 'head rotate').append('div').append('span').append('span'); // th.head are the column headers
 
     const that = this; // for the function below
-    function updateTableBody(bodyData: Array<Array<Array<IScoreCell>>>) {
+    function updateTableBody(bodyData: IScoreCell[][][]) {
       if (that.nodeObject.attr('data-timestamp') !== timestamp) {
         return; // skip outdated result
       }
@@ -98,10 +98,10 @@ export class ColumnComparison extends ATouringTask {
 
 
       // create a table body for every column
-      const bodies = that.nodeObject.select('table').selectAll('tbody').data(bodyData, (d) => d[0][0].label); // the data of each body is of type: Array<Array<IScoreCell>>
+      const bodies = that.nodeObject.select('table').selectAll('tbody').data(bodyData, (d) => d[0][0].label); // the data of each body is of type: IScoreCell[][]
       bodies.enter().append('tbody'); // For each IColumnTableData, create a tbody
 
-      // the data of each row is of type: Array<IScoreCell>
+      // the data of each row is of type: IScoreCell[]
       const trs = bodies.selectAll('tr').data((d) => d, (d) => d[0].label); // had to specify the function to derive the data (d -> d)
       trs.enter().append('tr');
       const tds = trs.selectAll('td').data((d) => d);
@@ -147,7 +147,7 @@ export class ColumnComparison extends ATouringTask {
     updateTableBody(data);
 
     // set values
-    this.getAttrTableBody(colData, rowData, filterMissingValues, updateTableBody).then(updateTableBody);
+    //this.getAttrTableBody(colData, rowData, filterMissingValues, updateTableBody).then(updateTableBody);
   }
 
   /**
@@ -156,7 +156,7 @@ export class ColumnComparison extends ATouringTask {
    * @param arr2 rows
    * @param scaffold only create the matrix with row headers, but no value calculation
    */
-  private async getAttrTableBody(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<Array<Array<Array<IScoreCell>>>> {
+  private async getAttrTableBody(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<IScoreCell[][][]> {
     const data = this.prepareDataArray(colAttributes, rowAttributes);
     console.log(data);
 

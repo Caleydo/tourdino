@@ -1,6 +1,6 @@
 import {intersection, getRandomUniqueIntegers} from '../util';
 
-function calc(setA: Array<any>, setB: Array<any>) {
+function calc(setA: any[], setB: any[]) {
   const {intersection: intersect, arr1: filteredsetA, arr2: filteredsetB} = intersection(setA, setB);
   const score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
   return score || 0;
@@ -11,9 +11,9 @@ const ctx: Worker = self as any;
 
 ctx.onmessage = (event) => {
   try {
-    const setA: Array<any> = event.data.setA;
-    const setB: Array<any> = event.data.setB;
-    const allData: Array<any> = event.data.allData;
+    const setA: any[] = event.data.setA;
+    const setB: any[] = event.data.setB;
+    const allData: any[] = event.data.allData;
 
     const actualScore = calc(setA, setB);
 

@@ -124,7 +124,7 @@ export class RowComparison extends ATouringTask {
       .attr('class', 'head rotate').append('div').append('span').append('span'); // th.head are the column headers
 
     const that = this; // for the function below
-    function updateTableBody(bodyData: Array<Array<Array<IScoreCell>>>, timestamp: string) {
+    function updateTableBody(bodyData: IScoreCell[][][], timestamp: string) {
       if (that.nodeObject.attr('data-timestamp') !== timestamp) {
         return; // skip outdated result
       }
@@ -132,10 +132,10 @@ export class RowComparison extends ATouringTask {
       that.updateTableDescription(bodyData.length === 0);
 
       // create a table body for every column
-      const bodies = that.nodeObject.select('table').selectAll('tbody').data(bodyData, (d) => d[0][0].label); // the data of each body is of type: Array<Array<IScoreCell>>
+      const bodies = that.nodeObject.select('table').selectAll('tbody').data(bodyData, (d) => d[0][0].label); // the data of each body is of type: IScoreCell[][]
       bodies.enter().append('tbody').classed('bottom-margin', true); // For each IColumnTableData, create a tbody
 
-      // the data of each row is of type: Array<IScoreCell>
+      // the data of each row is of type: IScoreCell[]
       const trs = bodies.selectAll('tr').data((d) => d, (d) => d[0].key); // had to specify the function to derive the data (d -> d)
       trs.enter().append('tr');
       const tds = trs.selectAll('td').data((d) => d);   // the data of each td is of type: IScoreCell
@@ -206,7 +206,7 @@ export class RowComparison extends ATouringTask {
    * @param scaffold only create the matrix with row headers, but no value calculation
    * @param update
    */
-  async getAttrTableBody(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<Array<Array<Array<IScoreCell>>>> {
+  async getAttrTableBody(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<IScoreCell[][][]> {
     const data = this.prepareDataArray(colGroups, rowGroups, rowAttributes);
 
     const promises = [];
