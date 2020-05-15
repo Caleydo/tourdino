@@ -197,16 +197,16 @@ export class ColumnComparison extends ATouringTask {
               const hashObject = {
                 ids: this.ranking.getDisplayedIds(),
                 selection: this.ranking.getSelection(),
-                row: { lable: (row as IServerColumn).label, column: (row as IServerColumn).column },
-                column: { lable: (col as IServerColumn).label, column: (col as IServerColumn).column },
+                row: { label: (row as IServerColumn).label, column: (row as IServerColumn).column },
+                column: { label: (col as IServerColumn).label, column: (col as IServerColumn).column },
               };
 
               // remove selection ids, if both row and column are not 'Selection'
-              if (hashObject.row.lable !== 'Selection' && hashObject.column.lable !== 'Selection') {
+              if (hashObject.row.label !== 'Selection' && hashObject.column.label !== 'Selection') {
                 delete hashObject.selection;
               }
               // sort the ids, if both row and column are not 'Rank'
-              if (hashObject.row.lable !== 'Rank' && hashObject.column.lable !== 'Rank') {
+              if (hashObject.row.label !== 'Rank' && hashObject.column.label !== 'Rank') {
                 hashObject.ids = this.ranking.getDisplayedIds().sort();
               }
 

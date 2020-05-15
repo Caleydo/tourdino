@@ -255,19 +255,19 @@ export class RowComparison extends ATouringTask {
                 const hashObject = {
                   ids: this.ranking.getDisplayedIds(),
                   selection: this.ranking.getSelection(),
-                  attribute: { lable: (attr as IServerColumn).label, column: (attr as IServerColumn).column },
+                  attribute: { label: (attr as IServerColumn).label, column: (attr as IServerColumn).column },
                   setACategory: rowGrp.label,
                   setBCategory: colGrp.label
                 };
 
                 // remove selection ids, if both categories and the data column are not selection
-                if (hashObject.attribute.lable !== 'Selection' &&
+                if (hashObject.attribute.label !== 'Selection' &&
                   hashObject.setACategory !== 'Unselected' && hashObject.setACategory !== 'Selected' &&
                   hashObject.setBCategory !== 'Unselected' && hashObject.setBCategory !== 'Selected') {
                   delete hashObject.selection;
                 }
                 // sort the ids, if the data column is not 'Rank'
-                if (hashObject.attribute.lable !== 'Rank') {
+                if (hashObject.attribute.label !== 'Rank') {
                   hashObject.ids = this.ranking.getDisplayedIds().sort();
                 }
 
