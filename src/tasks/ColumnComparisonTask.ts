@@ -153,12 +153,14 @@ export class ColumnComparison extends ATouringTask {
   }
 
   /**
-   * async: return promise
-   * @param attr1 columns
-   * @param arr2 rows
-   * @param scaffold only create the matrix with row headers, but no value calculation
+   * Retrieve the values for each table cell and return the data structure.
+   *
+   * @param colAttributes Selected column descriptions (in column direction)
+   * @param rowAttributes Selected column descriptions (in row direction)
+   * @param filterMissingValues Filter missing values?
+   * @param updateRow Update function, which gets called once all cells of a row are calculated
    */
-  private async getAttrTableBody(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<IScoreCell[][][]> {
+  private async getAttrTableBody(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, updateRow: (bodyData: IScoreCell[][][]) => void): Promise<IScoreCell[][][]> {
     const data = prepareDataArray(colAttributes, rowAttributes);
 
     // cache cell for faster lookup and reuse results for inverse cells
@@ -188,6 +190,7 @@ export class ColumnComparison extends ATouringTask {
                 setA: inverseResult.setParameters.setB,
                 setADesc: inverseResult.setParameters.setBDesc,
                 setACategory: inverseResult.setParameters.setBCategory,
+
                 setB: inverseResult.setParameters.setA,
                 setBDesc: inverseResult.setParameters.setADesc,
                 setBCategory: inverseResult.setParameters.setACategory,
@@ -214,7 +217,7 @@ export class ColumnComparison extends ATouringTask {
       return Promise.all(colPromises)
         .then(() => {
           // update the table with the new row data and update visualization for the selected row
-          update(data);
+          updateRow(data);
           this.updateSelectionAndVisualization(row);
         });
     });
@@ -224,6 +227,10 @@ export class ColumnComparison extends ATouringTask {
     return data; // then return the data
   }
 
+  /**
+   * This functions returns a promise that gets resolved, once the score column is loaded.
+   * The notification is implemented based on a flag or an event.
+   */
   private waitUntilScoreColumnIsLoaded(desc: IColumnDesc): Promise<any> {
     const scoreColumn = (<ValueColumn<any>[]>this.ranking.getScoreColumns()).find((col) => (<IServerColumn>col.desc).column === (<IServerColumn>desc).column);
 
@@ -238,14 +245,22 @@ export class ColumnComparison extends ATouringTask {
         return;
       }
 
-      scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + '.touring', () => {
-        scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + '.touring', null);
+      scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + '.tourdino', () => { // add suffix for unique event name
+        scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + '.tourdino', null);
         // console.log('data loaded (notified by event) for', scoreColumn.desc.label);
         resolve();
       });
     });
   }
 
+  /**
+   * Retrieve a cell result for the given row and column.
+   * A result can be either a score, an null value for self-references, or an error.
+   *
+   * @param row Column description (in row direction)
+   * @param col Column description (in column direction)
+   * @param filterMissingValues Filter missing values?
+   */
   private async getScoreCellResult(row: IColumnDesc, col: IColumnDesc, filterMissingValues: boolean): Promise<IScoreCell> {
     if (row.label === col.label) {
       // identical attributes
@@ -314,6 +329,15 @@ export class ColumnComparison extends ATouringTask {
     }
   }
 
+  /**
+   * Calculate a score for the given measurement and dataset.
+   * Score values are stored with the given hash value in the session store.
+   * The calculation is skipped if an exisitng score for the hash value is found in the session store.
+   *
+   * @param hashValue Hash value for lookup in the session store
+   * @param data Data used for the score calculation
+   * @param measure Selected measurment class
+   */
   private async getMeasurementScore(hashValue: string, data: {setA: any[], setB: any[], allData: any[]}, measure: ISimilarityMeasure) {
 
     const sessionScore = sessionStorage.getItem(hashValue);
@@ -337,6 +361,11 @@ export class ColumnComparison extends ATouringTask {
 }
 
 
+/**
+ * Prepare data array with loading icon to visualize with D3
+ * @param colAttributes selected columns (in column direction)
+ * @param rowAttributes selected columns (in row direction)
+ */
 function prepareDataArray(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[]): any[] {
   if (rowAttributes.length === 0 || colAttributes.length === 0) {
     return [];
@@ -354,20 +383,50 @@ function prepareDataArray(colAttributes: IColumnDesc[], rowAttributes: IColumnDe
   return data;
 }
 
+/**
+ * Hash object
+ */
 interface IHashObject {
+  /**
+   * List of visible ids in the ranking
+   */
   ids: any[];
+
+  /**
+   * List of selected rows in the ranking
+   */
   selection: number[];
+
+  /**
+   * Selected column (in row direction)
+   */
   row: {
       label: string;
       column: string;
   };
+
+  /**
+   * Selected column (in column direction)
+   */
   column: {
       label: string;
       column: string;
   };
+
+  /**
+   * Filter missing values?
+   */
   filterMissingValues: boolean;
 }
 
+/**
+ * Generate a (unique) hash object that can be used to create a hash value
+ * @param row Column description (in row direction)
+ * @param col Column description (in column direction)
+ * @param ids List of visible ids in the ranking
+ * @param selection List of selected rows in the ranking
+ * @param filterMissingValues Filter missing values?
+ */
 function generateHashObject(row: IColumnDesc, col: IColumnDesc, ids: any[], selection: number[], filterMissingValues: boolean): IHashObject {
   // sort the ids, if both row and column are not 'Rank'
   if (row.label !== 'Rank' && col.label !== 'Rank') {
@@ -390,6 +449,10 @@ function generateHashObject(row: IColumnDesc, col: IColumnDesc, ids: any[], sele
   return hashObject;
 }
 
+/**
+ * Generate a (unique) hash value from the given hash object
+ * @param hashObject hash object to be hashed
+ */
 function generateHashValue(hashObject: IHashObject): string {
   // console.log('hashObject: ', hashObject, ' | unsortedSelction: ', this.ranking.getSelectionUnsorted());
   const hashObjectString = JSON.stringify(hashObject);
