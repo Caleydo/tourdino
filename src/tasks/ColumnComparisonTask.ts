@@ -9,6 +9,7 @@ import {IServerColumn} from 'tdp_core/src/rest';
 import {MethodManager} from '../Managers';
 import {WorkerManager} from '../Workers/WorkerManager';
 import {cloneDeep} from 'lodash';
+import {removeMissingValues} from '../util';
 
 export class ColumnComparison extends ATouringTask {
 
@@ -197,7 +198,7 @@ export class ColumnComparison extends ATouringTask {
           });
 
         } else {
-          promise = this.getScoreCellResult(row, col);
+          promise = this.getScoreCellResult(row, col, filterMissingValues);
 
           promise.then((result: IScoreCell) => {
             data[rowIndex][0][colIndex + 1] = result;
@@ -245,7 +246,7 @@ export class ColumnComparison extends ATouringTask {
     });
   }
 
-  private async getScoreCellResult(row: IColumnDesc, col: IColumnDesc): Promise<IScoreCell> {
+  private async getScoreCellResult(row: IColumnDesc, col: IColumnDesc, filterMissingValues: boolean): Promise<IScoreCell> {
     if (row.label === col.label) {
       // identical attributes
       return { label: '<span class="circle"/>', measure: null };
@@ -268,11 +269,16 @@ export class ColumnComparison extends ATouringTask {
     // use always the first measure
     const measure = measures[0];
 
-    try {
-      const score = await this.getMeasurementScore(row, col, measure);
+    const hashObject = generateHashObject(row, col, this.ranking.getDisplayedIds(), this.ranking.getSelection(), filterMissingValues);
+    const hashValue = generateHashValue(hashObject);
 
-      const data1 = this.ranking.getAttributeDataDisplayed((col as IServerColumn).column); // minus one because the first column is headers
-      const data2 = this.ranking.getAttributeDataDisplayed((row as IServerColumn).column);
+    const first = this.ranking.getAttributeDataDisplayed((col as IServerColumn).column); // minus one because the first column is headers
+    const second = this.ranking.getAttributeDataDisplayed((row as IServerColumn).column);
+
+    const [data1, data2] = filterMissingValues ? removeMissingValues(first, second) : [first, second];
+
+    try {
+      const score = await this.getMeasurementScore(hashValue, {setA: data1, setB:data2, allData: null}, measure);
 
       // check if all values are NaN
       // necessary for score columns that are lazy loaded
@@ -308,9 +314,7 @@ export class ColumnComparison extends ATouringTask {
     }
   }
 
-  private async getMeasurementScore(row: IColumnDesc, col: IColumnDesc, measure: ISimilarityMeasure) {
-    const hashObject = generateHashObject(row, col, this.ranking.getDisplayedIds(), this.ranking.getSelection());
-    const hashValue = generateHashValue(hashObject);
+  private async getMeasurementScore(hashValue: string, data: {setA: any[], setB: any[], allData: any[]}, measure: ISimilarityMeasure) {
 
     const sessionScore = sessionStorage.getItem(hashValue);
 
@@ -319,13 +323,7 @@ export class ColumnComparison extends ATouringTask {
       return Promise.resolve<IMeasureResult>(JSON.parse(sessionScore));
     }
 
-    const first = this.ranking.getAttributeDataDisplayed((col as IServerColumn).column); // minus one because the first column is headers
-    const second = this.ranking.getAttributeDataDisplayed((row as IServerColumn).column);
-
-    // const [data1, data2] = filterMissingValues ? removeMissingValues(first, second) : [first, second];
-    const [data1, data2] = [first, second];
-
-    const score = await measure.calc(data1, data2, null);
+    const score = await measure.calc(data.setA, data.setB, data.allData);
 
     // cache score result in session storage
     const scoreString = JSON.stringify(score);
@@ -367,9 +365,10 @@ interface IHashObject {
       label: string;
       column: string;
   };
+  filterMissingValues: boolean;
 }
 
-function generateHashObject(row: IColumnDesc, col: IColumnDesc, ids: any[], selection: number[]): IHashObject {
+function generateHashObject(row: IColumnDesc, col: IColumnDesc, ids: any[], selection: number[], filterMissingValues: boolean): IHashObject {
   // sort the ids, if both row and column are not 'Rank'
   if (row.label !== 'Rank' && col.label !== 'Rank') {
     ids = ids.sort();
@@ -380,6 +379,7 @@ function generateHashObject(row: IColumnDesc, col: IColumnDesc, ids: any[], sele
     selection,
     row: {label: (row as IServerColumn).label, column: (row as IServerColumn).column},
     column: {label: (col as IServerColumn).label, column: (col as IServerColumn).column},
+    filterMissingValues
   };
 
   // remove selection ids, if both row and column are not 'Selection'
