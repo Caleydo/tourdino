@@ -223,7 +223,7 @@ export class ColumnComparison extends ATouringTask {
     return data; // then return the data
   }
 
-  private waitForScoreColumnLoaded(desc: IColumnDesc): Promise<any> {
+  private waitUntilScoreColumnIsLoaded(desc: IColumnDesc): Promise<any> {
     const scoreColumn = (<ValueColumn<any>[]>this.ranking.getScoreColumns()).find((col) => (<IServerColumn>col.desc).column === (<IServerColumn>desc).column);
 
     if(!scoreColumn) {
@@ -232,30 +232,30 @@ export class ColumnComparison extends ATouringTask {
 
     return new Promise((resolve) => {
       if(scoreColumn.isLoaded()) {
-        console.log('data already loaded for', scoreColumn.desc.label);
+        // console.log('data already loaded for', scoreColumn.desc.label);
         resolve();
         return;
       }
 
       scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + '.touring', () => {
         scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + '.touring', null);
-        console.log('data loaded (notified by event) for', scoreColumn.desc.label);
+        // console.log('data loaded (notified by event) for', scoreColumn.desc.label);
         resolve();
       });
     });
   }
 
-  private async getScoreCellResult(row: IColumnDesc, col: IColumnDesc) {
+  private async getScoreCellResult(row: IColumnDesc, col: IColumnDesc): Promise<IScoreCell> {
     if (row.label === col.label) {
       // identical attributes
       return { label: '<span class="circle"/>', measure: null };
     }
 
-    // wait until score column is loaded before proceeding to the calculation + result
-    await this.waitForScoreColumnLoaded(row);
-    console.log('row is loaded', row);
-    await this.waitForScoreColumnLoaded(col);
-    console.log('col is loaded', col);
+    // wait until score columns are loaded before proceeding to the calculation
+    await this.waitUntilScoreColumnIsLoaded(row);
+    // console.log('row is loaded', row);
+    await this.waitUntilScoreColumnIsLoaded(col);
+    // console.log('col is loaded', col);
 
     const measures = MethodManager.getMeasuresByType(Type.get(row.type), Type.get(col.type), SCOPE.ATTRIBUTES);
 
@@ -277,16 +277,16 @@ export class ColumnComparison extends ATouringTask {
       // check if all values are NaN
       // necessary for score columns that are lazy loaded
       // TODO the score column is flaged as `loaded`, but the data is still not available. needs further investigation
-      if(data1.every((item) => Number.isNaN(item))) {
-        // wait until score column is loaded before calculating the score
-        console.warn('all NaN!!!! should have waited for it', col);
-      }
+      // if(data1.every((item) => Number.isNaN(item))) {
+      //   // wait until score column is loaded before calculating the score
+      //   console.warn('all NaN!!!! should have waited for it', col);
+      // }
 
       // TODO the score column is flaged as `loaded`, but the data is still not available. needs further investigation
-      if(data2.every((item) => Number.isNaN(item))) {
-        // wait until score column is loaded before calculating the score
-        console.warn('all NaN!!!! should have waited for it', row);
-      }
+      // if(data2.every((item) => Number.isNaN(item))) {
+      //   // wait until score column is loaded before calculating the score
+      //   console.warn('all NaN!!!! should have waited for it', row);
+      // }
 
       const setParameters = {
         setA: data1,
@@ -344,7 +344,6 @@ export class ColumnComparison extends ATouringTask {
    */
   private async getAttrTableBody__OLD(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<IScoreCell[][][]> {
     const data = prepareDataArray(colAttributes, rowAttributes);
-    console.log('input data', data);
 
     let promises = [];
     for (const [rowIndex, row] of rowAttributes.entries()) {
