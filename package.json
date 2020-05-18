@@ -102,6 +102,7 @@
     "d3.parsets": "git+https://github.com/jasondavies/d3-parsets.git#v1.2.4",
     "d3-grubert-boxplot": "gist:366430a0ac8e6e55ce09b040b5b493a6",
     "jStat": "1.8.6",
+    "lodash": "~4.17.15",
     "phovea_core": "github:phovea/phovea_core#develop",
     "xxhashjs": "^0.2.2"
   }

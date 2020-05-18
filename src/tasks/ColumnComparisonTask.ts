@@ -8,6 +8,7 @@ import {IMeasureResult, Type, SCOPE, ISimilarityMeasure} from '../interfaces';
 import {IServerColumn} from 'tdp_core/src/rest';
 import {MethodManager} from '../Managers';
 import {WorkerManager} from '../Workers/WorkerManager';
+import {cloneDeep} from 'lodash';
 
 export class ColumnComparison extends ATouringTask {
 
@@ -159,10 +160,54 @@ export class ColumnComparison extends ATouringTask {
   private async getAttrTableBody(colAttributes: IColumnDesc[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<IScoreCell[][][]> {
     const data = prepareDataArray(colAttributes, rowAttributes);
 
+    // cache cell for faster lookup and reuse results for inverse cells
+    const cellCache: Map<string, Promise<IScoreCell>> = new Map();
+
     const rowPromises = rowAttributes.map((row, rowIndex) => {
-      const colPromises = colAttributes.map(async (col, colIndex) => {
-        const result = await this.getScoreCellResult(row, col);
-        data[rowIndex][0][colIndex + 1] = result;
+      const colPromises = colAttributes.map((col, colIndex) => {
+        // regular cache key (row + col)
+        const cacheKey = `${(<IServerColumn>row).column}_${(<IServerColumn>col).column}`;
+
+        // inverse cache key (col + row) to check for cell across the diagonal
+        const inverseCacheKey = `${(<IServerColumn>col).column}_${(<IServerColumn>row).column}`;
+
+        let promise;
+
+        // check if already some inverse cell exists
+        if(cellCache.has(inverseCacheKey)) {
+          promise = cellCache.get(inverseCacheKey);
+
+          promise.then((result: IScoreCell) => {
+            // clone result as it is identical, except ...
+            const inverseResult = cloneDeep(result) as IScoreCell;
+
+            // ... switch set parameters A -> B and B -> A
+            if(inverseResult.setParameters) {
+              inverseResult.setParameters = {
+                setA: inverseResult.setParameters.setB,
+                setADesc: inverseResult.setParameters.setBDesc,
+                setACategory: inverseResult.setParameters.setBCategory,
+                setB: inverseResult.setParameters.setA,
+                setBDesc: inverseResult.setParameters.setADesc,
+                setBCategory: inverseResult.setParameters.setACategory,
+              };
+            }
+
+            data[rowIndex][0][colIndex + 1] = inverseResult;
+          });
+
+        } else {
+          promise = this.getScoreCellResult(row, col);
+
+          promise.then((result: IScoreCell) => {
+            data[rowIndex][0][colIndex + 1] = result;
+          });
+
+          // store in cache for possible inverse cells
+          cellCache.set(cacheKey, promise);
+        }
+
+        return promise;
       });
 
       return Promise.all(colPromises)
