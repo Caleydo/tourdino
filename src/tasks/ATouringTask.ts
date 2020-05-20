@@ -7,6 +7,7 @@ import {LocalDataProvider, IColumnDesc, CategoricalColumn, ICategoricalColumnDes
 import {deepCopy, score2color} from './utils';
 import {IServerColumn} from 'tdp_core/src/rest';
 import {isNumber} from 'util';
+import {uniqueId} from 'phovea_core/src';
 
 export interface ITouringTask {
   id: string;
@@ -84,7 +85,7 @@ export abstract class ATouringTask implements ITouringTask {
    */
   addFilterCheckbox() {
     const updateTable = this.updateTable.bind(this);
-    const uniqueID = Math.floor(Math.random() * 100000)
+    const uniqueID = uniqueId()
     this.nodeObject.select('.form-horizontal').append('div')
       .attr('class', `form-group filter-missing`)
       .html(`
