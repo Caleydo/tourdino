@@ -6,7 +6,7 @@ import * as d3 from 'd3';
 import * as XXH from 'xxhashjs';
 import {textColor4Background} from './utils';
 import {IAttributeCategory} from '../RankingAdapter';
-import {IColumnDesc, ICategoricalColumnDesc, ICategory} from 'lineupjs';
+import {IColumnDesc, ICategoricalColumnDesc, ICategory, isMissingValue} from 'lineupjs';
 import {IScoreCell, IHighlightData, ATouringTask} from './ATouringTask';
 import {IMeasureResult, Type, SCOPE} from '../interfaces';
 import {IServerColumn} from 'tdp_core/src/rest';
@@ -187,7 +187,7 @@ export class RowComparison extends ATouringTask {
     }
 
     // initialize
-    const data = this.prepareDataArray(colGrpData, rowGrpData, rowAttrData);
+    const data = prepareDataArray(colGrpData, rowGrpData, rowAttrData);
     updateTableBody(data, timestamp);
 
     // set values
@@ -207,7 +207,7 @@ export class RowComparison extends ATouringTask {
    * @param update
    */
   async getAttrTableBody(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<IScoreCell[][][]> {
-    const data = this.prepareDataArray(colGroups, rowGroups, rowAttributes);
+    const data = prepareDataArray(colGroups, rowGroups, rowAttributes);
 
     const promises = [];
 
@@ -227,7 +227,9 @@ export class RowComparison extends ATouringTask {
 
         for (const [rowIndex, rowGrp] of rowGroups.entries()) {
           // Get the data of 'attr' for the rows inside 'rowGrp'
-          const rowData = rowGrpsIndices[rowIndex].map((i) => attrData[i]);
+          const unfilteredRowData = rowGrpsIndices[rowIndex].map((i) => attrData[i]);
+          const rowData = filterMissingValues ? unfilteredRowData.filter((value) => !isMissingValue(value)) : unfilteredRowData
+
           for (const [colIndex, colGrp] of colGroups.entries()) {
             const colIndexOffset = rowIndex === 0 ? 2 : 1; // Two columns if the attribute label is in the same line, (otherwise 1 (because rowspan))
 
@@ -236,7 +238,8 @@ export class RowComparison extends ATouringTask {
             } else if (colIndex4rowGrp[rowIndex] >= 0 && rowIndex4colGrp[colIndex] >= 0 && rowIndex4colGrp[colIndex] < rowIndex) {
               // the rowGrp is also part of the colGroups array, and the colGrp is one of the previous rowGroups --> i.e. already calculated in a table row above the current one
             } else {
-              const colData = colGrpsIndices[colIndex].map((i) => attrData[i]);
+              const unfilteredColData = colGrpsIndices[colIndex].map((i) => attrData[i]);
+              let colData = filterMissingValues ? unfilteredColData.filter((value) => !isMissingValue(value)) : unfilteredColData
               const setParameters = {
                 setA: rowData,
                 setADesc: attr,
@@ -253,30 +256,8 @@ export class RowComparison extends ATouringTask {
 
 
               // generate HashObject and hash value
-              const hashObject = {
-                ids: this.ranking.getDisplayedIds(),
-                selection: this.ranking.getSelection(),
-                attribute: { label: (attr as IServerColumn).label, column: (attr as IServerColumn).column },
-                setACategory: rowGrp.label,
-                setBCategory: colGrp.label
-              };
-
-              // remove selection ids, if both categories and the data column are not selection
-              if (hashObject.attribute.label !== 'Selection' &&
-                hashObject.setACategory !== 'Unselected' && hashObject.setACategory !== 'Selected' &&
-                hashObject.setBCategory !== 'Unselected' && hashObject.setBCategory !== 'Selected') {
-                delete hashObject.selection;
-              }
-              // sort the ids, if the data column is not 'Rank'
-              if (hashObject.attribute.label !== 'Rank') {
-                hashObject.ids = this.ranking.getDisplayedIds().sort();
-              }
-
-              // console.log('hashObject: ', hashObject);
-              const hashObjectString = JSON.stringify(hashObject);
-              // console.log('hashObject.srtringify: ', hashObjectString);
-              const hashValue = XXH.h32(hashObjectString, 0).toString(16);
-              // console.log('Hash: ', hash);
+              const hashObject = generateHashObject(attr, rowGrp, colGrp, this.ranking.getDisplayedIds(), this.ranking.getSelection(), filterMissingValues)
+              const hashValue = generateHashValue(hashObject);
 
               let isStoredScoreAvailable = false; // flag for the availability of a stored score
 
@@ -341,35 +322,110 @@ export class RowComparison extends ATouringTask {
     await Promise.all(promises); // rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
     return data; // then return the data
   }
+}
 
-  prepareDataArray(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[]) {
-    if (colGroups.length === 0 || rowGroups.length === 0 || rowAttributes.length === 0) {
-      return []; // return empty array, will cause an empty table
-    }
-    const data = new Array(rowAttributes.length); // one array per attribute (number of table bodies)
+/**
+* Generate a (unique) hash value from the given hash object
+* @param hashObject hash object to be hashed
+*/
+function generateHashValue(hashObject: IHashObject): string {
+  // console.log('hashObject: ', hashObject, ' | unsortedSelction: ', this.ranking.getSelectionUnsorted());
+  const hashObjectString = JSON.stringify(hashObject);
+  // console.log('hashObject.srtringify: ', hashObjectString);
+  const hashValue = XXH.h32(hashObjectString, 0).toString(16);
+  // console.log('Hash: ', hashValue);
+  return hashValue;
+}
 
-    for (const [i, attr] of rowAttributes.entries()) {
-      data[i] = new Array(rowGroups.length); // one array per rowGroup (number of rows in body)
-      for (const [j, rowGrp] of rowGroups.entries()) {
-        data[i][j] = new Array(colGroups.length + (j === 0 ? 2 : 1)).fill({ label: '<i class="fa fa-circle-o-notch fa-spin"></i>', measure: null } as IScoreCell);
-        data[i][j][j === 0 ? 1 : 0] = { // through rowspan, this becomes the first array item
-          label: `${rowGrp.label} (${rowGrp.attribute.label})`,
-          background: rowGrp.color,
-          foreground: textColor4Background(rowGrp.color)
-        };
+/**
+ * Hash object
+ */
+interface IHashObject {
+  /**
+   * List of visible ids in the ranking
+   */
+  ids: any[];
 
-        if (j === 0) {
-          data[i][j][0] = {
-            label: `<b>${attr.label}</b>`,
-            rowspan: rowGroups.length,
-            type: attr.type
-          };
-        }
+  /**
+   * List of selected rows in the ranking
+   */
+  selection: number[];
 
-        data[i][j][0].key = `${attr.label}-${rowGrp.attribute.label}-${rowGrp.label}`;
-      }
-    }
-
-    return data;
+  /**
+   * Column/attribute to be compared
+   */
+  attribute: {
+    label: string;
+    column: string;
   }
+
+  /**
+   * Selected column (in row direction)
+   */
+  setACategory: string
+
+  /**
+   * Selected column (in column direction)
+   */
+  setBCategory: string
+
+  /**
+   * Filter missing values?
+   */
+  filterMissingValues: boolean;
+}
+
+function generateHashObject(attr: IColumnDesc, rowGrp: IAttributeCategory, colGrp: IAttributeCategory, ids: any[], selection: number[], filterMissingValues: boolean): IHashObject {
+  // sort the ids, if the data column is not 'Rank'
+  if (attr.label !== 'Rank') {
+    ids = ids.sort();
+  }
+
+  const hashObject = {
+    ids,
+    selection,
+    attribute: {label: (attr as IServerColumn).label, column: (attr as IServerColumn).column},
+    setACategory: rowGrp.label,
+    setBCategory: colGrp.label,
+    filterMissingValues
+  };
+  // remove selection ids, if both categories and the data column are not selection
+  if (attr.label !== 'Selection' &&
+    rowGrp.label !== 'Unselected' && rowGrp.label !== 'Selected' &&
+    colGrp.label !== 'Unselected' && colGrp.label !== 'Selected') {
+    delete hashObject.selection;
+  }
+
+  return hashObject;
+}
+
+function prepareDataArray(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[]) {
+  if (colGroups.length === 0 || rowGroups.length === 0 || rowAttributes.length === 0) {
+    return []; // return empty array, will cause an empty table
+  }
+
+  const data = new Array(rowAttributes.length); // one array per attribute (number of table bodies)
+  for (const [i, attr] of rowAttributes.entries()) {
+    data[i] = new Array(rowGroups.length); // one array per rowGroup (number of rows in body)
+    for (const [j, rowGrp] of rowGroups.entries()) {
+      data[i][j] = new Array(colGroups.length + (j === 0 ? 2 : 1)).fill({label: '<i class="fa fa-circle-o-notch fa-spin"></i>', measure: null} as IScoreCell);
+      data[i][j][j === 0 ? 1 : 0] = { // through rowspan, this becomes the first array item
+        label: `${rowGrp.label} (${rowGrp.attribute.label})`,
+        background: rowGrp.color,
+        foreground: textColor4Background(rowGrp.color)
+      };
+
+      if (j === 0) {
+        data[i][j][0] = {
+          label: `<b>${attr.label}</b>`,
+          rowspan: rowGroups.length,
+          type: attr.type
+        };
+      }
+
+      data[i][j][0].key = `${attr.label}-${rowGrp.attribute.label}-${rowGrp.label}`;
+    }
+  }
+
+  return data;
 }
