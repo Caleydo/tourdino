@@ -10,6 +10,7 @@ import {MethodManager} from '../Managers';
 import {WorkerManager} from '../Workers/WorkerManager';
 import {cloneDeep} from 'lodash';
 import {removeMissingValues} from '../util';
+import {uniqueId} from 'phovea_core/src';
 
 export class ColumnComparison extends ATouringTask {
 
@@ -244,9 +245,9 @@ export class ColumnComparison extends ATouringTask {
         resolve();
         return;
       }
-
-      scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + '.tourdino', () => { // add suffix for unique event name
-        scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + '.tourdino', null);
+      const uniqueSuffix = `.tourdino${uniqueId()}`;
+      scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + uniqueSuffix, () => { // add suffix with unique Id to resolve all promises for each instance of scoreColumn
+        scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + uniqueSuffix, null);
         // console.log('data loaded (notified by event) for', scoreColumn.desc.label);
         resolve();
       });
