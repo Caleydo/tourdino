@@ -90,7 +90,7 @@ export abstract class ATouringTask implements ITouringTask {
       .attr('class', `form-group filter-missing`)
       .html(`
         <label class="col-sm-4 control-label" for="${uniqueID}">
-          Do you want to filter out missing values for the compared columns?
+          Do you want to exclude missing values in each comparison?
         </label>
         <div class="col-sm-8">
           <input type="checkbox" checked id="${uniqueID}">
