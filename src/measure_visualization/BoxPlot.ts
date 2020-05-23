@@ -1,6 +1,6 @@
-import {IMeasureVisualization, ISetParameters, IMeasureResult} from '../';
 import * as d3 from 'd3';
 import 'd3-grubert-boxplot';
+import {IMeasureResult, IMeasureVisualization, ISetParameters} from '../';
 
 export class BoxPlot implements IMeasureVisualization {
 
@@ -54,7 +54,7 @@ export class BoxPlot implements IMeasureVisualization {
     rowBoxData.push(setBBoxData);
 
 
-    const boxColor = setParameters.setBDesc.color ? setParameters.setBDesc.color : null;
+    const boxColor = setParameters.setBDesc.color ? setParameters.setBDesc.color : '#EFEFEF';
     const rowBoxObj = {
       color: boxColor,
       data: rowBoxData,
