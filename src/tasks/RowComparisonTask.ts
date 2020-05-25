@@ -200,9 +200,9 @@ export class RowComparison extends ATouringTask {
    *     and there are |colGroups| columns
    *     + plus the rows and columns where we put labels
    *
-   * @param colGroups
-   * @param rowGroups
-   * @param rowAttributes
+   * @param colGroups selected groups (in column direction)
+   * @param rowGroups selected groups (in row direction)
+   * @param rowAttributes selected columns (in row direction)
    * @param scaffold only create the matrix with row headers, but no value calculation
    * @param update
    */
@@ -228,7 +228,7 @@ export class RowComparison extends ATouringTask {
         for (const [rowIndex, rowGrp] of rowGroups.entries()) {
           // Get the data of 'attr' for the rows inside 'rowGrp'
           const unfilteredRowData = rowGrpsIndices[rowIndex].map((i) => attrData[i]);
-          const rowData = filterMissingValues ? unfilteredRowData.filter((value) => !isMissingValue(value)) : unfilteredRowData
+          const rowData = filterMissingValues ? unfilteredRowData.filter((value) => !isMissingValue(value)) : unfilteredRowData;
 
           for (const [colIndex, colGrp] of colGroups.entries()) {
             const colIndexOffset = rowIndex === 0 ? 2 : 1; // Two columns if the attribute label is in the same line, (otherwise 1 (because rowspan))
@@ -239,7 +239,8 @@ export class RowComparison extends ATouringTask {
               // the rowGrp is also part of the colGroups array, and the colGrp is one of the previous rowGroups --> i.e. already calculated in a table row above the current one
             } else {
               const unfilteredColData = colGrpsIndices[colIndex].map((i) => attrData[i]);
-              let colData = filterMissingValues ? unfilteredColData.filter((value) => !isMissingValue(value)) : unfilteredColData
+              const colData = filterMissingValues ? unfilteredColData.filter((value) => !isMissingValue(value)) : unfilteredColData;
+
               const setParameters = {
                 setA: rowData,
                 setADesc: attr,
@@ -315,6 +316,7 @@ export class RowComparison extends ATouringTask {
           }
         }
       }
+
       Promise.all(attrPromises).then(() => { update(data); this.updateSelectionAndVisualization(attr); });
       promises.concat(attrPromises);
     }
@@ -325,81 +327,12 @@ export class RowComparison extends ATouringTask {
 }
 
 /**
-* Generate a (unique) hash value from the given hash object
-* @param hashObject hash object to be hashed
-*/
-function generateHashValue(hashObject: IHashObject): string {
-  // console.log('hashObject: ', hashObject, ' | unsortedSelction: ', this.ranking.getSelectionUnsorted());
-  const hashObjectString = JSON.stringify(hashObject);
-  // console.log('hashObject.srtringify: ', hashObjectString);
-  const hashValue = XXH.h32(hashObjectString, 0).toString(16);
-  // console.log('Hash: ', hashValue);
-  return hashValue;
-}
-
-/**
- * Hash object
+ * Prepare data array with loading icon to visualize with D3
+ * @param colGroups selected groups (in column direction)
+ * @param rowGroups selected groups (in row direction)
+ * @param rowAttributes selected columns (in row direction)
  */
-interface IHashObject {
-  /**
-   * List of visible ids in the ranking
-   */
-  ids: any[];
-
-  /**
-   * List of selected rows in the ranking
-   */
-  selection: number[];
-
-  /**
-   * Column/attribute to be compared
-   */
-  attribute: {
-    label: string;
-    column: string;
-  }
-
-  /**
-   * Selected column (in row direction)
-   */
-  setACategory: string
-
-  /**
-   * Selected column (in column direction)
-   */
-  setBCategory: string
-
-  /**
-   * Filter missing values?
-   */
-  filterMissingValues: boolean;
-}
-
-function generateHashObject(attr: IColumnDesc, rowGrp: IAttributeCategory, colGrp: IAttributeCategory, ids: any[], selection: number[], filterMissingValues: boolean): IHashObject {
-  // sort the ids, if the data column is not 'Rank'
-  if (attr.label !== 'Rank') {
-    ids = ids.sort();
-  }
-
-  const hashObject = {
-    ids,
-    selection,
-    attribute: {label: (attr as IServerColumn).label, column: (attr as IServerColumn).column},
-    setACategory: rowGrp.label,
-    setBCategory: colGrp.label,
-    filterMissingValues
-  };
-  // remove selection ids, if both categories and the data column are not selection
-  if (attr.label !== 'Selection' &&
-    rowGrp.label !== 'Unselected' && rowGrp.label !== 'Selected' &&
-    colGrp.label !== 'Unselected' && colGrp.label !== 'Selected') {
-    delete hashObject.selection;
-  }
-
-  return hashObject;
-}
-
-function prepareDataArray(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[]) {
+function prepareDataArray(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[]): any[] {
   if (colGroups.length === 0 || rowGroups.length === 0 || rowAttributes.length === 0) {
     return []; // return empty array, will cause an empty table
   }
@@ -428,4 +361,89 @@ function prepareDataArray(colGroups: IAttributeCategory[], rowGroups: IAttribute
   }
 
   return data;
+}
+
+/**
+ * Hash object
+ */
+interface IHashObject {
+  /**
+   * List of visible ids in the ranking
+   */
+  ids: any[];
+
+  /**
+   * List of selected rows in the ranking
+   */
+  selection: number[];
+
+  /**
+   * Column/attribute to be compared
+   */
+  attribute: {
+    label: string;
+    column: string;
+  };
+
+  /**
+   * Selected column (in row direction)
+   */
+  setACategory: string;
+
+  /**
+   * Selected column (in column direction)
+   */
+  setBCategory: string;
+
+  /**
+   * Filter missing values?
+   */
+  filterMissingValues: boolean;
+}
+
+/**
+ * Generate a (unique) hash object that can be used to create a hash value
+ * @param attr
+ * @param rowGrp
+ * @param colGrp
+ * @param ids List of visible ids in the ranking
+ * @param selection List of selected rows in the ranking
+ * @param filterMissingValues Filter missing values?
+ */
+function generateHashObject(attr: IColumnDesc, rowGrp: IAttributeCategory, colGrp: IAttributeCategory, ids: any[], selection: number[], filterMissingValues: boolean): IHashObject {
+  // sort the ids, if the data column is not 'Rank'
+  if (attr.label !== 'Rank') {
+    ids = ids.sort();
+  }
+
+  const hashObject = {
+    ids,
+    selection,
+    attribute: {label: (attr as IServerColumn).label, column: (attr as IServerColumn).column},
+    setACategory: rowGrp.label,
+    setBCategory: colGrp.label,
+    filterMissingValues
+  };
+
+  // remove selection ids, if both categories and the data column are not selection
+  if (attr.label !== 'Selection' &&
+    rowGrp.label !== 'Unselected' && rowGrp.label !== 'Selected' &&
+    colGrp.label !== 'Unselected' && colGrp.label !== 'Selected') {
+    delete hashObject.selection;
+  }
+
+  return hashObject;
+}
+
+/**
+ * Generate a (unique) hash value from the given hash object
+ * @param hashObject hash object to be hashed
+ */
+function generateHashValue(hashObject: IHashObject): string {
+  // console.log('hashObject: ', hashObject, ' | unsortedSelction: ', this.ranking.getSelectionUnsorted());
+  const hashObjectString = JSON.stringify(hashObject);
+  // console.log('hashObject.srtringify: ', hashObjectString);
+  const hashValue = XXH.h32(hashObjectString, 0).toString(16);
+  // console.log('Hash: ', hashValue);
+  return hashValue;
 }
