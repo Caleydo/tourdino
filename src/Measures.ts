@@ -5,7 +5,7 @@ import {ScatterPlot} from './measure_visualization/ScatterPlot';
 import {RelGroupedBarChart} from './measure_visualization/RelGroupedBarChart';
 import {measureResultObj, sleep} from './util';
 import * as d3 from 'd3';
-import {jStat} from 'jStat';
+import {jStat} from 'jstat';
 import {LineChart} from './measure_visualization/LineChart';
 import {JaccardRandomizationWorker, AdjustedRandRandomizationWorker, EnrichmentRandomizationWorker} from './Workers/WorkerManager';
 
