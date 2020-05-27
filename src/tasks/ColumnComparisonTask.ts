@@ -2,15 +2,14 @@ import colCmpHtml from 'html-loader!./ColumnComparison.html'; // webpack imports
 import colCmpIcon from './colCmp.png';
 
 import * as XXH from 'xxhashjs';
-import {IColumnDesc, ValueColumn} from 'lineupjs';
+import {cloneDeep} from 'lodash';
+import {IColumnDesc} from 'lineupjs';
 import {IScoreCell, IHighlightData, ATouringTask} from './ATouringTask';
 import {IMeasureResult, Type, SCOPE, ISimilarityMeasure} from '../interfaces';
 import {IServerColumn} from 'tdp_core/src/rest';
 import {MethodManager} from '../Managers';
 import {WorkerManager} from '../Workers/WorkerManager';
-import {cloneDeep} from 'lodash';
 import {removeMissingValues, waitUntilScoreColumnIsLoaded} from '../util';
-import {uniqueId} from 'phovea_core/src';
 
 export class ColumnComparison extends ATouringTask {
 
