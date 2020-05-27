@@ -201,7 +201,7 @@ export class ColumnComparison extends ATouringTask {
           });
 
         } else {
-          promise = this.getScoreCellResult(row, col, filterMissingValues);
+          promise = this.getScoreCellResult(col, row, filterMissingValues);
 
           promise.then((result: IScoreCell) => {
             data[rowIndex][0][colIndex + 1] = result;
@@ -231,11 +231,11 @@ export class ColumnComparison extends ATouringTask {
    * Retrieve a cell result for the given row and column.
    * A result can be either a score, an null value for self-references, or an error.
    *
-   * @param row Column description (in row direction)
    * @param col Column description (in column direction)
+   * @param row Column description (in row direction)
    * @param filterMissingValues Filter missing values?
    */
-  private async getScoreCellResult(row: IColumnDesc, col: IColumnDesc, filterMissingValues: boolean): Promise<IScoreCell> {
+  private async getScoreCellResult(col: IColumnDesc, row: IColumnDesc, filterMissingValues: boolean): Promise<IScoreCell> {
     if (row.label === col.label) {
       // identical attributes
       return { label: '<span class="circle"/>', measure: null };
@@ -258,7 +258,7 @@ export class ColumnComparison extends ATouringTask {
     // use always the first measure
     const measure = measures[0];
 
-    const hashObject = generateHashObject(row, col, this.ranking.getDisplayedIds(), this.ranking.getSelection(), filterMissingValues);
+    const hashObject = generateHashObject(col, row, this.ranking.getDisplayedIds(), this.ranking.getSelection(), filterMissingValues);
     const hashValue = generateHashValue(hashObject);
 
     const first = this.ranking.getAttributeDataDisplayed((col as IServerColumn).column); // minus one because the first column is headers
@@ -395,13 +395,13 @@ interface IHashObject {
 
 /**
  * Generate a (unique) hash object that can be used to create a hash value
- * @param row Column description (in row direction)
  * @param col Column description (in column direction)
+ * @param row Column description (in row direction)
  * @param ids List of visible ids in the ranking
  * @param selection List of selected rows in the ranking
  * @param filterMissingValues Filter missing values?
  */
-function generateHashObject(row: IColumnDesc, col: IColumnDesc, ids: any[], selection: number[], filterMissingValues: boolean): IHashObject {
+function generateHashObject(col: IColumnDesc, row: IColumnDesc, ids: any[], selection: number[], filterMissingValues: boolean): IHashObject {
   // sort the ids, if both row and column are not 'Rank'
   if (row.label !== 'Rank' && col.label !== 'Rank') {
     ids = ids.sort();
