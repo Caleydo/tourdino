@@ -8,10 +8,11 @@ import {textColor4Background} from './utils';
 import {IAttributeCategory} from '../RankingAdapter';
 import {IColumnDesc, ICategoricalColumnDesc, ICategory, isMissingValue} from 'lineupjs';
 import {IScoreCell, IHighlightData, ATouringTask} from './ATouringTask';
-import {IMeasureResult, Type, SCOPE} from '../interfaces';
+import {IMeasureResult, Type, SCOPE, ISimilarityMeasure} from '../interfaces';
 import {IServerColumn} from 'tdp_core/src/rest';
 import {MethodManager} from '../Managers';
 import {WorkerManager} from '../Workers/WorkerManager';
+import {waitUntilScoreColumnIsLoaded} from '../util';
 
 
 export class RowComparison extends ATouringTask {
@@ -195,142 +196,187 @@ export class RowComparison extends ATouringTask {
   }
 
   /**
-   *     For each attribute in rowAttributes, we want to comapre the rows inside colGroups with the rows of rowGroups
-   *     i.e. the number of table rows is: |rowAttributes| * |rowGroups|
-   *     and there are |colGroups| columns
-   *     + plus the rows and columns where we put labels
+   * For each attribute in rowAttributes, we want to comapre the rows inside colGroups with the rows of rowGroups.
+   * That means that the number of table rows is: |rowAttributes| * |rowGroups| and there are |colGroups| columns
+   * (+ plus the rows and columns where we put labels).
    *
-   * @param colGroups selected groups (in column direction)
-   * @param rowGroups selected groups (in row direction)
-   * @param rowAttributes selected columns (in row direction)
-   * @param scaffold only create the matrix with row headers, but no value calculation
-   * @param update
+   * @param colGroups Selected groups (in column direction)
+   * @param rowGroups Selected groups (in row direction)
+   * @param rowAttributes Selected column description
+   * @param filterMissingValues Filter missing values?
+   * @param updateRow Update function, which gets called once all cells of a row are calculated
    */
-  async getAttrTableBody(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, update: (bodyData: IScoreCell[][][]) => void): Promise<IScoreCell[][][]> {
+  private async getAttrTableBody(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[], filterMissingValues: boolean, updateRow: (bodyData: IScoreCell[][][]) => void): Promise<IScoreCell[][][]> {
     const data = prepareDataArray(colGroups, rowGroups, rowAttributes);
 
-    const promises = [];
-
     // the row and column indices stay the same, only the data changes ->  we want to retrieve these indices only once.
-    const rowGrpsIndices = rowGroups.map((rowGrp) => this.ranking.getRowsWithCategory(rowGrp));
-    const colGrpsIndices = colGroups.map((colGrp) => this.ranking.getRowsWithCategory(colGrp));
-    // if a group is part of the column and row item groups, we use these array to get the correct index (so we can avoid duplicate calculations)
-    const rowIndex4colGrp = colGroups.map((colGrp) => rowGroups.indexOf(colGrp));
-    const colIndex4rowGrp = rowGroups.map((rowGrp) => colGroups.indexOf(rowGrp));
+    const rowGroupsIndices = rowGroups.map((rowGroup) => this.ranking.getRowsWithCategory(rowGroup));
+    const colGroupsIndices = colGroups.map((colGroup) => this.ranking.getRowsWithCategory(colGroup));
 
-    for (const [bodyIndex, attr] of rowAttributes.entries()) {
-      const attrPromises = [];
-      const attrData = this.ranking.getAttributeDataDisplayed((attr as IServerColumn).column); // minus one because the first column is headers
-      const measures = MethodManager.getMeasuresByType(Type.get(attr.type), Type.get(attr.type), SCOPE.SETS); // Always compare selected elements with a group of elements of the same column
-      if (measures.length > 0) {
-        const measure = measures[0];
+    // cache cell for faster lookup and reuse results for inverse cells
+    const cellCache: Map<string, Promise<IScoreCell>> = new Map();
 
-        for (const [rowIndex, rowGrp] of rowGroups.entries()) {
-          // Get the data of 'attr' for the rows inside 'rowGrp'
-          const unfilteredRowData = rowGrpsIndices[rowIndex].map((i) => attrData[i]);
-          const rowData = filterMissingValues ? unfilteredRowData.filter((value) => !isMissingValue(value)) : unfilteredRowData;
+    const rowAttrPromises = rowAttributes.map((rowAttr, bodyIndex) => {
+      const rowGroupPromises = rowGroups.map((rowGroup, rowIndex) => {
+        const colGroupPromises = colGroups.map((colGroup, colIndex) => {
+          // regular cache key (row + col)
+          const cacheKey = `${(<IServerColumn>rowAttr).column}_${rowGroup.name}_${colGroup.name}`;
 
-          for (const [colIndex, colGrp] of colGroups.entries()) {
-            const colIndexOffset = rowIndex === 0 ? 2 : 1; // Two columns if the attribute label is in the same line, (otherwise 1 (because rowspan))
+          // inverse cache key (col + row) to check for cell across the diagonal
+          const inverseCacheKey = `${(<IServerColumn>rowAttr).column}_${colGroup.name}_${rowGroup.name}`;
 
-            if (rowGrp.label === colGrp.label) { // identical groups
-              data[bodyIndex][rowIndex][colIndexOffset + colIndex] = { label: '<span class="circle"/>', measure };
-            } else if (colIndex4rowGrp[rowIndex] >= 0 && rowIndex4colGrp[colIndex] >= 0 && rowIndex4colGrp[colIndex] < rowIndex) {
-              // the rowGrp is also part of the colGroups array, and the colGrp is one of the previous rowGroups --> i.e. already calculated in a table row above the current one
-            } else {
-              const unfilteredColData = colGrpsIndices[colIndex].map((i) => attrData[i]);
-              const colData = filterMissingValues ? unfilteredColData.filter((value) => !isMissingValue(value)) : unfilteredColData;
+          let promise;
 
-              const setParameters = {
-                setA: rowData,
-                setADesc: attr,
-                setACategory: { label: `${rowGrp.label} (${rowGrp.attribute.label})`, color: rowGrp.color },
-                setB: colData,
-                setBDesc: attr,
-                setBCategory: { label: `${colGrp.label} (${colGrp.attribute.label})`, color: colGrp.color }
-              };
+          // check if already some inverse cell exists
+          if(cellCache.has(inverseCacheKey)) {
+            promise = cellCache.get(inverseCacheKey);
 
-              const highlight: IHighlightData[] = [
-                { column: (attr as IServerColumn).column, label: attr.label },
-                { column: rowGrp.attribute.column, label: rowGrp.attribute.label, category: rowGrp.name, color: rowGrp.color },
-                { column: colGrp.attribute.column, label: colGrp.attribute.label, category: colGrp.name, color: colGrp.color }];
+            promise.then((result: IScoreCell) => {
+              // two columns if the attribute label is in the same line, (otherwise 1 (because rowspan))
+              const colIndexOffset = (rowIndex === 0) ? 2 : 1;
 
+              data[bodyIndex][rowIndex][colIndexOffset + colIndex] = result;
+            });
 
-              // generate HashObject and hash value
-              const hashObject = generateHashObject(attr, rowGrp, colGrp, this.ranking.getDisplayedIds(), this.ranking.getSelection(), filterMissingValues)
-              const hashValue = generateHashValue(hashObject);
+          } else {
+            // note: pass the row and col indicies in addition to the group attributes
+            promise = this.getScoreCellResult({...colGroup, indices: colGroupsIndices[colIndex]}, {...rowGroup, indices: rowGroupsIndices[rowIndex]}, rowAttr, filterMissingValues);
 
-              let isStoredScoreAvailable = false; // flag for the availability of a stored score
+            promise.then((result: IScoreCell) => {
+              // two columns if the attribute label is in the same line, (otherwise 1 (because rowspan))
+              const colIndexOffset = (rowIndex === 0) ? 2 : 1;
 
-              attrPromises.push(new Promise<IMeasureResult>((resolve, reject) => {
-                // get score from sessionStorage
-                const sessionScore = sessionStorage.getItem(hashValue);
-                // console.log('sessionScore: ', sessionScore);
-                // score for the measure
-                let score: Promise<IMeasureResult> = null;
+              data[bodyIndex][rowIndex][colIndexOffset + colIndex] = result;
+            });
 
-                if (sessionScore === null || sessionScore === undefined) {
-                  score = measure.calc(rowData, colData, attrData);
-                } else if (sessionScore !== null || sessionScore !== undefined) {
-                  score = Promise.resolve(JSON.parse(sessionScore)) as Promise<IMeasureResult>;
-                  isStoredScoreAvailable = true;
-                }
-
-                // check if all values are NaN
-                const uniqueDataRow = rowData.filter((item) => Number.isNaN(item));
-                const uniqueDataCol = colData.filter((item) => Number.isNaN(item));
-                if (rowData.length === uniqueDataRow.length || colData.length === uniqueDataCol.length) {
-                  isStoredScoreAvailable = true;
-                }
-
-                // return score;
-                resolve(score);
-
-              }).then((score) => {
-
-                if (!isStoredScoreAvailable) {
-                  const scoreString = JSON.stringify(score);
-                  // console.log('new score: ', score);
-                  // console.log('new scoreString: ', scoreString);
-                  sessionStorage.setItem(hashValue, scoreString);
-                }
-
-                data[bodyIndex][rowIndex][colIndexOffset + colIndex] = this.toScoreCell(score, measure, setParameters, highlight);
-                if (colIndex4rowGrp[rowIndex] >= 0 && rowIndex4colGrp[colIndex] >= 0) {
-                  const colIndexOffset4Duplicate = rowIndex4colGrp[colIndex] === 0 ? 2 : 1; // Currenlty, we can't have duplicates in the first line, so this will always be 1
-                  data[bodyIndex][rowIndex4colGrp[colIndex]][colIndexOffset4Duplicate + colIndex4rowGrp[rowIndex]] = this.toScoreCell(score, measure, setParameters, highlight);
-                }
-
-              }).catch((err) => {
-                // console.error(err);
-                const errorCell = { label: 'err', measure };
-                data[bodyIndex][rowIndex][colIndexOffset + colIndex] = errorCell;
-                if (colIndex4rowGrp[rowIndex] >= 0 && rowIndex4colGrp[colIndex] >= 0) {
-                  const colIndexOffset4Duplicate = rowIndex4colGrp[colIndex] === 0 ? 2 : 1;
-                  data[bodyIndex][rowIndex4colGrp[colIndex]][colIndexOffset4Duplicate + colIndex4rowGrp[rowIndex]] = errorCell;
-                }
-              }));
-
-
-            }
+            // store in cache for possible inverse cells
+            cellCache.set(cacheKey, promise);
           }
-        }
-      }
 
-      Promise.all(attrPromises).then(() => { update(data); this.updateSelectionAndVisualization(attr); });
-      promises.concat(attrPromises);
-    }
+          return promise;
+        });
 
-    await Promise.all(promises); // rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
+        return Promise.all(colGroupPromises);
+      });
+
+      return Promise.all(rowGroupPromises)
+        .then(() => {
+          // update the table with the new row data and update visualization for the selected row
+          updateRow(data);
+          this.updateSelectionAndVisualization(data);
+        });
+    });
+
+    await Promise.all(rowAttrPromises); // rather await all at once: https://developers.google.com/web/fundamentals/primers/async-functions#careful_avoid_going_too_sequential
+
     return data; // then return the data
   }
+
+  /**
+   * Retrieve a cell result for the given row and column.
+   * A result can be either a score, an null value for self-references, or an error.
+   *
+   * @param colGroup Selected groups (in column direction)
+   * @param rowGroup Selected groups (in row direction)
+   * @param rowAttr Selected column description
+   * @param filterMissingValues Filter missing values?
+   */
+  private async getScoreCellResult(colGroup: IAttributeCategory & { indices: number[] }, rowGroup: IAttributeCategory & { indices: number[] }, rowAttr: IColumnDesc, filterMissingValues: boolean): Promise<IScoreCell> {
+    if (rowGroup.label === colGroup.label) {
+      // identical groups
+      return { label: '<span class="circle"/>', measure: null };
+    }
+
+    // wait until score columns are loaded before proceeding to the calculation
+    await waitUntilScoreColumnIsLoaded(this.ranking, rowAttr);
+    // console.log('row is loaded', rowAttr);
+
+    // Always compare selected elements with a group of elements of the same column
+    const measures = MethodManager.getMeasuresByType(Type.get(rowAttr.type), Type.get(rowAttr.type), SCOPE.SETS); // Always compare selected elements with a group of elements of the same column
+
+    // skip if no measures found
+    if (measures.length === 0) {
+      console.error('no measurement method found for type', rowAttr.type);
+      return { label: 'err' };
+    }
+
+    // use always the first measure
+    const measure = measures[0];
+
+    const hashObject = generateHashObject(colGroup, rowGroup, rowAttr, this.ranking.getDisplayedIds(), this.ranking.getSelection(), filterMissingValues)
+    const hashValue = generateHashValue(hashObject);
+
+    const attrData = this.ranking.getAttributeDataDisplayed((rowAttr as IServerColumn).column); // minus one because the first column is headers
+
+    // Get the data of 'attr' for the rows inside 'rowGrp'
+    const unfilteredRowData = rowGroup.indices.map((i) => attrData[i]);
+    const rowData = filterMissingValues ? unfilteredRowData.filter((value) => !isMissingValue(value)) : unfilteredRowData;
+
+    const unfilteredColData = rowGroup.indices.map((i) => attrData[i]);
+    const colData = filterMissingValues ? unfilteredColData.filter((value) => !isMissingValue(value)) : unfilteredColData;
+
+    try {
+      const score = await this.getMeasurementScore(hashValue, {setA: rowData, setB: colData, allData: attrData}, measure);
+
+      const setParameters = {
+        setA: rowData,
+        setADesc: rowAttr,
+        setACategory: { label: `${rowGroup.label} (${rowGroup.attribute.label})`, color: rowGroup.color },
+        setB: colData,
+        setBDesc: rowAttr,
+        setBCategory: { label: `${colGroup.label} (${colGroup.attribute.label})`, color: colGroup.color }
+      };
+
+      const highlight: IHighlightData[] = [
+        { column: (rowAttr as IServerColumn).column, label: rowAttr.label },
+        { column: rowGroup.attribute.column, label: rowGroup.attribute.label, category: rowGroup.name, color: rowGroup.color },
+        { column: colGroup.attribute.column, label: colGroup.attribute.label, category: colGroup.name, color: colGroup.color }
+      ];
+
+      return this.toScoreCell(score, measure, setParameters, highlight);
+
+    } catch(err) {
+      console.error(err);
+      return { label: 'err', measure };
+    }
+  }
+
+  /**
+   * Calculate a score for the given measurement and dataset.
+   * Score values are stored with the given hash value in the session store.
+   * The calculation is skipped if an exisitng score for the hash value is found in the session store.
+   *
+   * @param hashValue Hash value for lookup in the session store
+   * @param data Data used for the score calculation
+   * @param measure Selected measurment class
+   */
+  private async getMeasurementScore(hashValue: string, data: {setA: any[], setB: any[], allData: any[]}, measure: ISimilarityMeasure) {
+
+    const sessionScore = sessionStorage.getItem(hashValue);
+
+    // use cached score if available
+    if(sessionScore !== null && sessionScore !== undefined) {
+      return Promise.resolve<IMeasureResult>(JSON.parse(sessionScore));
+    }
+
+    const score = await measure.calc(data.setA, data.setB, data.allData);
+
+    // cache score result in session storage
+    const scoreString = JSON.stringify(score);
+    // console.log('new score: ', score);
+    // console.log('new scoreString: ', scoreString);
+    sessionStorage.setItem(hashValue, scoreString);
+
+    return score;
+  }
+
 }
 
 /**
  * Prepare data array with loading icon to visualize with D3
- * @param colGroups selected groups (in column direction)
- * @param rowGroups selected groups (in row direction)
- * @param rowAttributes selected columns (in row direction)
+ * @param colGroups Selected groups (in column direction)
+ * @param rowGroups Selected groups (in row direction)
+ * @param rowAttributes Selected column description
  */
 function prepareDataArray(colGroups: IAttributeCategory[], rowGroups: IAttributeCategory[], rowAttributes: IColumnDesc[]): any[] {
   if (colGroups.length === 0 || rowGroups.length === 0 || rowAttributes.length === 0) {
@@ -403,32 +449,32 @@ interface IHashObject {
 
 /**
  * Generate a (unique) hash object that can be used to create a hash value
- * @param attr
- * @param rowGrp
- * @param colGrp
+ * @param colGroup Selected group (in column direction)
+ * @param rowGroup Selected group (in row direction)
+ * @param rowAttribute Selected column description
  * @param ids List of visible ids in the ranking
  * @param selection List of selected rows in the ranking
  * @param filterMissingValues Filter missing values?
  */
-function generateHashObject(attr: IColumnDesc, rowGrp: IAttributeCategory, colGrp: IAttributeCategory, ids: any[], selection: number[], filterMissingValues: boolean): IHashObject {
+function generateHashObject(colGroup: IAttributeCategory, rowGroup: IAttributeCategory, rowAttr: IColumnDesc, ids: any[], selection: number[], filterMissingValues: boolean): IHashObject {
   // sort the ids, if the data column is not 'Rank'
-  if (attr.label !== 'Rank') {
+  if (rowAttr.label !== 'Rank') {
     ids = ids.sort();
   }
 
   const hashObject = {
     ids,
     selection,
-    attribute: {label: (attr as IServerColumn).label, column: (attr as IServerColumn).column},
-    setACategory: rowGrp.label,
-    setBCategory: colGrp.label,
+    attribute: {label: (rowAttr as IServerColumn).label, column: (rowAttr as IServerColumn).column},
+    setACategory: rowGroup.label,
+    setBCategory: colGroup.label,
     filterMissingValues
   };
 
   // remove selection ids, if both categories and the data column are not selection
-  if (attr.label !== 'Selection' &&
-    rowGrp.label !== 'Unselected' && rowGrp.label !== 'Selected' &&
-    colGrp.label !== 'Unselected' && colGrp.label !== 'Selected') {
+  if (rowAttr.label !== 'Selection' &&
+    rowGroup.label !== 'Unselected' && rowGroup.label !== 'Selected' &&
+    colGroup.label !== 'Unselected' && colGroup.label !== 'Selected') {
     delete hashObject.selection;
   }
 
