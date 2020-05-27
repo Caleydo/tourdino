@@ -1,5 +1,8 @@
 import {IMeasureResult} from './interfaces';
-import {IColumnDesc, isMissingValue} from 'lineupjs';
+import {IColumnDesc, isMissingValue, ValueColumn} from 'lineupjs';
+import {IServerColumn} from 'tdp_core/src/rest';
+import {RankingAdapter} from './RankingAdapter';
+import {uniqueId} from 'phovea_core/src';
 
 /**
  * Returns:
@@ -156,3 +159,31 @@ export function isScoreColumn(colDesc: IColumnDesc) {
   return colDesc.hasOwnProperty('lazyLoaded');
 }
 
+
+/**
+ * This functions returns a promise that gets resolved, once the score column is loaded.
+ * The notification is implemented based on a flag or an event.
+ */
+export function waitUntilScoreColumnIsLoaded(ranking: RankingAdapter, desc: IColumnDesc): Promise<any> {
+  const scoreColumn = (<ValueColumn<any>[]>ranking.getScoreColumns()).find((col) => (<IServerColumn>col.desc).column === (<IServerColumn>desc).column);
+
+  if(!scoreColumn) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    if(scoreColumn.isLoaded()) {
+      // console.log('data already loaded for', scoreColumn.desc.label);
+      resolve();
+      return;
+    }
+
+    const uniqueSuffix = `.tourdino${uniqueId()}`;
+
+    scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + uniqueSuffix, () => { // add suffix with unique Id to resolve all promises for each instance of scoreColumn
+      scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + uniqueSuffix, null);
+      // console.log('data loaded (notified by event) for', scoreColumn.desc.label);
+      resolve();
+    });
+  });
+}

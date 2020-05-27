@@ -9,7 +9,7 @@ import {IServerColumn} from 'tdp_core/src/rest';
 import {MethodManager} from '../Managers';
 import {WorkerManager} from '../Workers/WorkerManager';
 import {cloneDeep} from 'lodash';
-import {removeMissingValues} from '../util';
+import {removeMissingValues, waitUntilScoreColumnIsLoaded} from '../util';
 import {uniqueId} from 'phovea_core/src';
 
 export class ColumnComparison extends ATouringTask {
@@ -229,32 +229,6 @@ export class ColumnComparison extends ATouringTask {
   }
 
   /**
-   * This functions returns a promise that gets resolved, once the score column is loaded.
-   * The notification is implemented based on a flag or an event.
-   */
-  private waitUntilScoreColumnIsLoaded(desc: IColumnDesc): Promise<any> {
-    const scoreColumn = (<ValueColumn<any>[]>this.ranking.getScoreColumns()).find((col) => (<IServerColumn>col.desc).column === (<IServerColumn>desc).column);
-
-    if(!scoreColumn) {
-      return Promise.resolve();
-    }
-
-    return new Promise((resolve) => {
-      if(scoreColumn.isLoaded()) {
-        // console.log('data already loaded for', scoreColumn.desc.label);
-        resolve();
-        return;
-      }
-      const uniqueSuffix = `.tourdino${uniqueId()}`;
-      scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + uniqueSuffix, () => { // add suffix with unique Id to resolve all promises for each instance of scoreColumn
-        scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + uniqueSuffix, null);
-        // console.log('data loaded (notified by event) for', scoreColumn.desc.label);
-        resolve();
-      });
-    });
-  }
-
-  /**
    * Retrieve a cell result for the given row and column.
    * A result can be either a score, an null value for self-references, or an error.
    *
@@ -269,9 +243,9 @@ export class ColumnComparison extends ATouringTask {
     }
 
     // wait until score columns are loaded before proceeding to the calculation
-    await this.waitUntilScoreColumnIsLoaded(row);
+    await waitUntilScoreColumnIsLoaded(this.ranking, row);
     // console.log('row is loaded', row);
-    await this.waitUntilScoreColumnIsLoaded(col);
+    await waitUntilScoreColumnIsLoaded(this.ranking, col);
     // console.log('col is loaded', col);
 
     const measures = MethodManager.getMeasuresByType(Type.get(row.type), Type.get(col.type), SCOPE.ATTRIBUTES);
