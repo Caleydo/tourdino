@@ -87,11 +87,10 @@ function calcEnrichmentScoreCategory(setCombined: any[], currCategory: string, a
   return propertiesCategory;
 }
 
-
-
+// @ts-ignore: `TS2451: Cannot redeclare block-scoped variable 'ctx'.`
 const ctx: Worker = self as any;
 
-ctx.onmessage = function (event) {
+ctx.onmessage = (event) => {
   try {
     const setNumber: any[] = event.data.setNumber;
     const setCategory: any[] = event.data.setCategory;
