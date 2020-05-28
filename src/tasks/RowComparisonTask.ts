@@ -312,7 +312,7 @@ export class RowComparison extends ATouringTask {
     const unfilteredRowData = rowGroup.indices.map((i) => attrData[i]);
     const rowData = filterMissingValues ? unfilteredRowData.filter((value) => !isMissingValue(value)) : unfilteredRowData;
 
-    const unfilteredColData = rowGroup.indices.map((i) => attrData[i]);
+    const unfilteredColData = colGroup.indices.map((i) => attrData[i]);
     const colData = filterMissingValues ? unfilteredColData.filter((value) => !isMissingValue(value)) : unfilteredColData;
 
     try {
