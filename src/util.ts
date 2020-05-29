@@ -1,9 +1,10 @@
 import {IMeasureResult} from './interfaces';
-import {IColumnDesc, isMissingValue, ValueColumn} from 'lineupjs';
+import {IColumnDesc} from 'lineupjs';
 import {IServerColumn} from 'tdp_core/src/rest';
 import {RankingAdapter} from './RankingAdapter';
 import {uniqueId} from 'phovea_core/src';
 
+const EVENT_DATA_LOADED = 'dataLoaded';
 /**
  * Returns:
  *  intersection: elements in both items
@@ -49,6 +50,21 @@ export function removeMissingValues(arr1: any[], arr2: any[]) {
 
 export function binom2(n: number): number {
   return n*(n-1)/2;
+}
+
+export function isMissingValue(v: any): boolean {
+  if(v == null || v === undefined || v === '' || v === 'NA' || v === 'na' || v === 'Na' || v === 'nA' || v === 'NaN' || (typeof v === 'number' && isNaN(v))) {
+    return true;
+  }
+  if (!Array.isArray(v)) {
+    return false;
+  }
+  for (const vi of v) {
+    if (!isMissingValue(vi)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /**
@@ -165,7 +181,7 @@ export function isScoreColumn(colDesc: IColumnDesc) {
  * The notification is implemented based on a flag or an event.
  */
 export function waitUntilScoreColumnIsLoaded(ranking: RankingAdapter, desc: IColumnDesc): Promise<any> {
-  const scoreColumn = (<ValueColumn<any>[]>ranking.getScoreColumns()).find((col) => (<IServerColumn>col.desc).column === (<IServerColumn>desc).column);
+  const scoreColumn = (<any[]>ranking.getScoreColumns()).find((col) => (<IServerColumn>col.desc).column === (<IServerColumn>desc).column);
 
   if(!scoreColumn) {
     return Promise.resolve();
@@ -180,8 +196,8 @@ export function waitUntilScoreColumnIsLoaded(ranking: RankingAdapter, desc: ICol
 
     const uniqueSuffix = `.tourdino${uniqueId()}`;
 
-    scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + uniqueSuffix, () => { // add suffix with unique Id to resolve all promises for each instance of scoreColumn
-      scoreColumn.on(ValueColumn.EVENT_DATA_LOADED + uniqueSuffix, null);
+    scoreColumn.on(EVENT_DATA_LOADED + uniqueSuffix, () => { // add suffix with unique Id to resolve all promises for each instance of scoreColumn
+      scoreColumn.on(EVENT_DATA_LOADED + uniqueSuffix, null);
       // console.log('data loaded (notified by event) for', scoreColumn.desc.label);
       resolve();
     });

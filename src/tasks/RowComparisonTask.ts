@@ -6,13 +6,13 @@ import * as d3 from 'd3';
 import * as XXH from 'xxhashjs';
 import {textColor4Background} from './utils';
 import {IAttributeCategory} from '../RankingAdapter';
-import {IColumnDesc, ICategoricalColumnDesc, ICategory, isMissingValue} from 'lineupjs';
+import {IColumnDesc, ICategoricalColumnDesc, ICategory} from 'lineupjs';
 import {IScoreCell, IHighlightData, ATouringTask} from './ATouringTask';
 import {IMeasureResult, Type, SCOPE, ISimilarityMeasure} from '../interfaces';
 import {IServerColumn} from 'tdp_core/src/rest';
 import {MethodManager} from '../Managers';
 import {WorkerManager} from '../Workers/WorkerManager';
-import {waitUntilScoreColumnIsLoaded} from '../util';
+import {waitUntilScoreColumnIsLoaded, isMissingValue} from '../util';
 
 
 export class RowComparison extends ATouringTask {
