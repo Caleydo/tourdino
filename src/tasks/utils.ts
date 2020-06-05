@@ -1,4 +1,10 @@
 import * as d3 from 'd3';
+import {IColumnDesc} from 'lineupjs';
+import {IServerColumn} from 'tdp_core/src/rest';
+import {RankingAdapter} from '../RankingAdapter';
+import {uniqueId} from 'phovea_core/src';
+
+const EVENT_DATA_LOADED = 'dataLoaded';
 
 // SOURCE: https://stackoverflow.com/a/51592360/2549748
 /**
@@ -54,4 +60,33 @@ export function textColor4Background(backgroundColor: string) {
   }
 
   return color;
+}
+
+
+/**
+ * This functions returns a promise that gets resolved, once the score column is loaded.
+ * The notification is implemented based on a flag or an event.
+ */
+export function waitUntilScoreColumnIsLoaded(ranking: RankingAdapter, desc: IColumnDesc): Promise<any> {
+  const scoreColumn = (<any[]>ranking.getScoreColumns()).find((col) => (<IServerColumn>col.desc).column === (<IServerColumn>desc).column);
+
+  if(!scoreColumn) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    if(scoreColumn.isLoaded()) {
+      // console.log('data already loaded for', scoreColumn.desc.label);
+      resolve();
+      return;
+    }
+
+    const uniqueSuffix = `.tourdino${uniqueId()}`;
+
+    scoreColumn.on(EVENT_DATA_LOADED + uniqueSuffix, () => { // add suffix with unique Id to resolve all promises for each instance of scoreColumn
+      scoreColumn.on(EVENT_DATA_LOADED + uniqueSuffix, null);
+      // console.log('data loaded (notified by event) for', scoreColumn.desc.label);
+      resolve();
+    });
+  });
 }

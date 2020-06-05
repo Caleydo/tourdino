@@ -4,7 +4,7 @@ import rowCmpIcon from './rowCmp.png';
 import * as $ from 'jquery';
 import * as d3 from 'd3';
 import * as XXH from 'xxhashjs';
-import {textColor4Background} from './utils';
+import {textColor4Background, waitUntilScoreColumnIsLoaded} from './utils';
 import {IAttributeCategory} from '../RankingAdapter';
 import {IColumnDesc, ICategoricalColumnDesc, ICategory} from 'lineupjs';
 import {IScoreCell, IHighlightData, ATouringTask} from './ATouringTask';
@@ -12,7 +12,7 @@ import {IMeasureResult, Type, SCOPE, ISimilarityMeasure} from '../interfaces';
 import {IServerColumn} from 'tdp_core/src/rest';
 import {MethodManager} from '../Managers';
 import {WorkerManager} from '../Workers/WorkerManager';
-import {waitUntilScoreColumnIsLoaded, isMissingValue} from '../util';
+import {isMissingValue} from '../util';
 
 
 export class RowComparison extends ATouringTask {
