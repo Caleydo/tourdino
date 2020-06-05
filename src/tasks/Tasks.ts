@@ -10,6 +10,8 @@ import * as d3 from 'd3';
 import * as XXH from 'xxhashjs';
 import {isNumber} from 'util';
 import {SCOPE, WorkerManager, IMeasureResult, ISimilarityMeasure, ISetParameters, IMeasureVisualization, MethodManager, Type} from '..';
+import '
+';
 
 export const tasks = new Array<ATouringTask>();
 export function TaskDecorator() {
