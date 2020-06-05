@@ -36,15 +36,15 @@ export function intersection(arr1: any[], arr2: any[]) {
  * @returns An array containing two same length arrays with no null/missing values
  */
 export function removeMissingValues(arr1: any[], arr2: any[]) {
-  let filtered1 = [];
-  let filtered2 = [];
+  const filtered1 = [];
+  const filtered2 = [];
   arr1.forEach((item, index) => {
     if (isMissingValue(item) || isMissingValue(arr2[index])) {
-      return
+      return;
     }
     filtered1.push(item);
-    filtered2.push(arr2[index])
-  })
+    filtered2.push(arr2[index]);
+  });
   return [filtered1, filtered2];
 }
 

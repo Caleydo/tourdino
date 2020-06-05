@@ -85,7 +85,7 @@ export abstract class ATouringTask implements ITouringTask {
    */
   addFilterCheckbox() {
     const updateTable = this.updateTable.bind(this);
-    const uniqueID = uniqueId()
+    const uniqueID = uniqueId();
     this.nodeObject.select('.form-horizontal').append('div')
       .attr('class', `form-group filter-missing`)
       .html(`

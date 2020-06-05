@@ -113,7 +113,7 @@ export class RowComparison extends ATouringTask {
 
     let colGrpData = this.nodeObject.selectAll('select.rowGrp[name="row1[]"] option:checked').data();
     let rowGrpData = this.nodeObject.selectAll('select.rowGrp[name="row2[]"]  option:checked').data();
-    const filterMissingValues = !this.nodeObject.select('input[type="checkbox"]:checked').empty() // check if checkbox to filter missing values is checked
+    const filterMissingValues = !this.nodeObject.select('input[type="checkbox"]:checked').empty(); // check if checkbox to filter missing values is checked
 
     if (colGrpData.length > rowGrpData.length) {
       [rowGrpData, colGrpData] = [colGrpData, rowGrpData]; // avoid having more columns than rows --> flip table
@@ -303,7 +303,7 @@ export class RowComparison extends ATouringTask {
     // use always the first measure
     const measure = measures[0];
 
-    const hashObject = generateHashObject(colGroup, rowGroup, rowAttr, this.ranking.getDisplayedIds(), this.ranking.getSelection(), filterMissingValues)
+    const hashObject = generateHashObject(colGroup, rowGroup, rowAttr, this.ranking.getDisplayedIds(), this.ranking.getSelection(), filterMissingValues);
     const hashValue = generateHashValue(hashObject);
 
     const attrData = this.ranking.getAttributeDataDisplayed((rowAttr as IServerColumn).column); // minus one because the first column is headers
