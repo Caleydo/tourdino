@@ -7,7 +7,7 @@ import {IColumnDesc} from 'lineupjs';
  *  arr1: eleents only in arr1
  *  arr2: eleents only in arr2
  */
-export function intersection(arr1: Array<any>, arr2: Array<any>) {
+export function intersection(arr1: any[], arr2: any[]) {
   const intersection = [];
   const filtered2 = arr2.slice(0); // Slice is fastest (internally optimized) method on blink browsers (e.g. chrome) to copy an array
   const filtered1 = arr1.filter((itemA) => {
@@ -24,8 +24,43 @@ export function intersection(arr1: Array<any>, arr2: Array<any>) {
 }
 // const union = selectionSet.concat(categorySet).sort().filter((item, i, arr) => !i || item != arr[i-1]) // !i => if first elemnt, or if unqueal to previous item (item != arr[i-1]) include in arr
 
+/**
+ * Remove missing values from both arrays. If a value is missing in the first array, remove it.
+ * Remove the item in the second array with the same index.
+ * @param arr1 First array
+ * @param arr2 Second array
+ * @returns An array containing two same length arrays with no null/missing values
+ */
+export function removeMissingValues(arr1: any[], arr2: any[]) {
+  const filtered1 = [];
+  const filtered2 = [];
+  arr1.forEach((item, index) => {
+    if (isMissingValue(item) || isMissingValue(arr2[index])) {
+      return;
+    }
+    filtered1.push(item);
+    filtered2.push(arr2[index]);
+  });
+  return [filtered1, filtered2];
+}
+
 export function binom2(n: number): number {
   return n*(n-1)/2;
+}
+
+export function isMissingValue(v: any): boolean {
+  if(v == null || v === undefined || v === '' || v === 'NA' || v === 'na' || v === 'Na' || v === 'nA' || v === 'NaN' || (typeof v === 'number' && isNaN(v))) {
+    return true;
+  }
+  if (!Array.isArray(v)) {
+    return false;
+  }
+  for (const vi of v) {
+    if (!isMissingValue(vi)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /**
@@ -76,7 +111,7 @@ export function sleep(millis: number) {
  * See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
  * See: https://stackoverflow.com/a/1527820/2549748
  */
-export function getRandomInt(min, max) {
+function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -116,7 +151,7 @@ export function getRandomUniqueIntegers(n, max) {
  * Shuffles array in place. From: https://stackoverflow.com/a/6274381/2549748
  * @param {Array} arr An array containing the items.
  */
-export function shuffle(arr: Array<any>): Array<any> {
+export function shuffle(arr: any[]): any[] {
   let index, rndIndex, helper;
   for (index = arr.length - 1; index > 0; index--) {
       rndIndex = Math.floor(Math.random() * (index + 1));
@@ -135,4 +170,3 @@ export function shuffle(arr: Array<any>): Array<any> {
 export function isScoreColumn(colDesc: IColumnDesc) {
   return colDesc.hasOwnProperty('lazyLoaded');
 }
-

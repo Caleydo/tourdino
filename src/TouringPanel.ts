@@ -1,7 +1,7 @@
 import './style.scss';
 import {RankingAdapter} from './RankingAdapter';
 import * as d3 from 'd3';
-import {tasks as Tasks, ATouringTask} from './tasks/Tasks';
+import {tasks as Tasks, ATouringTask} from './tasks';
 import {LocalDataProvider} from 'lineupjs';
 import {PanelTab} from 'tdp_core/src/lineup/internal/panel/PanelTab';
 import {IPanelTabExtensionDesc} from 'tdp_core/src/extensions';
@@ -108,7 +108,14 @@ class TouringPanel {
   }
 
   private updateTask() {
-    this.currentTask = d3.select(this.node).select('button.task-btn.active').datum() as ATouringTask;
+    const activeButton = d3.select(this.node).select('button.task-btn.active');
+
+    if(activeButton.size() === 0) {
+      console.warn('No comparison tasks registered and found.');
+      return;
+    }
+
+    this.currentTask = activeButton.datum() as ATouringTask;
     this.currentTask.show();
   }
 }

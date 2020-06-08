@@ -1,7 +1,20 @@
-import {getRandomInt} from '../util';
+/**
+ * Returns a random integer between min (inclusive) and max (inclusive).
+ * The value is no lower than min (or the next integer greater than min
+ * if min isn't an integer) and no greater than max (or the next integer
+ * lower than max if max isn't an integer).
+ * Using Math.round() will give you a non-uniform distribution!
+ * See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+ * See: https://stackoverflow.com/a/1527820/2549748
+ */
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 // function to calculate enrichment score for one attribute
-function calc(setNumber: Array<any>, setCategory: Array<any>) {
+function calc(setNumber: any[], setCategory: any[]) {
   const categories = setCategory.filter((item, index, self) => self.indexOf(item) === index);
 
   // combine both sets
@@ -38,7 +51,7 @@ function calc(setNumber: Array<any>, setCategory: Array<any>) {
 }
 
 // function to calculate enrichment score for one category
-function calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: string, amountCategory: number): {
+function calcEnrichmentScoreCategory(setCombined: any[], currCategory: string, amountCategory: number): {
   category: string,
   enrichmentScore: number} {
 
@@ -74,15 +87,14 @@ function calcEnrichmentScoreCategory(setCombined: Array<any>, currCategory: stri
   return propertiesCategory;
 }
 
-
-
+// @ts-ignore: `TS2451: Cannot redeclare block-scoped variable 'ctx'.`
 const ctx: Worker = self as any;
 
-ctx.onmessage = function (event) {
+ctx.onmessage = (event) => {
   try {
-    const setNumber: Array<any> = event.data.setNumber;
-    const setCategory: Array<any> = event.data.setCategory;
-    const actualScores: Array<any> = event.data.actualScores;
+    const setNumber: any[] = event.data.setNumber;
+    const setCategory: any[] = event.data.setCategory;
+    const actualScores: any[] = event.data.actualScores;
 
     const n = setCategory.length;
     const categories = setCategory.filter((item, index, self) => self.indexOf(item) === index);

@@ -43,7 +43,7 @@ export class MethodManager {
   }
 
   public static getMeasuresByType(a: Type, b: Type, scope: SCOPE) {
-    const measures = new Array<ISimilarityMeasure>();
+    const measures: ISimilarityMeasure[] = [];
     for (const measure of registeredClasses) {
       if (measure.scope === scope && measure.type.equals(Comparison.get(a, b))) {
         measures.push(measure);

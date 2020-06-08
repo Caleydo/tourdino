@@ -1,8 +1,8 @@
-import {binom2, shuffle} from '../util';
+import {binom2, shuffle} from '../utils';
 
 const ctx: Worker = self as any;
 
-function calcAdjRand(arr1: Array<any>, arr2: Array<any>): number {
+function calcAdjRand(arr1: any[], arr2: any[]): number {
     // deduce catgeories from strings, e.g.: ['Cat1', 'Cat3', 'Cat2', 'Cat2', 'Cat1', 'Cat3']
     const A = [...new Set(arr1)]; // The set removes duplicates, and the conversion to array gives the content an order
     const B = [...new Set(arr2)];
@@ -52,8 +52,8 @@ ctx.onmessage = (event) => {
   const rndScoreCount =  1000.0;
 
   try {
-    const setA: Array<any> = event.data.setA;
-    const setB: Array<any> = event.data.setB;
+    const setA: any[] = event.data.setA;
+    const setB: any[] = event.data.setB;
 
     const actualScore = calcAdjRand(setA, setB);
 

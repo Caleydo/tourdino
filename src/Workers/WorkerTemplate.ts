@@ -1,5 +1,6 @@
 
 
+// @ts-ignore: `TS2451: Cannot redeclare block-scoped variable 'ctx'.`
 const ctx: Worker = self as any;
 
 ctx.onmessage = (event) => {
