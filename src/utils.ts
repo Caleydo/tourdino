@@ -52,15 +52,10 @@ export function isMissingValue(v: any): boolean {
   if(v == null || v === undefined || v === '' || v === 'NA' || v === 'na' || v === 'Na' || v === 'nA' || v === 'NaN' || (typeof v === 'number' && isNaN(v))) {
     return true;
   }
-  if (!Array.isArray(v)) {
-    return false;
+  if(Array.isArray(v)) {
+    return v.every((value) => isMissingValue(value));
   }
-  for (const vi of v) {
-    if (!isMissingValue(vi)) {
-      return false;
-    }
-  }
-  return true;
+  return false;
 }
 
 /**
