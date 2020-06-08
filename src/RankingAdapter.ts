@@ -1,6 +1,6 @@
 import {LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow, isMissingValue, CategoricalColumn} from 'lineupjs';
 import {IServerColumn} from 'tdp_core/src/rest';
-import {isScoreColumn} from './util';
+import {isScoreColumn} from './utils';
 import {IAccessorFunc} from 'tdp_core/src/lineup/internal/utils';
 
 

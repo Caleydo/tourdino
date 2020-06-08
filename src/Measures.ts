@@ -3,7 +3,7 @@ import {ParallelSets} from './measure_visualization/ParallelSets';
 import {BoxPlot} from './measure_visualization/BoxPlot';
 import {ScatterPlot} from './measure_visualization/ScatterPlot';
 import {RelGroupedBarChart} from './measure_visualization/RelGroupedBarChart';
-import {measureResultObj, sleep} from './util';
+import {measureResultObj, sleep} from './utils';
 import * as d3 from 'd3';
 import {jStat} from 'jstat';
 import {LineChart} from './measure_visualization/LineChart';

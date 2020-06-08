@@ -12,7 +12,7 @@ import {IMeasureResult, Type, SCOPE, ISimilarityMeasure} from '../interfaces';
 import {IServerColumn} from 'tdp_core/src/rest';
 import {MethodManager} from '../Managers';
 import {WorkerManager} from '../Workers/WorkerManager';
-import {isMissingValue} from '../util';
+import {isMissingValue} from '../utils';
 
 
 export class RowComparison extends ATouringTask {

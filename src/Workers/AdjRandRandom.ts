@@ -1,4 +1,4 @@
-import {binom2, shuffle} from '../util';
+import {binom2, shuffle} from '../utils';
 
 const ctx: Worker = self as any;
 

@@ -1,4 +1,4 @@
-import {intersection, getRandomUniqueIntegers} from '../util';
+import {intersection, getRandomUniqueIntegers} from '../utils';
 
 function calc(setA: any[], setB: any[]) {
   const {intersection: intersect, arr1: filteredsetA, arr2: filteredsetB} = intersection(setA, setB);

@@ -9,7 +9,7 @@ import {IMeasureResult, Type, SCOPE, ISimilarityMeasure} from '../interfaces';
 import {IServerColumn} from 'tdp_core/src/rest';
 import {MethodManager} from '../Managers';
 import {WorkerManager} from '../Workers/WorkerManager';
-import {removeMissingValues} from '../util';
+import {removeMissingValues} from '../utils';
 import {waitUntilScoreColumnIsLoaded} from './utils';
 
 export class ColumnComparison extends ATouringTask {
