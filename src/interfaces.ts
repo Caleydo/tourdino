@@ -97,7 +97,7 @@ export interface IGroupDesc {
   label: string;
   parent: IAttributeDesc;
   type: Type;
-  values: Array<any>;
+  values: any[];
 }
 
 /**
@@ -119,7 +119,7 @@ export interface ISimilarityMeasure {
  * A function to compare two arrays of values
  */
 export interface ISimilarityFunc {
-  (setA: Array<any>, setB: Array<any>, allData: Array<any>): Promise<IMeasureResult>;
+  (setA: any[], setB: any[], allData: any[]): Promise<IMeasureResult>;
 }
 
 export interface IMeasureResult {
@@ -158,10 +158,10 @@ export interface IGenerateVisualizationFunc {
 }
 
 export interface ISetParameters {
-    setA: Array<any>;
+    setA: any[];
     setADesc: any;
     setACategory?: any;
-    setB: Array<any>;
+    setB: any[];
     setBDesc: any;
     setBCategory?: any;
 }

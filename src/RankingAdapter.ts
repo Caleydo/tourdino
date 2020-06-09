@@ -1,6 +1,6 @@
 import {LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow, IOrderedGroup} from 'lineupjs';
 import {IServerColumn} from 'tdp_core/src/rest';
-import {isScoreColumn} from './util';
+import {isScoreColumn} from './utils';
 import {IAccessorFunc} from 'tdp_core/src/lineup/internal/utils';
 
 
@@ -38,14 +38,14 @@ export class RankingAdapter {
   /**
    * Identify scores through their `lazyLoaded` attribute.
    */
-  private getScoreColumns() {
+  public getScoreColumns() {
     return this.getDisplayedAttributes().filter((attr) => isScoreColumn(attr.desc));
   }
 
-  private oldOrder: Array<number> = new Array();
-  private oldSelection: Array<number> = new Array();
-  private oldAttributes: Array<Column> = new Array();
-  private data: Array<any>;
+  private oldOrder: number[] = [];
+  private oldSelection: number[] = [];
+  private oldAttributes: Column[] = [];
+  private data: any[];
 
   /**
    * Return an array of displayed items, with their id and data (including selection status and rank).
@@ -59,14 +59,14 @@ export class RankingAdapter {
    *    ...
    *    ]
    */
-  public getItemsDisplayed(sort = true): Array<Object> {
+  public getItemsDisplayed(sort = true): Object[] {
     const allItems = this.getItems();
     // get currently displayed data
     return this.getItemOrder().map((rowId) => allItems[rowId]);
   }
 
 
-  public getItems(): Array<Object> {
+  public getItems(): Object[] {
     // if the attributes are the same, we can reuse the data array
     // if the selection
     const displayedAttributes = this.getDisplayedAttributes();
@@ -174,6 +174,14 @@ export class RankingAdapter {
     return this.provider.getRankings()[this.rankingIndex];
   }
 
+  // public getRanking(col1,col2,filter): Ranking {
+  //   const col = <CategoricalColumn>this.provider.getRankings()[this.rankingIndex].children.find((col) => (<IServerColumn>col.desc).column === 'organ')
+  //   const col2 = <CategoricalColumn>this.provider.getRankings()[this.rankingIndex].children[6]
+  //   col.setFilter({filter: null, filterMissing: true})
+  //   col2.setFilter({filter: null, filterMissing: true})
+  //   return this.provider.getRankings()[this.rankingIndex];
+  // }
+
   /**
    * Contains  selection, rank and score data.
    */
@@ -248,7 +256,7 @@ export class RankingAdapter {
    * Generate a Attribute description that represents the current selection
    */
   public getSelectionDesc() {
-    const selCategories = new Array<ICategory>();
+    const selCategories: ICategory[] = [];
     const numberOfRows = this.getItemOrder().length; // get length of groups and sum them up
     if (this.getSelectionUnsorted().length > 0) {
       selCategories.push({ name: 'Selected', label: 'Selected', value: 0, color: '#1f77b4', });

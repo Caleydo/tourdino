@@ -7,7 +7,7 @@ import {SCOPE} from '../interfaces';
 interface IFormatedDataParallelSet {
   dimension1: string;
   dimension2: string;
-  data: Array<any>;
+  data: any[];
 }
 
 export class ParallelSets implements IMeasureVisualization {
@@ -16,7 +16,7 @@ export class ParallelSets implements IMeasureVisualization {
     // console.log('Parallel Sets - formatData');
     const dimension1 = setParameters.setBDesc.label;
     let dimension2 = setParameters.setADesc.label;
-    let data: Array<any>;
+    let data: any[];
 
     if(isAttr) {
       data = this.formatDataAttribute(setParameters, dimension1, dimension2);

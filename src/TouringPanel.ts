@@ -1,7 +1,7 @@
 import './style.scss';
 import {RankingAdapter} from './RankingAdapter';
 import * as d3 from 'd3';
-import {tasks as Tasks, ATouringTask} from './tasks/Tasks';
+import {tasks as Tasks, ATouringTask} from './tasks';
 import {LocalDataProvider} from 'lineupjs';
 import {PanelTab} from 'tdp_core/src/lineup/internal/panel/PanelTab';
 import {IPanelTabExtensionDesc} from 'tdp_core/src/extensions';
@@ -9,8 +9,8 @@ import {IPanelTabExtensionDesc} from 'tdp_core/src/extensions';
 
 const touringTemplate = `
 <p class="touring-intro-text">
-  This panel allows you to perform basic statistical analyses. You can either compare multiple columns (e.g., are the values of column A correlated with the values of column B)
-  or compare sets of rows (e.g., does row set 1 differ from row set 2 with respect to the values in column C).
+  This panel allows you to perform basic statistical analyses. You can either compare multiple columns (e.g., are the values of column A correlated with the values of column B?)
+  or compare sets of rows (e.g., does row set 1 differ from row set 2 with respect to the values in column C?).
 </p>
 <div class="alert alert-warning" role="alert">
   <strong>Please note:</strong> This panel is still under development. Please report any problems you might observe. Furthermore, there is currently no multiple-testing correction being performed.
@@ -108,7 +108,14 @@ class TouringPanel {
   }
 
   private updateTask() {
-    this.currentTask = d3.select(this.node).select('button.task-btn.active').datum() as ATouringTask;
+    const activeButton = d3.select(this.node).select('button.task-btn.active');
+
+    if(activeButton.size() === 0) {
+      console.warn('No comparison tasks registered and found.');
+      return;
+    }
+
+    this.currentTask = activeButton.datum() as ATouringTask;
     this.currentTask.show();
   }
 }
