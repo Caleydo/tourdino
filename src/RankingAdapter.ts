@@ -1,4 +1,4 @@
-import {LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow, isMissingValue, CategoricalColumn} from 'lineupjs';
+import {LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow, IOrderedGroup} from 'lineupjs';
 import {IServerColumn} from 'tdp_core/src/rest';
 import {isScoreColumn} from './utils';
 import {IAccessorFunc} from 'tdp_core/src/lineup/internal/utils';
@@ -140,10 +140,9 @@ export class RankingAdapter {
   /**
    * Returns an array of indices for the providers data array
    */
-  private getItemOrder() {
+  private getItemOrder(): number[] {
     // order is always defined for groups (rows (data) only if there is a grouping)
-    return [].concat(...this.getRanking().getGroups().map((grp) => grp.order)); // Map groups to order arrays and concat those
-
+    return [].concat(...this.getRanking().getGroups().map((grp) => Array.from(grp.order))); // Map groups to order arrays and concat those
   }
 
   public getDisplayedIds() {
@@ -190,19 +189,15 @@ export class RankingAdapter {
     // console.time('get data (getGroupedData) time')
     const data = this.getItems();
     // console.timeEnd('get data (getGroupedData) time')
-    const groups = [];
-
-    for (const grp of this.getRanking().getGroups()) {
-      groups.push({
+    return this.getRanking().getGroups().map((grp: IOrderedGroup) => {
+      return {
         name: grp.name,
         label: grp.name,
         color: grp.color,
-        rows: grp.order.map((index) => data[index]).filter((item) => item !== undefined)
-      });
-    }
-    return groups;
+        rows: Array.from(grp.order).map((index) => data[index]).filter((item) => item !== undefined)
+      };
+    });
   }
-
 
   /**
    * returns the data for the given attribute

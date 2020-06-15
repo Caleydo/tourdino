@@ -1,5 +1,6 @@
 import * as $ from 'jquery';
 import * as d3 from 'd3';
+import 'select2';
 import {IMeasureResult, ISimilarityMeasure, ISetParameters, SCOPE, IMeasureVisualization} from '../interfaces';
 import {RankingAdapter} from '../RankingAdapter';
 import {WorkerManager} from '../Workers/WorkerManager';
