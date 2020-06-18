@@ -1,7 +1,7 @@
 import {LocalDataProvider, IColumnDesc, ICategory, Column, Ranking, IDataRow, IOrderedGroup} from 'lineupjs';
-import {IServerColumn} from 'tdp_core/src/rest';
-import {isScoreColumn} from './utils';
-import {IAccessorFunc} from 'tdp_core/src/lineup/internal/utils';
+import {IServerColumn} from 'tdp_core';
+import {BaseUtils} from '../base/BaseUtils';
+import {IAccessorFunc} from 'tdp_core';
 
 
 export interface IAttributeCategory extends ICategory {
@@ -39,7 +39,7 @@ export class RankingAdapter {
    * Identify scores through their `lazyLoaded` attribute.
    */
   public getScoreColumns() {
-    return this.getDisplayedAttributes().filter((attr) => isScoreColumn(attr.desc));
+    return this.getDisplayedAttributes().filter((attr) => BaseUtils.isScoreColumn(attr.desc));
   }
 
   private oldOrder: number[] = [];
@@ -242,7 +242,7 @@ export class RankingAdapter {
     const ids = this.getDisplayedIds();
     const data = [];
 
-    if (desc.column && isScoreColumn(desc)) {
+    if (desc.column && BaseUtils.isScoreColumn(desc)) {
       for (const id of ids) {
         const dataEntry = { id };
         dataEntry[desc.column] = accessor({ v: { id }, i: null } as IDataRow); // i is not used by the accessor function

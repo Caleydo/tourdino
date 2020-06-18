@@ -1,14 +1,14 @@
 import * as $ from 'jquery';
 import * as d3 from 'd3';
 import 'select2';
-import {IMeasureResult, ISimilarityMeasure, ISetParameters, SCOPE, IMeasureVisualization} from '../interfaces';
-import {RankingAdapter} from '../RankingAdapter';
-import {WorkerManager} from '../Workers/WorkerManager';
+import {IMeasureResult, ISimilarityMeasure, ISetParameters, SCOPE, IMeasureVisualization} from '../base/interfaces';
+import {RankingAdapter} from './RankingAdapter';
+import {WorkerManager} from '../workers/WorkerManager';
 import {LocalDataProvider, IColumnDesc, CategoricalColumn, ICategoricalColumnDesc, Column} from 'lineupjs';
-import {deepCopy, score2color} from './utils';
-import {IServerColumn} from 'tdp_core/src/rest';
+import {TaskUtils} from './TaskUtils';
+import {IServerColumn} from 'tdp_core';
 import {isNumber} from 'util';
-import {uniqueId} from 'phovea_core/src';
+import {UniqueIdManager} from 'phovea_core';
 
 export interface ITouringTask {
   id: string;
@@ -86,7 +86,7 @@ export abstract class ATouringTask implements ITouringTask {
    */
   addFilterCheckbox() {
     const updateTable = this.updateTable.bind(this);
-    const uniqueID = uniqueId();
+    const uniqueID = UniqueIdManager.getInstance().uniqueId();
     this.nodeObject.select('.form-horizontal').append('div')
       .attr('class', `form-group filter-missing`)
       .html(`
@@ -187,10 +187,10 @@ export abstract class ATouringTask implements ITouringTask {
 
   getAttriubuteDescriptions(): IColumnDesc[] {
     let descriptions: IColumnDesc[] = this.ranking.getDisplayedAttributes().map((col: Column) => {
-      const desc: IColumnDesc = deepCopy(col.desc);
+      const desc: IColumnDesc = TaskUtils.deepCopy(col.desc);
       if ((col as CategoricalColumn).categories) {
         const displayedCategories = this.ranking.getAttributeCategoriesDisplayed((col.desc as IServerColumn).column);
-        (desc as ICategoricalColumnDesc).categories = deepCopy((col as CategoricalColumn).categories).filter((category) => displayedCategories.has(category.name));
+        (desc as ICategoricalColumnDesc).categories = TaskUtils.deepCopy((col as CategoricalColumn).categories).filter((category) => displayedCategories.has(category.name));
       }
 
       return desc;
@@ -210,7 +210,7 @@ export abstract class ATouringTask implements ITouringTask {
   }
 
   toScoreCell(score: IMeasureResult, measure: ISimilarityMeasure, setParameters: ISetParameters, highlightData: IHighlightData[]): IScoreCell {
-    let color = score2color(score.pValue);
+    let color = TaskUtils.score2color(score.pValue);
     let cellLabel = score.pValue.toFixed(3);
 
     cellLabel = cellLabel.startsWith('0') ? cellLabel.substring(1) : score.pValue.toFixed(2); // [0,1) --> .123, 1 --> 1.00

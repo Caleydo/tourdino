@@ -1,16 +1,16 @@
-import colCmpHtml from 'html-loader!./ColumnComparison.html'; // webpack imports html to variable
-import colCmpIcon from './colCmp.png';
+import colCmpHtml from 'html-loader!./templates/ColumnComparison.html'; // webpack imports html to variable
+import colCmpIcon from './assets/colCmp.png';
 
 import * as XXH from 'xxhashjs';
 import {cloneDeep} from 'lodash';
 import {IColumnDesc} from 'lineupjs';
 import {IScoreCell, IHighlightData, ATouringTask} from './ATouringTask';
-import {IMeasureResult, Type, SCOPE, ISimilarityMeasure} from '../interfaces';
-import {IServerColumn} from 'tdp_core/src/rest';
-import {MethodManager} from '../Managers';
-import {WorkerManager} from '../Workers/WorkerManager';
-import {removeMissingValues} from '../utils';
-import {waitUntilScoreColumnIsLoaded} from './utils';
+import {IMeasureResult, Type, SCOPE, ISimilarityMeasure} from '../base/interfaces';
+import {IServerColumn} from 'tdp_core';
+import {MethodManager} from '../measures/MethodManager';
+import {WorkerManager} from '../workers/WorkerManager';
+import {BaseUtils} from '../base/BaseUtils';
+import {TaskUtils} from './TaskUtils';
 
 export class ColumnComparison extends ATouringTask {
 
@@ -243,9 +243,9 @@ export class ColumnComparison extends ATouringTask {
     }
 
     // wait until score columns are loaded before proceeding to the calculation
-    await waitUntilScoreColumnIsLoaded(this.ranking, row);
+    await TaskUtils.waitUntilScoreColumnIsLoaded(this.ranking, row);
     // console.log('row is loaded', row);
-    await waitUntilScoreColumnIsLoaded(this.ranking, col);
+    await TaskUtils.waitUntilScoreColumnIsLoaded(this.ranking, col);
     // console.log('col is loaded', col);
 
     const measures = MethodManager.getMeasuresByType(Type.get(row.type), Type.get(col.type), SCOPE.ATTRIBUTES);
@@ -265,7 +265,7 @@ export class ColumnComparison extends ATouringTask {
     const first = this.ranking.getAttributeDataDisplayed((col as IServerColumn).column); // minus one because the first column is headers
     const second = this.ranking.getAttributeDataDisplayed((row as IServerColumn).column);
 
-    const [data1, data2] = filterMissingValues ? removeMissingValues(first, second) : [first, second];
+    const [data1, data2] = filterMissingValues ? BaseUtils.removeMissingValues(first, second) : [first, second];
 
     try {
       const score = await this.getMeasurementScore(hashValue, {setA: data1, setB:data2, allData: null}, measure);

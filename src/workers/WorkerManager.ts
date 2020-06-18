@@ -31,14 +31,11 @@ export class WorkerManager {
       resolveF = resolve;
       rejectF = reject;
     });
-
     const workerPromise = {promise, resolve: resolveF, reject: rejectF};
     WorkerManager.workers.set(tWorker, workerPromise);
-
     if (this.workers.size <= this.MAX_WORKERS) {
       resolveF(tWorker.getWorker()); // resolve the first n workers immediately, they will resolve the next promises
     }
-
     return promise;
   }
 
@@ -80,7 +77,6 @@ export abstract class ATouringWorker {
 
   public getWorker(): Worker {
     const workers = this.getWorkers();
-
     if (workers.length < WorkerManager.MAX_WORKERS) {
       workers.unshift(this.getWorkerInstance()); // add new worker to the beginning of the list
     }

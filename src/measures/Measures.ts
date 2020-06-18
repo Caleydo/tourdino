@@ -1,16 +1,16 @@
-import {Comparison, SCOPE, ISimilarityMeasure, Type, IMeasureResult, IMeasureVisualization} from './interfaces';
-import {ParallelSets} from './measure_visualization/ParallelSets';
-import {BoxPlot} from './measure_visualization/BoxPlot';
-import {ScatterPlot} from './measure_visualization/ScatterPlot';
-import {RelGroupedBarChart} from './measure_visualization/RelGroupedBarChart';
-import {measureResultObj, sleep} from './utils';
+import {Comparison, SCOPE, ISimilarityMeasure, Type, IMeasureResult, IMeasureVisualization} from '../base/interfaces';
+import {ParallelSets} from '../measure_visualization/ParallelSets';
+import {BoxPlot} from '../measure_visualization/BoxPlot';
+import {ScatterPlot} from '../measure_visualization/ScatterPlot';
+import {RelGroupedBarChart} from '../measure_visualization/RelGroupedBarChart';
+import {BaseUtils} from '../base/BaseUtils';
 import * as d3 from 'd3';
 import {jStat} from 'jstat';
-import {LineChart} from './measure_visualization/LineChart';
-import {JaccardRandomizationWorker, AdjustedRandRandomizationWorker, EnrichmentRandomizationWorker} from './Workers/WorkerManager';
+import {LineChart} from '../measure_visualization/LineChart';
+import {JaccardRandomizationWorker, AdjustedRandRandomizationWorker, EnrichmentRandomizationWorker} from '../workers/WorkerManager';
 
 export const registeredClasses: ASimilarityMeasure[] = [];
-export function MeasureDecorator() {
+function MeasureDecorator() {
   return function (target: {new(): ASimilarityMeasure}) { // only instantiable subtypes of ASimilarityClass can be passed.
     registeredClasses.push(new target());
   };
@@ -62,7 +62,7 @@ export class ChiSquareTest extends ASimilarityMeasure {
 
 
   public async calc(setA: any[], setB: any[]) {
-    await sleep(0);
+    await BaseUtils.sleep(0);
     const setACategories = setA.filter((item, index, self) => self.indexOf(item) === index);
     const setBCategories = setB.filter((item, index, self) => self.indexOf(item) === index);
     const allCategories = setACategories.concat(setBCategories).filter((item, index, self) => self.indexOf(item) === index);
@@ -117,7 +117,7 @@ export class ChiSquareTest extends ASimilarityMeasure {
       // console.log('ChiSquare - table: ', {setA,setB,allCategories,table,chiSquare,df,pValue});
     }
 
-    return measureResultObj(score, pValue, setA.length, setB.length);
+    return BaseUtils.measureResultObj(score, pValue, setA.length, setB.length);
   }
 
   public getSum(total: number, numb: number) {
@@ -147,7 +147,7 @@ export class JaccardSimilarity extends ASimilarityMeasure {
 
   public async calc(setA: any[], setB: any[], allData: any[]) {
     const {score, p} = await this.calc_Randomize(setA, setB, allData);
-    return measureResultObj(score, p, setA.length, setB.length);
+    return BaseUtils.measureResultObj(score, p, setA.length, setB.length);
   }
 
   async calc_Randomize(setA: any[], setB: any[], allData: any[]): Promise<{score: number, p: number}> {
@@ -169,7 +169,7 @@ export class ChiSquareIndependenceTest extends ChiSquareTest {
 
   // compare: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3900058
   public async calc(arrA: any[], arrB: any[]) {
-    await sleep(0);
+    await BaseUtils.sleep(0);
 
     if (arrA.length !== arrB.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
@@ -192,7 +192,7 @@ export class ChiSquareIndependenceTest extends ChiSquareTest {
     if (rows <= 1 || columns <= 1) {
       // chi2 is 0, because observed === expected value, and chi2 = (obs - expect)²/expect
       // chi2 is really 0, so we can set p to 1s
-      return measureResultObj(score, 1, setACategories.length, setBCategories.length);
+      return BaseUtils.measureResultObj(score, 1, setACategories.length, setBCategories.length);
     }
 
     for (const catA of setACategories) { // contingency table rows
@@ -224,7 +224,7 @@ export class ChiSquareIndependenceTest extends ChiSquareTest {
     // console.log('score', score, 'n', n, 't', t);
     score = cramerV;
 
-    return measureResultObj(score, pValue, setACategories.length, setBCategories.length, this.scope);
+    return BaseUtils.measureResultObj(score, pValue, setACategories.length, setBCategories.length, this.scope);
   }
 }
 
@@ -256,7 +256,7 @@ export class AdjustedRandIndex extends ASimilarityMeasure {
     }
 
     const {score, p} = await this.calcP_Randomize(arr1, arr2);
-    return measureResultObj(score, p, arr1.length, arr2.length, this.scope); // async function --> returns promise
+    return BaseUtils.measureResultObj(score, p, arr1.length, arr2.length, this.scope); // async function --> returns promise
   }
 
   async calcP_Randomize(arr1: any[], arr2: any[]): Promise<{score: number, p: number}> {
@@ -292,7 +292,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
 
 
   public async calc(setA: any[], setB: any[]) {
-    await sleep(0);
+    await BaseUtils.sleep(0);
     const setAValid = setA.filter((value) => {return (value !== null && value !== undefined && !isNaN(value));});
     const selectionRankObj: IRankObJ[] = setAValid.map((a) => {
       return {
@@ -408,7 +408,7 @@ export class WilcoxonRankSumTest extends ASimilarityMeasure {
       }
     }
 
-    return measureResultObj(score, pValue, setAValid.length, setBValid.length);
+    return BaseUtils.measureResultObj(score, pValue, setAValid.length, setBValid.length);
   }
 }
 
@@ -446,7 +446,7 @@ export class StudentTTest extends ASimilarityMeasure {
 
 
   public async calc(setA: any[], setB: any[]) {
-    await sleep(0);
+    await BaseUtils.sleep(0);
     const setAValid = setA.filter((value) => {return (value !== null && value !== undefined && !isNaN(value));});
     const nSelection = setAValid.length;
     const muSelection = d3.mean(setAValid);
@@ -477,7 +477,7 @@ export class StudentTTest extends ASimilarityMeasure {
       }
     }
 
-    return measureResultObj(score, pValue, setAValid.length, setBValid.length);
+    return BaseUtils.measureResultObj(score, pValue, setAValid.length, setBValid.length);
   }
 }
 
@@ -501,7 +501,7 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
 
   public async calc(set1: any[], set2: any[]) {
     // calculation: https://www.statisticshowto.datasciencecentral.com/spearman-rank-correlation-definition-calculate/
-    await sleep(0);
+    await BaseUtils.sleep(0);
 
     if (set1.length !== set2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
@@ -561,7 +561,7 @@ export class SpearmanCorrelation extends ASimilarityMeasure {
       }
     }
 
-    return measureResultObj(spearmanCorr, pValue, validPoints.length, validPoints.length); // async function --> returns promise
+    return BaseUtils.measureResultObj(spearmanCorr, pValue, validPoints.length, validPoints.length); // async function --> returns promise
   }
 
   protected pValueAvailability(original: number, valid: number, threshold = 0.1): boolean {
@@ -589,7 +589,7 @@ export class PearsonCorrelation extends ASimilarityMeasure {
 
 
   public async calc(set1: any[], set2: any[]) {
-    await sleep(0);
+    await BaseUtils.sleep(0);
 
     if (set1.length !== set2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
@@ -642,7 +642,7 @@ export class PearsonCorrelation extends ASimilarityMeasure {
       }
     }
 
-    return measureResultObj(pearsonCorr, pValue, validPoints.length, validPoints.length); // async function --> returns promise
+    return BaseUtils.measureResultObj(pearsonCorr, pValue, validPoints.length, validPoints.length); // async function --> returns promise
   }
 }
 
@@ -682,7 +682,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
 
 
   public async calc(set1: any[], set2: any[]) {
-    await sleep(0);
+    await BaseUtils.sleep(0);
 
     if (set1.length !== set2.length) {
       throw Error('Value Pairs are compared, therefore the array sizes have to be equal.');
@@ -779,7 +779,7 @@ export class EnrichmentScore extends ASimilarityMeasure {
 
     }
     const calculatedLength = validCombinedSet === null ? set1.length : validCombinedSet.length;
-    return measureResultObj(overallScore, p, calculatedLength, calculatedLength, properties); // async function --> returns promise
+    return BaseUtils.measureResultObj(overallScore, p, calculatedLength, calculatedLength, properties); // async function --> returns promise
   }
 
   async calcPValuePermutation(numericSet: any[], categorySet: any[], actualScores: any[]): Promise<{category: string, pvalue: number}[]> {

@@ -1,6 +1,5 @@
-import {IMeasureVisualization, ISetParameters, IMeasureResult} from '../';
+import {IMeasureVisualization, ISetParameters, IMeasureResult} from '../base/interfaces';
 import * as d3 from 'd3';
-import 'd3-grubert-boxplot';
 
 export class BoxPlot implements IMeasureVisualization {
 

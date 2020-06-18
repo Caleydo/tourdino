@@ -1,4 +1,4 @@
-import {binom2, shuffle} from '../utils';
+import {BaseUtils} from '../base/BaseUtils';
 
 const ctx: Worker = self as any;
 
@@ -31,13 +31,13 @@ function calcAdjRand(arr1: any[], arr2: any[]): number {
     const rowsSums = table.map((row) => row.reduce((sum, curr) => sum += curr)); // reduce each row to the sum
     const colSums = A.map((cat, i) => table.reduce((sum, curr) => sum += curr[i], 0)); // reduce each all rows to the sum of column i
     // const cellBinomSum = table.reduce((rowsum, row) => rowsum + row.reduce((colsum, col) => colsum += binom2(col), 0), 0);
-    const cellBinomSum = table.reduce((sum, row) => sum + row.reduce((colsum, col) => colsum += binom2(col), 0), 0); // set accumulator to zero!
+    const cellBinomSum = table.reduce((sum, row) => sum + row.reduce((colsum, col) => colsum += BaseUtils.binom2(col), 0), 0); // set accumulator to zero!
     // use 0 as initial value, otherwise reduce takes the first element as initial value and the binom coefficient is nt calculated for it!
-    const rowBinomSum = rowsSums.reduce((sum, curr) => sum += binom2(curr), 0);
-    const colBinomSum = colSums.reduce((sum, curr) => sum += binom2(curr), 0);
+    const rowBinomSum = rowsSums.reduce((sum, curr) => sum += BaseUtils.binom2(curr), 0);
+    const colBinomSum = colSums.reduce((sum, curr) => sum += BaseUtils.binom2(curr), 0);
 
     const index = cellBinomSum;
-    const expectedIndex = (rowBinomSum * colBinomSum) / binom2(arr1.length);
+    const expectedIndex = (rowBinomSum * colBinomSum) / BaseUtils.binom2(arr1.length);
     const maxIndex = 0.5 * (rowBinomSum + colBinomSum);
 
     if (0 === (maxIndex - expectedIndex)) {
@@ -65,9 +65,9 @@ ctx.onmessage = (event) => {
 
       for (const scoreIndex of rndScores.keys()) {
         if (scoreIndex % 2 === 0) { // alternate array shuffling (shuffling one array is enough)
-          shuffle(setA); // the array is shuffled in place!
+          BaseUtils.shuffle(setA); // the array is shuffled in place!
         } else {
-          shuffle(setB);
+          BaseUtils.shuffle(setB);
         }
         rndScores[scoreIndex] = calcAdjRand(setA, setB);
       }

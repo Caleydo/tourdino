@@ -1,7 +1,7 @@
-import {intersection, getRandomUniqueIntegers} from '../utils';
+import {BaseUtils} from '../base/BaseUtils';
 
 function calc(setA: any[], setB: any[]) {
-  const {intersection: intersect, arr1: filteredsetA, arr2: filteredsetB} = intersection(setA, setB);
+  const {intersection: intersect, arr1: filteredsetA, arr2: filteredsetB} = BaseUtils.intersection(setA, setB);
   const score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
   return score || 0;
 }
@@ -27,7 +27,7 @@ ctx.onmessage = (event) => {
       const drawSize = setA.length;
 
       for (const scoreIndex of rndScores.keys()) {
-        const rndIndices = getRandomUniqueIntegers(drawSize, allData.length-1);
+        const rndIndices = BaseUtils.getRandomUniqueIntegers(drawSize, allData.length-1);
         const rndSet = rndIndices.map((index) => allData[index]); // get elments with the random indices
         rndScores[scoreIndex] = calc(rndSet, setB);
       }

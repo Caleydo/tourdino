@@ -1,18 +1,18 @@
-import rowCmpHtml from 'html-loader!./RowComparison.html'; // webpack imports html to variable
-import rowCmpIcon from './rowCmp.png';
+import rowCmpHtml from 'html-loader!./templates/RowComparison.html'; // webpack imports html to variable
+import rowCmpIcon from './assets/rowCmp.png';
 
 import * as $ from 'jquery';
 import * as d3 from 'd3';
 import * as XXH from 'xxhashjs';
-import {textColor4Background, waitUntilScoreColumnIsLoaded} from './utils';
-import {IAttributeCategory} from '../RankingAdapter';
+import {TaskUtils} from './TaskUtils';
+import {IAttributeCategory} from './RankingAdapter';
 import {IColumnDesc, ICategoricalColumnDesc, ICategory} from 'lineupjs';
 import {IScoreCell, IHighlightData, ATouringTask} from './ATouringTask';
-import {IMeasureResult, Type, SCOPE, ISimilarityMeasure} from '../interfaces';
-import {IServerColumn} from 'tdp_core/src/rest';
-import {MethodManager} from '../Managers';
-import {WorkerManager} from '../Workers/WorkerManager';
-import {isMissingValue} from '../utils';
+import {IMeasureResult, Type, SCOPE, ISimilarityMeasure} from '../base/interfaces';
+import {IServerColumn} from 'tdp_core';
+import {MethodManager} from '../measures/MethodManager';
+import {WorkerManager} from '../workers/WorkerManager';
+import {BaseUtils} from '../base/BaseUtils';
 
 
 export class RowComparison extends ATouringTask {
@@ -288,7 +288,7 @@ export class RowComparison extends ATouringTask {
     }
 
     // wait until score columns are loaded before proceeding to the calculation
-    await waitUntilScoreColumnIsLoaded(this.ranking, rowAttr);
+    await TaskUtils.waitUntilScoreColumnIsLoaded(this.ranking, rowAttr);
     // console.log('row is loaded', rowAttr);
 
     // Always compare selected elements with a group of elements of the same column
@@ -310,10 +310,10 @@ export class RowComparison extends ATouringTask {
 
     // Get the data of 'attr' for the rows inside 'rowGrp'
     const unfilteredRowData = rowGroup.indices.map((i) => attrData[i]);
-    const rowData = filterMissingValues ? unfilteredRowData.filter((value) => !isMissingValue(value)) : unfilteredRowData;
+    const rowData = filterMissingValues ? unfilteredRowData.filter((value) => !BaseUtils.isMissingValue(value)) : unfilteredRowData;
 
     const unfilteredColData = colGroup.indices.map((i) => attrData[i]);
-    const colData = filterMissingValues ? unfilteredColData.filter((value) => !isMissingValue(value)) : unfilteredColData;
+    const colData = filterMissingValues ? unfilteredColData.filter((value) => !BaseUtils.isMissingValue(value)) : unfilteredColData;
 
     try {
       const score = await this.getMeasurementScore(hashValue, {setA: rowData, setB: colData, allData: attrData}, measure);
@@ -391,7 +391,7 @@ function prepareDataArray(colGroups: IAttributeCategory[], rowGroups: IAttribute
       data[i][j][j === 0 ? 1 : 0] = { // through rowspan, this becomes the first array item
         label: `${rowGrp.label} (${rowGrp.attribute.label})`,
         background: rowGrp.color,
-        foreground: textColor4Background(rowGrp.color)
+        foreground: TaskUtils.textColor4Background(rowGrp.color)
       };
 
       if (j === 0) {

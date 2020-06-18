@@ -1,7 +1,6 @@
-import {IMeasureVisualization, intersection, ISetParameters, IMeasureResult} from '../';
+import {IMeasureVisualization, ISetParameters, IMeasureResult, SCOPE} from '../base/interfaces';
 import * as d3 from 'd3';
-import 'd3.parsets';
-import {SCOPE} from '../interfaces';
+import {BaseUtils} from '../base/BaseUtils';
 
 
 interface IFormatedDataParallelSet {
@@ -56,7 +55,7 @@ export class ParallelSets implements IMeasureVisualization {
 
     const currHeaderNum = setParameters.setA.length;
 
-    const {intersection: intersect} = intersection(setParameters.setA,setParameters.setB);
+    const {intersection: intersect} = BaseUtils.intersection(setParameters.setA,setParameters.setB);
     const numHeader = intersect.length;
 
     label = '';
@@ -149,7 +148,7 @@ export class ParallelSets implements IMeasureVisualization {
         } else {
           categoryBLabel = defCategoryB[0].label;
         }
-        const intersect = intersection(currCatAIds,currCatBIds);
+        const intersect = BaseUtils.intersection(currCatAIds,currCatBIds);
         const amounts = {
           intersectAmount: intersect.intersection.length,
           setARestAmount: intersect.arr1.length,

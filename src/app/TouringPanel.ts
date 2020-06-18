@@ -1,10 +1,17 @@
-import './style.scss';
-import {RankingAdapter} from './RankingAdapter';
+import './scss/main.scss';
+import {RankingAdapter} from '../tasks/RankingAdapter';
 import * as d3 from 'd3';
-import {tasks as Tasks, ATouringTask} from './tasks';
 import {LocalDataProvider} from 'lineupjs';
-import {PanelTab} from 'tdp_core/src/lineup/internal/panel/PanelTab';
-import {IPanelTabExtensionDesc} from 'tdp_core/src/extensions';
+import {PanelTab} from 'tdp_core/dist/lineup/internal/panel/PanelTab';
+import {IPanelTabExtensionDesc} from 'tdp_core/dist/lineup/internal/LineUpPanelActions';
+import {RowComparison} from '../tasks/RowComparisonTask';
+import {ColumnComparison} from '../tasks/ColumnComparisonTask';
+import { ATouringTask } from '../tasks/ATouringTask';
+
+export const tasks = [
+  new RowComparison(),
+  new ColumnComparison(),
+].sort((a, b) => b.order - a.order); // sort descending
 
 
 const touringTemplate = `
@@ -26,7 +33,7 @@ const touringTemplate = `
 <div class="output"></div> <!-- task output -->`;
 
 
-class TouringPanel {
+export class TouringPanel {
 
   private readonly node: HTMLElement;
   private ranking: RankingAdapter;
@@ -48,7 +55,7 @@ class TouringPanel {
     this.updateTask();
   }
   private initTasks() {
-    for (const task of Tasks) {
+    for (const task of tasks) {
       task.init(this.ranking, d3.select(this.node).select('div.output').node() as HTMLElement);
     }
   }
@@ -57,10 +64,10 @@ class TouringPanel {
     // For each Task, create a button
     // Link tasks with buttons
     const taskSelectForm = d3.select(this.node).select('.input .type .form-group');
-    const taskButtons = taskSelectForm.selectAll('.btn-wrapper').data(Tasks, (task) => task.id);
+    const taskButtons = taskSelectForm.selectAll('.btn-wrapper').data(tasks, (task) => task.id);
 
     taskButtons.enter() // enter: add a button for each task
-      .append('div').attr('class', `btn-wrapper col-sm-${Math.max(Math.floor(8 / Tasks.length), 1)}`)
+      .append('div').attr('class', `btn-wrapper col-sm-${Math.max(Math.floor(8 / tasks.length), 1)}`)
       .append('button').attr('class', 'task-btn btn btn-default btn-block')
       .classed('active', (d, i) => i === 0) // Activate first task
       .html((d) => `<img src="${d.icon}"/>${d.label}`);
@@ -118,15 +125,17 @@ class TouringPanel {
     this.currentTask = activeButton.datum() as ATouringTask;
     this.currentTask.show();
   }
+
+    /**
+   *
+   * @param tab PanelTab
+   * @param provider Instance of the LocalDataProvider that contains all ranking
+   * @param desc Options provided through the extension point i.e `headerCssClass, headerTitle`
+   */
+  static create(desc: IPanelTabExtensionDesc, tab: PanelTab, provider: LocalDataProvider): void {
+    // tslint:disable-next-line:no-unused-expression
+    new TouringPanel(desc, tab, provider);
+  }
 }
 
-/**
- *
- * @param tab PanelTab
- * @param provider Instance of the LocalDataProvider that contains all ranking
- * @param desc Options provided through the extension point i.e `headerCssClass, headerTitle`
- */
-export default function create(desc: IPanelTabExtensionDesc, tab: PanelTab, provider: LocalDataProvider): void {
-  // tslint:disable-next-line:no-unused-expression
-  new TouringPanel(desc, tab, provider);
-}
+

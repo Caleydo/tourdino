@@ -1,4 +1,4 @@
-import {IAttributeDesc, Type, Comparison, SCOPE, MeasureMap, ISimilarityMeasure} from './interfaces';
+import {IAttributeDesc, Type, Comparison, SCOPE, MeasureMap, ISimilarityMeasure} from '../base/interfaces';
 import {registeredClasses} from './Measures';
 
 
