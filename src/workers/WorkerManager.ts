@@ -12,7 +12,6 @@ interface IWorkerPromise {
   reject: (value?: Worker) => void;
 }
 
-
 /**
  * Allows the concurrent executions of 'window.navigator.hardwareConcurrency' workers.
  */
