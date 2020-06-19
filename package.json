@@ -69,7 +69,8 @@
     "@types/d3": "~3.5.36",
     "@types/jquery": "~3.3.33",
     "@types/node": "^13.7.7",
-    "@types/select2": "4.0.44"
+    "@types/select2": "4.0.44",
+    "worker-loader": "^2.0.0"
   },
   "dependencies": {
     "tdp_core": "github:datavisyn/tdp_core#vstoiber/refactoring",
