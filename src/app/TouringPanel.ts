@@ -126,7 +126,7 @@ export class TouringPanel {
     this.currentTask.show();
   }
 
-    /**
+  /**
    *
    * @param tab PanelTab
    * @param provider Instance of the LocalDataProvider that contains all ranking
