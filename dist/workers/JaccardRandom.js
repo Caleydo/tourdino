@@ -1,16 +1,12 @@
 import { BaseUtils } from '../base/BaseUtils';
-function calc(setA, setB) {
-    const { intersection: intersect, arr1: filteredsetA, arr2: filteredsetB } = BaseUtils.intersection(setA, setB);
-    const score = intersect.length / (intersect.length + filteredsetA.length + filteredsetB.length);
-    return score || 0;
-}
+import { WorkerUtils } from './WorkerUtils';
 const ctx = self;
 ctx.onmessage = (event) => {
     try {
         const setA = event.data.setA;
         const setB = event.data.setB;
         const allData = event.data.allData;
-        const actualScore = calc(setA, setB);
+        const actualScore = WorkerUtils.calcJaccard(setA, setB);
         if (actualScore === 1) {
             ctx.postMessage({ score: actualScore, p: 0.0 }); // Jaccard score is maximum, the other random sets can't get a higher score
         }
@@ -24,7 +20,7 @@ ctx.onmessage = (event) => {
             for (const scoreIndex of rndScores.keys()) {
                 const rndIndices = BaseUtils.getRandomUniqueIntegers(drawSize, allData.length - 1);
                 const rndSet = rndIndices.map((index) => allData[index]); // get elments with the random indices
-                rndScores[scoreIndex] = calc(rndSet, setB);
+                rndScores[scoreIndex] = WorkerUtils.calcJaccard(rndSet, setB);
             }
             const p = rndScores.filter((rndScore) => rndScore > actualScore).length / 1000.0; //  filter the array so only higher jaccard scores remain, then divide by number of computations. .0 to force floating point division
             ctx.postMessage({ score: actualScore, p });

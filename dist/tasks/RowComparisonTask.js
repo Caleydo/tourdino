@@ -1,5 +1,5 @@
-import rowCmpHtml from 'html-loader!./templates/RowComparison.html'; // webpack imports html to variable
-import rowCmpIcon from './assets/rowCmp.png';
+import rowCmpHtml from 'html-loader!../templates/RowComparison.html'; // webpack imports html to variable
+import rowCmpIcon from '../assets/rowCmp.png';
 import * as $ from 'jquery';
 import * as d3 from 'd3';
 import * as XXH from 'xxhashjs';

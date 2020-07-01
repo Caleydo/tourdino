@@ -1,5 +1,5 @@
-import colCmpHtml from 'html-loader!./templates/ColumnComparison.html'; // webpack imports html to variable
-import colCmpIcon from './assets/colCmp.png';
+import colCmpHtml from 'html-loader!../templates/ColumnComparison.html'; // webpack imports html to variable
+import colCmpIcon from '../assets/colCmp.png';
 
 import * as XXH from 'xxhashjs';
 import {cloneDeep} from 'lodash';

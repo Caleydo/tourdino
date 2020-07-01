@@ -1,4 +1,4 @@
-import './scss/main.scss';
+import '../scss/main.scss';
 import { RankingAdapter } from '../tasks/RankingAdapter';
 import * as d3 from 'd3';
 import { PanelTab } from 'tdp_core/dist/lineup/internal/panel/PanelTab';
@@ -102,11 +102,11 @@ export class TouringPanel {
         this.currentTask.show();
     }
     /**
-   *
-   * @param tab PanelTab
-   * @param provider Instance of the LocalDataProvider that contains all ranking
-   * @param desc Options provided through the extension point i.e `headerCssClass, headerTitle`
-   */
+     *
+     * @param tab PanelTab
+     * @param provider Instance of the LocalDataProvider that contains all ranking
+     * @param desc Options provided through the extension point i.e `headerCssClass, headerTitle`
+     */
     static create(desc, tab, provider) {
         // tslint:disable-next-line:no-unused-expression
         new TouringPanel(desc, tab, provider);

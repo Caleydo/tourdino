@@ -1,4 +1,4 @@
-import './scss/main.scss';
+import '../scss/main.scss';
 import {RankingAdapter} from '../tasks/RankingAdapter';
 import * as d3 from 'd3';
 import {LocalDataProvider} from 'lineupjs';

@@ -1,4 +1,4 @@
-import './scss/main.scss';
+import '../scss/main.scss';
 import { LocalDataProvider } from 'lineupjs';
 import { PanelTab } from 'tdp_core/dist/lineup/internal/panel/PanelTab';
 import { IPanelTabExtensionDesc } from 'tdp_core/dist/lineup/internal/LineUpPanelActions';
@@ -21,10 +21,10 @@ export declare class TouringPanel {
     updateOutput(forceUpdate?: boolean): Promise<void>;
     private updateTask;
     /**
-   *
-   * @param tab PanelTab
-   * @param provider Instance of the LocalDataProvider that contains all ranking
-   * @param desc Options provided through the extension point i.e `headerCssClass, headerTitle`
-   */
+     *
+     * @param tab PanelTab
+     * @param provider Instance of the LocalDataProvider that contains all ranking
+     * @param desc Options provided through the extension point i.e `headerCssClass, headerTitle`
+     */
     static create(desc: IPanelTabExtensionDesc, tab: PanelTab, provider: LocalDataProvider): void;
 }
