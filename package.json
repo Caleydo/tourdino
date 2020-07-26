@@ -36,6 +36,7 @@
   },
   "scripts": {
     "clean": "rimraf dist lib",
+    "delete-dependencies": "rimraf node_modules",
     "compile": "tsc",
     "compile:watch": "tsc -w",
     "postcompile": "npm run copy",
@@ -75,13 +76,13 @@
     "worker-loader": "^2.0.0"
   },
   "dependencies": {
-    "tdp_core": "github:datavisyn/tdp_core#vstoiber/refactoring",
+    "tdp_core": "github:datavisyn/tdp_core#develop",
     "d3": "~3.5.17",
     "d3.parsets": "git+https://github.com/jasondavies/d3-parsets.git#v1.2.4",
     "d3-grubert-boxplot": "gist:366430a0ac8e6e55ce09b040b5b493a6",
     "jstat": "^1.9.3",
     "lodash": "~4.17.15",
-    "phovea_core": "github:phovea/phovea_core#asteiner/refactoring",
+    "phovea_core": "github:phovea/phovea_core#develop",
     "xxhashjs": "^0.2.2"
   }
 }
