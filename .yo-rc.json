@@ -15,9 +15,15 @@
     "entries": "./index.js",
     "ignores": [],
     "extensions": [],
-    "name": "touring",
-    "author": "Klaus Eckelt",
+    "name": "tourdino",
+    "author": "The Caleydo Team",
     "today": "Wed, 19 Sep 2018 10:27:30 GMT",
-    "githubAccount": "caleydo"
+    "githubAccount": "caleydo",
+    "promptValues": {
+      "authorName": "The Caleydo Team",
+      "authorEmail": "contact@caleydo.org",
+      "authorUrl": "https://caleydo.org/",
+      "githubAccount": "caleydo"
+    }
   }
 }

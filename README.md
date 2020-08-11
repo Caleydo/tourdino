@@ -1,4 +1,10 @@
+ 
+
 # TourDino
+
+ [![Phovea][phovea-image]][phovea-url] [![NPM version][npm-image]][npm-url] [![Build Status][circleci-image]][circleci-url]
+ 
+ 
 A TypeScript library to calculate and visualize similarity measures.
 
 ## Similarity Measures
@@ -33,7 +39,6 @@ This repository is part of **[Phovea](http://phovea.caleydo.org/)**, a platform 
 [phovea-url]: https://phovea.caleydo.org
 [npm-image]: https://badge.fury.io/js/touring.svg
 [npm-url]: https://npmjs.org/package/touring
-[travis-image]: https://travis-ci.org/caleydo/touring.svg?branch=master
-[travis-url]: https://travis-ci.org/caleydo/touring
-[daviddm-image]: https://david-dm.org/caleydo/touring/status.svg
-[daviddm-url]: https://david-dm.org/caleydo/touring
+[circleci-image]: https://circleci.com/gh/Caleydo/tourdino.svg?style=shield
+[circleci-url]: https://circleci.com/gh/Caleydo/tourdino
+

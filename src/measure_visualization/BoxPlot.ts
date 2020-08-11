@@ -1,6 +1,5 @@
 import * as d3 from 'd3';
-import 'd3-grubert-boxplot';
-import {IMeasureResult, IMeasureVisualization, ISetParameters} from '../';
+import {IMeasureResult, IMeasureVisualization, ISetParameters} from '../base/interfaces';
 
 export class BoxPlot implements IMeasureVisualization {
 
@@ -84,7 +83,7 @@ export class BoxPlot implements IMeasureVisualization {
     // console.log('BoxPlot: ',{data,min,max});
 
 
-    const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
+    const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; // -25 because of the scroll bar
 
     const calcWidth = Math.max(containerWidth,data.length * 50 + 30);
 
@@ -119,7 +118,7 @@ export class BoxPlot implements IMeasureVisualization {
                                   .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
                                   .attr('class','boxplot');
 
-    	// the x-axis
+    // the x-axis
     const x = d3.scale.ordinal()
     .domain( data.map(function(d) { return d[0]; } ) )
     .rangeRoundBands([0 , width], 0.7, 0.3);
@@ -164,7 +163,7 @@ export class BoxPlot implements IMeasureVisualization {
         .attr('y', 0 + (margin.top / 2))
         .attr('text-anchor', 'middle')
         .style('font-size', '18px')
-        //.style('text-decoration', 'underline')
+        // .style('text-decoration', 'underline')
         .text(setParameters.setBDesc.label);
 
     // draw y axis

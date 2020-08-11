@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import {IMeasureResult, IMeasureVisualization, ISetParameters} from '../';
+import {IMeasureResult, IMeasureVisualization, ISetParameters} from '../base/interfaces';
 
 export class GroupedBarChart implements IMeasureVisualization {
 
@@ -72,7 +72,7 @@ export class GroupedBarChart implements IMeasureVisualization {
 
     // only for more than one category should a visulization be created
     if(formatData.bargroups.length > 1) {
-      const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
+      const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; // -25 because of the scroll bar
       const barWidth = 15;
       const dataCategorySpace = 2;
 
@@ -98,7 +98,7 @@ export class GroupedBarChart implements IMeasureVisualization {
       const x0Scale = d3.scale.ordinal()
                               .domain(xDomainCategories)
                               .rangeBands([0,width], 0.2);
-      //scale.rangeBand() -> is the space for 1 band
+      // scale.rangeBand() -> is the space for 1 band
 
       const x1Scale = d3.scale.ordinal()
                               .domain(['0','1'])

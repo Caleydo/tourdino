@@ -1,4 +1,4 @@
-import {ISetParameters, IMeasureResult} from '..';
+import {ISetParameters, IMeasureResult} from '../base/interfaces';
 import {GroupedBarChart} from './GroupedBarChart';
 import * as d3 from 'd3';
 
