@@ -1,13 +1,13 @@
 import '../scss/main.scss';
 import {RankingAdapter} from '../tasks/RankingAdapter';
 import * as d3 from 'd3';
+import 'd3.parsets/d3.parsets';
 import {LocalDataProvider} from 'lineupjs';
 import {PanelTab} from 'tdp_core/dist/lineup/internal/panel/PanelTab';
 import {IPanelTabExtensionDesc} from 'tdp_core/dist/lineup/internal/LineUpPanelActions';
 import {RowComparison} from '../tasks/RowComparisonTask';
 import {ColumnComparison} from '../tasks/ColumnComparisonTask';
 import { ATouringTask } from '../tasks/ATouringTask';
-import 'd3.parsets/d3.parsets';
 
 export const tasks = [
   new RowComparison(),
