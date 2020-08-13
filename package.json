@@ -1,97 +1,88 @@
 {
-  "main": "build/tourdino.js",
-  "types": "src/index.d.ts",
-  "files": [
-    "src",
-    "index.js",
-    "build"
-  ],
-  "engines": {
-    "npm": ">= 3",
-    "node": ">= 6"
-  },
-  "scripts": {
-    "compile": "tsc",
-    "lint": "tslint -c tslint.json src/**.ts tests/**.ts",
-    "docs": "typedoc --options typedoc.json src/**.ts",
-    "prebuild": "node -e \"process.exit(process.env.PHOVEA_SKIP_TESTS === undefined?1:0)\" || npm run test",
-    "pretest": "npm run compile",
-    "test": "test ! -d tests || karma start",
-    "posttest": "npm run lint",
-    "test:watch": "karma start --autoWatch=true --singleRun=false",
-    "build:dev": "webpack",
-    "prepare": "webpack --env prod",
-    "build": "webpack --env prod",
-    "start": "webpack-dev-server --inline",
-    "start:hot": "webpack-dev-server --inline --hot",
-    "watch": "webpack --watch",
-    "release:major": "npm version major && npm publish && git push --follow-tags",
-    "release:minor": "npm version minor && npm publish && git push --follow-tags",
-    "release:patch": "npm version patch && npm publish && git push --follow-tags",
-    "predist": "npm run build && npm run docs",
-    "dist": "mkdirp dist && cd build && tar cvzf ../dist/tourdino.tar.gz *"
-  },
-  "devDependencies": {
-    "@types/jasmine": "2.8.0",
-    "awesome-typescript-loader": "3.1.2",
-    "cache-loader": "1.2.0",
-    "css-loader": "0.28.0",
-    "extract-loader": "0.1.0",
-    "extract-text-webpack-plugin": "2.1.0",
-    "file-loader": "0.11.1",
-    "fork-ts-checker-webpack-plugin": "0.4.1",
-    "html-loader": "0.4.5",
-    "ifdef-loader": "2.0.0",
-    "imports-loader": "0.7.1",
-    "jasmine": "2.8",
-    "json-loader": "0.5.4",
-    "karma": "1.5.0",
-    "karma-chrome-launcher": "2.0.0",
-    "karma-firefox-launcher": "1.0.1",
-    "karma-jasmine": "1.1.0",
-    "karma-junit-reporter": "2.0.0",
-    "karma-sourcemap-loader": "0.3.7",
-    "karma-webpack": "2.0.3",
-    "mkdirp": "0.5.1",
-    "node-sass": "^4.10.x",
-    "null-loader": "0.1.1",
-    "raw-loader": "0.5.1",
-    "sass-loader": "6.0.7",
-    "style-loader": "0.16.1",
-    "thread-loader": "1.1.2",
-    "ts-loader": "4.0.1",
-    "tslib": "1.9.0",
-    "tslint": "5.9.1",
-    "typedoc": "0.11.1",
-    "typescript": "2.7.2",
-    "url-loader": "0.5.8",
-    "webpack": "2.3.3",
-    "webpack-dev-server": "2.4.2",
-    "worker-loader": "^2.0.0"
-  },
-  "dependencies": {
-    "@types/d3": "3.5.36",
-    "@types/jquery": "2.0.33",
-    "d3": "3.5.17",
-    "d3.parsets": "git+https://github.com/jasondavies/d3-parsets.git#v1.2.4",
-    "d3-grubert-boxplot": "gist:366430a0ac8e6e55ce09b040b5b493a6",
-    "jStat": "1.7.1"
-  },
   "name": "tourdino",
   "description": "Calculate and visualize similarity measures.",
   "homepage": "https://phovea.caleydo.org",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "author": {
-    "name": "Klaus Eckelt",
-    "email": "Klaus.Eckelt@jku.at",
-    "url": "https://www.jku.at/en/institute-of-computer-graphics/about-us/team/klaus-eckelt/"
+    "name": "The Caleydo Team",
+    "email": "contact@caleydo.org",
+    "url": "https://caleydo.org/"
   },
+  "contributors": [
+    {
+      "name": "Klaus Eckelt",
+      "email": "Klaus.Eckelt@jku.at",
+      "url": "https://www.jku.at/en/institute-of-computer-graphics/about-us/team/klaus-eckelt/"
+    }
+  ],
   "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/caleydo/tourdino/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/caleydo/tourdino.git"
+    "url": "git@github.com:Caleydo/tourdino.git"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "src",
+    "phovea_registry.js",
+    "dist"
+  ],
+  "engines": {
+    "npm": ">= 6.12",
+    "node": ">= 12.13"
+  },
+  "scripts": {
+    "clean": "rimraf dist lib",
+    "delete-dependencies": "rimraf node_modules",
+    "compile": "tsc",
+    "compile:watch": "tsc -w",
+    "postcompile": "npm run copy",
+    "lint": "tslint -c tslint.json -p . 'src/**/*.ts?(x)' 'tests/**/*.ts?(x)'",
+    "docs": "typedoc --options typedoc.json src/**.ts",
+    "prebuild": "node -e \"process.exit(process.env.PHOVEA_SKIP_TESTS === undefined?1:0)\" || npm run test",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "posttest": "npm run lint",
+    "build": "npm run clean && npm run compile",
+    "copy": "npm run copy-assets && npm run copy-styles && npm run copy-app-assets",
+    "copy-assets": "if [ -d src/assets ]; then shx --verbose cp -R src/assets/. dist/assets/; fi",
+    "copy-styles": "if [ -d src/scss ]; then shx --verbose cp -R src/scss/. dist/scss/; fi",
+    "copy-app-assets": "shx --verbose cp src/*.txt | true dist/ && shx --verbose cp -R src/templates/. dist/templates/ && shx --verbose cp src/*.ejs dist/ | true",
+    "release:major": "npm version major && npm publish && git push --follow-tags",
+    "release:minor": "npm version minor && npm publish && git push --follow-tags",
+    "release:patch": "npm version patch && npm publish && git push --follow-tags",
+    "predist": "npm run build && npm run docs",
+    "dist": "mkdir lib && cd dist && tar cvzf ../lib/tourdino.tar.gz *"
+  },
+  "devDependencies": {
+    "@types/jest": "~26.0.5",
+    "identity-obj-proxy": "~3.0.0",
+    "jest": "~26.1.0",
+    "jest-raw-loader": "~1.0.1",
+    "rimraf": "~3.0.2",
+    "shx": "~0.3.2",
+    "ts-jest": "~26.1.3",
+    "tslib": "~2.0.0",
+    "tslint": "~5.20.1",
+    "typedoc": "~0.17.8",
+    "typescript": "~3.9.7",
+    "@types/d3": "~3.5.36",
+    "@types/jquery": "~3.5.0",
+    "@types/node": "^13.7.7",
+    "@types/select2": "4.0.44",
+    "worker-loader": "^2.0.0"
+  },
+  "dependencies": {
+    "tdp_core": "^10.0.1",
+    "d3": "~3.5.17",
+    "d3.parsets": "git+https://github.com/jasondavies/d3-parsets.git#v1.2.4",
+    "d3-grubert-boxplot": "gist:366430a0ac8e6e55ce09b040b5b493a6",
+    "jstat": "^1.9.3",
+    "lodash": "~4.17.15",
+    "phovea_core": "^5.0.1",
+    "xxhashjs": "^0.2.2"
   }
 }

@@ -1,31 +1,26 @@
 {
   "compilerOptions": {
-    "module": "es6",
-    "target": "es6",
+    "module": "ES2020",
+    "target": "ES2019",
     "importHelpers": true,
     "sourceMap": true,
+    "declaration": true,
     "moduleResolution": "node",
     "jsx": "react",
+    "allowJs": true,
+    "declarationDir": "dist",
+    "outDir": "dist",
     "experimentalDecorators": true,
-    "lib": [
-      "dom",
-      "es6",
-      "es2016.array.include",
-      "es2017.object"
-    ],
-    "baseUrl": "../",
-    "declaration": true,
     "noImplicitAny": false,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
+    "esModuleInterop": false,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "preserveWatchOutput": true
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "tests/**/*.ts",
-    "index.ts",
     "tsd.d.ts"
   ]
 }

@@ -1,10 +1,16 @@
-import {IMeasureVisualization, ISetParameters, IMeasureResult} from '../';
 import * as d3 from 'd3';
+import {IMeasureResult, IMeasureVisualization, ISetParameters} from '../base/interfaces';
 
 export class GroupedBarChart implements IMeasureVisualization {
 
   protected formatData(setParameters: ISetParameters, score: IMeasureResult) {
-    const allCategories = setParameters.setADesc.categories.map((item) => {return {name: item.name, label: item.label, color: item.color};});
+    const allCategories = setParameters.setADesc.categories.map((item) => {
+      if(typeof(item) === 'string') {
+        return {name: item, label: item, color: '#808080'};
+      } else {
+        return {name: item.name, label: item.label, color: item.color};
+      }
+    });
     allCategories.push({name: 'Missing values', label: 'Missing values', color: '#808080'});
     console.log('allCategories: ',allCategories);
 
@@ -66,7 +72,7 @@ export class GroupedBarChart implements IMeasureVisualization {
 
     // only for more than one category should a visulization be created
     if(formatData.bargroups.length > 1) {
-      const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
+      const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; // -25 because of the scroll bar
       const barWidth = 15;
       const dataCategorySpace = 2;
 
@@ -92,7 +98,7 @@ export class GroupedBarChart implements IMeasureVisualization {
       const x0Scale = d3.scale.ordinal()
                               .domain(xDomainCategories)
                               .rangeBands([0,width], 0.2);
-      //scale.rangeBand() -> is the space for 1 band
+      // scale.rangeBand() -> is the space for 1 band
 
       const x1Scale = d3.scale.ordinal()
                               .domain(['0','1'])

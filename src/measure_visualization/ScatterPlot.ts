@@ -1,4 +1,4 @@
-import {IMeasureVisualization, ISetParameters, IMeasureResult} from '../';
+import {IMeasureVisualization, ISetParameters, IMeasureResult} from '../base/interfaces';
 import * as d3 from 'd3';
 
 
@@ -28,7 +28,7 @@ export class ScatterPlot implements IMeasureVisualization {
     });
 
     // domains
-    const domainSpace = 0.01; //add space to domain so that the data points are not on the axis
+    const domainSpace = 0.01; // add space to domain so that the data points are not on the axis
     const xValue = validDataPoints.map(((item) => (item.x)));
     const yValue = validDataPoints.map(((item) => (item.y)));
     const xDomain = [Math.min(...xValue),Math.max(...xValue)];
@@ -98,7 +98,7 @@ export class ScatterPlot implements IMeasureVisualization {
     if(formatData.dataPoints.length > 0) {
 
       // get size of space and calculate scatter plot size
-      const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; //-25 because of the scroll bar
+      const containerWidth = Number(miniVisualisation.style('width').slice(0,-2)) - 25; // -25 because of the scroll bar
 
       const labelOffsetAxisX = 35;
       const labelOffsetAxisY = 15;
