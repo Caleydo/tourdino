@@ -1,5 +1,5 @@
-import { IMeasureVisualization, ISetParameters, IMeasureResult } from '../base/interfaces';
 import * as d3 from 'd3';
+import { IMeasureResult, IMeasureVisualization, ISetParameters } from '../base/interfaces';
 export declare class GroupedBarChart implements IMeasureVisualization {
     protected formatData(setParameters: ISetParameters, score: IMeasureResult): {
         setADef: any;

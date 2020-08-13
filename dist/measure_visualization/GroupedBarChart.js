@@ -1,7 +1,14 @@
 import * as d3 from 'd3';
 export class GroupedBarChart {
     formatData(setParameters, score) {
-        const allCategories = setParameters.setADesc.categories.map((item) => { return { name: item.name, label: item.label, color: item.color }; });
+        const allCategories = setParameters.setADesc.categories.map((item) => {
+            if (typeof (item) === 'string') {
+                return { name: item, label: item, color: '#808080' };
+            }
+            else {
+                return { name: item.name, label: item.label, color: item.color };
+            }
+        });
         allCategories.push({ name: 'Missing values', label: 'Missing values', color: '#808080' });
         console.log('allCategories: ', allCategories);
         let yMax = 0;
