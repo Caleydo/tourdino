@@ -1,10 +1,16 @@
-import {IMeasureVisualization, ISetParameters, IMeasureResult} from '../base/interfaces';
 import * as d3 from 'd3';
+import {IMeasureResult, IMeasureVisualization, ISetParameters} from '../base/interfaces';
 
 export class GroupedBarChart implements IMeasureVisualization {
 
   protected formatData(setParameters: ISetParameters, score: IMeasureResult) {
-    const allCategories = setParameters.setADesc.categories.map((item) => {return {name: item.name, label: item.label, color: item.color};});
+    const allCategories = setParameters.setADesc.categories.map((item) => {
+      if(typeof(item) === 'string') {
+        return {name: item, label: item, color: '#808080'};
+      } else {
+        return {name: item.name, label: item.label, color: item.color};
+      }
+    });
     allCategories.push({name: 'Missing values', label: 'Missing values', color: '#808080'});
     console.log('allCategories: ',allCategories);
 

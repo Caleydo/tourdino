@@ -41,7 +41,7 @@ export class BoxPlot {
         setBBoxData.push({ 'min': min, 'max': max });
         // add the boxplot to all boxplots for this row
         rowBoxData.push(setBBoxData);
-        const boxColor = setParameters.setBDesc.color ? setParameters.setBDesc.color : null;
+        const boxColor = setParameters.setBDesc.color ? setParameters.setBDesc.color : '#EFEFEF';
         const rowBoxObj = {
             color: boxColor,
             data: rowBoxData,

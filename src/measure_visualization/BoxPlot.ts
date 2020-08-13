@@ -1,5 +1,5 @@
-import {IMeasureVisualization, ISetParameters, IMeasureResult} from '../base/interfaces';
 import * as d3 from 'd3';
+import {IMeasureResult, IMeasureVisualization, ISetParameters} from '../base/interfaces';
 
 export class BoxPlot implements IMeasureVisualization {
 
@@ -53,7 +53,7 @@ export class BoxPlot implements IMeasureVisualization {
     rowBoxData.push(setBBoxData);
 
 
-    const boxColor = setParameters.setBDesc.color ? setParameters.setBDesc.color : null;
+    const boxColor = setParameters.setBDesc.color ? setParameters.setBDesc.color : '#EFEFEF';
     const rowBoxObj = {
       color: boxColor,
       data: rowBoxData,
