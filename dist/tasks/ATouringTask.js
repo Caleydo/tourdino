@@ -530,13 +530,13 @@ export class ATouringTask {
                         for (const attr of cellData.highlightData.filter((data) => data.category !== undefined)) {
                             const indices = this.ranking.getAttributeDataDisplayed(attr.column).reduce((indices, cat, index) => cat === attr.category ? [...indices, index] : indices, []);
                             for (const index of indices) {
-                                const elem = focusedLineupNode.select(` .lineup-engine main .lu-row[data-index="${index}"][data-agg="detail"] [data-id="${id}"]`);
+                                const elem = focusedLineupNode.select(` .lineup-engine main .le-tr[data-index="${index}"][data-agg="detail"] [data-id="${id}"]`);
                                 if (!elem.empty()) {
                                     const setDarker = elem.classed(`${cssClass}-1`); // if previous class is already set
                                     elem.classed(`${cssClass}-${i}`, true)
                                         .classed(`${cssClass}-dark`, setDarker);
                                     const catId = focusedLineupNode.select(` .lineup-engine header .lu-header[title^="${attr.label}"]`).attr('data-col-id');
-                                    focusedLineupNode.select(`.lineup-engine main .lu-row[data-index="${index}"] [data-id="${catId}"]`).classed(`${cssClass}-border`, true);
+                                    focusedLineupNode.select(`.lineup-engine main .le-tr[data-index="${index}"] [data-id="${catId}"]`).classed(`${cssClass}-border`, true);
                                 }
                             }
                             i++;
