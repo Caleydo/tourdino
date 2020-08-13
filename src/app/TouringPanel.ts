@@ -7,6 +7,7 @@ import {IPanelTabExtensionDesc} from 'tdp_core/dist/lineup/internal/LineUpPanelA
 import {RowComparison} from '../tasks/RowComparisonTask';
 import {ColumnComparison} from '../tasks/ColumnComparisonTask';
 import { ATouringTask } from '../tasks/ATouringTask';
+import 'd3.parsets/d3.parsets';
 
 export const tasks = [
   new RowComparison(),

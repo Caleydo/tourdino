@@ -4,7 +4,8 @@ import { PanelTab } from 'tdp_core/dist/lineup/internal/panel/PanelTab';
 import { IPanelTabExtensionDesc } from 'tdp_core/dist/lineup/internal/LineUpPanelActions';
 import { RowComparison } from '../tasks/RowComparisonTask';
 import { ColumnComparison } from '../tasks/ColumnComparisonTask';
-export declare const tasks: (ColumnComparison | RowComparison)[];
+import 'd3.parsets/d3.parsets';
+export declare const tasks: (RowComparison | ColumnComparison)[];
 export declare class TouringPanel {
     private readonly _desc;
     private readonly tab;

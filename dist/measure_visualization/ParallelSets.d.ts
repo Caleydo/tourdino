@@ -1,6 +1,5 @@
 import { IMeasureVisualization, ISetParameters, IMeasureResult } from '../base/interfaces';
 import * as d3 from 'd3';
-import 'd3.parsets/d3.parsets';
 export declare class ParallelSets implements IMeasureVisualization {
     private formatData;
     private formatDataSelectionAgainstCatOrGroup;

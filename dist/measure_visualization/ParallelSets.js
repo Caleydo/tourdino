@@ -1,6 +1,5 @@
 import { SCOPE } from '../base/interfaces';
 import * as d3 from 'd3';
-import 'd3.parsets/d3.parsets';
 import { BaseUtils } from '../base/BaseUtils';
 export class ParallelSets {
     formatData(setParameters, isAttr) {
