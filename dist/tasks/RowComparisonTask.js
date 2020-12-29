@@ -307,7 +307,7 @@ function prepareDataArray(colGroups, rowGroups, rowAttributes) {
     for (const [i, attr] of rowAttributes.entries()) {
         data[i] = new Array(rowGroups.length); // one array per rowGroup (number of rows in body)
         for (const [j, rowGrp] of rowGroups.entries()) {
-            data[i][j] = new Array(colGroups.length + (j === 0 ? 2 : 1)).fill({ label: '<i class="fa fa-circle-o-notch fa-spin"></i>', measure: null });
+            data[i][j] = new Array(colGroups.length + (j === 0 ? 2 : 1)).fill({ label: '<i class="fas fa-circle-notch fa-spin"></i>', measure: null });
             data[i][j][j === 0 ? 1 : 0] = {
                 label: `${rowGrp.label} (${rowGrp.attribute.label})`,
                 background: rowGrp.color,

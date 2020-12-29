@@ -76,7 +76,7 @@
     "worker-loader": "^2.0.0"
   },
   "dependencies": {
-    "tdp_core": "github:datavisyn/tdp_core#dmoitzi/refactor_stylesheets_organiation_and_imports",
+    "tdp_core": "github:datavisyn/tdp_core#develop",
     "d3": "~3.5.17",
     "d3.parsets": "git+https://github.com/jasondavies/d3-parsets.git#v1.2.4",
     "d3-grubert-boxplot": "gist:366430a0ac8e6e55ce09b040b5b493a6",
