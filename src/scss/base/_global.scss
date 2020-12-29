@@ -1,0 +1,112 @@
+
+[hidden] {
+  display: none !important;
+}
+
+.touring.active {
+  display: flex;
+}
+
+.touring-highlight-hover {
+  background-color: $highlight-color !important;
+}
+
+.touring-highlight-hover-1 {
+  background-color: $highlight-color-1 !important;
+}
+
+.touring-highlight-hover-2 {
+  background-color: $highlight-color-2 !important;
+}
+
+.touring-highlight-hover-dark {
+  background-color: darken($highlight-color, 10%) !important;
+}
+
+.touring-highlight-hover-border {
+  border: 1px black dashed !important;
+}
+
+.select2-dropdown {
+  // dropdown is seperatly attached to DOM
+  $hover-background-color: darken(
+    $color: #ddd,
+    $amount: 20%
+  ) !default; // #ddd is default color for selected elements
+  $hover-color: white !default;
+
+  .select2-results > .select2-results__options {
+    max-height: 25vh; // 50% of browser window
+  }
+
+  .select2-results__option {
+    // changes the padding of every option in the dropdown
+    padding: 2px 6px;
+  }
+
+  .select2-results__option--highlighted {
+    // hover effect for non nested options (not in optgroup)
+    background-color: $hover-background-color; // do my own hover styling
+    color: $hover-color;
+  }
+
+  .select2-results__options--nested {
+    // hover effect for options in optgroups
+    .select2-results__option--highlighted {
+      // inside the dropdown, which is not inside the .select2
+      background-color: transparent; // default hover styling is done by adding a class
+      color: $dark-font-color;
+
+      &[aria-selected="true"] {
+        // reset
+        background-color: #ddd;
+        color: $dark-font-color;
+      }
+    }
+
+    .select2-results__option:hover {
+      background-color: $hover-background-color; // do my own hover styling
+      color: $hover-color;
+    }
+  }
+
+  .select2-results__group {
+    cursor: pointer; // let it look clickable
+
+    &:hover {
+      background-color: $hover-background-color;
+      color: $hover-color;
+    }
+  }
+}
+
+.select2 {
+  // the input that is always visible
+  .select2-selection__choice {
+    background-color: $active-color;
+
+    span {
+      color: $dark-font-color;
+    }
+  }
+}
+
+button {
+  &.touring.active::before {
+    color: #ffa500; // use highlight color of column headers
+    border: none;
+  }
+
+  img {
+    height: 1.2em;
+    width: auto;
+    padding-right: 1em;
+  }
+}
+
+.tooltip.measure {
+  background-color: #c0c0c0;
+  position: absolute;
+  padding: 5px;
+  opacity: 1;
+}

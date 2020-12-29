@@ -350,7 +350,7 @@ function prepareDataArray(colAttributes: IColumnDesc[], rowAttributes: IColumnDe
     return [[ // n2 arrays (bodies)
       { label: `<b>${rowAttribute.label}</b>`, type: rowAttribute.type },
       ...colAttributes.map((_) => {
-        return { label: '<i class="fa fa-circle-o-notch fa-spin"></i>', measure: null } as IScoreCell; // containing n1+1 elements (header + n1 values)
+        return { label: '<i class="fas fa-circle-notch fa-spin"></i>', measure: null } as IScoreCell; // containing n1+1 elements (header + n1 values)
       })
     ]];
   });
