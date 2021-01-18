@@ -1,7 +1,6 @@
 import { RankingAdapter } from '../tasks/RankingAdapter';
 import * as d3 from 'd3';
 import 'd3.parsets/d3.parsets';
-import 'd3-grubert-boxplot/box';
 import { PanelTab } from 'tdp_core/dist/lineup/internal/panel/PanelTab';
 import { RowComparison } from '../tasks/RowComparisonTask';
 import { ColumnComparison } from '../tasks/ColumnComparisonTask';
