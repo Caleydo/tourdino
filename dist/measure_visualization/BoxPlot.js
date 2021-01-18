@@ -33,7 +33,7 @@ export class BoxPlot {
         if (setParameters.setBCategory && setParameters.setBCategory.label) {
             label = setParameters.setBCategory.label;
         }
-        setBBoxData.push('' + label);
+        setBBoxData.push('​' + label);
         const setBValid = setParameters.setB.filter((item) => { return (item !== undefined) && (item !== null) && (!Number.isNaN(item)); });
         min = Math.min(min, Math.min(...setBValid));
         max = Math.max(max, Math.max(...setBValid));
