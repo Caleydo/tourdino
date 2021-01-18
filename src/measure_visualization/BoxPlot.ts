@@ -41,7 +41,7 @@ export class BoxPlot implements IMeasureVisualization {
     if(setParameters.setBCategory && setParameters.setBCategory.label) {
       label = setParameters.setBCategory.label;
     }
-    setBBoxData.push('​'+label);
+    setBBoxData.push('​'+label); // this label has a zero width space in between ''
     const setBValid = setParameters.setB.filter((item) => { return (item !== undefined) && (item !== null) && (!Number.isNaN(item)); });
     min = Math.min(min,Math.min(...(<number[]> setBValid)));
     max = Math.max(max,Math.max(...(<number[]> setBValid)));
