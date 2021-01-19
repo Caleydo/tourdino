@@ -390,7 +390,7 @@ export abstract class ATouringTask implements ITouringTask {
         .classed('detail-label', true)
         .text('Data Column: ')
         .append('span')
-        .text(setParameters.setADesc.label);
+        .html(setParameters.setADesc.label);
       detailSetInfo.append('span')
         .text(' / ');
     }
@@ -398,14 +398,14 @@ export abstract class ATouringTask implements ITouringTask {
       .classed('detail-label', true)
       .text('Comparing ');
     detailSetInfo.append('span')
-      .text(setALabel + ' ')
+      .html(setALabel)
       .append('span')
       .text('[' + measureResult.setSizeA + ']');
     detailSetInfo.append('span')
       .classed('detail-label', true)
       .text(' vs. ');
     detailSetInfo.append('span')
-      .text(setBLabel + ' ')
+      .html(setBLabel)
       .append('span')
       .text('[' + measureResult.setSizeB + ']');
 

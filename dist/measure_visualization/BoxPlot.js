@@ -148,6 +148,7 @@ export class BoxPlot {
             .attr('class', 'x axis')
             .attr('transform', 'translate(0,' + (height + margin.top + 10) + ')')
             .call(xAxis);
+        svgFigureGroup.selectAll('.x.axis .tick text').html((d) => d);
         // .append('text')             // text label for the x axis
         //   .attr('x', (width / 2) )
         //   .attr('y',  10 )

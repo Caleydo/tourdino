@@ -177,7 +177,7 @@ export class GroupedBarChart implements IMeasureVisualization {
                         .attr('y', function(d) { return yScale(d.amount); })
                         .append('title')
                           .classed('tooltip.measure',true)
-                          .text(function(d) {
+                          .html(function(d) {
                             const tooltipText = `Data Column: ${d.categoryLabel}\nCategory: ${d.def.label}\nAmount: ${d.amount}`;
                             return tooltipText;
                           });
@@ -202,7 +202,7 @@ export class GroupedBarChart implements IMeasureVisualization {
                 .attr('x', 19)
                 .attr('y', 7.5)
                 .attr('dy', '0.32em')
-                .text(function(d) { return d.label; });
+                .html(function(d) { return d.label; });
 
 
     }
