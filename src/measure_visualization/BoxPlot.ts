@@ -1,5 +1,4 @@
 import * as d3 from 'd3';
-import 'd3-grubert-boxplot/box'; // adds .box() function to d3
 import {IMeasureResult, IMeasureVisualization, ISetParameters} from '../base/interfaces';
 
 export class BoxPlot implements IMeasureVisualization {
@@ -41,7 +40,7 @@ export class BoxPlot implements IMeasureVisualization {
     if(setParameters.setBCategory && setParameters.setBCategory.label) {
       label = setParameters.setBCategory.label;
     }
-    setBBoxData.push('​'+label); // this label has a zero width space in between ''
+    setBBoxData.push(''+label);
     const setBValid = setParameters.setB.filter((item) => { return (item !== undefined) && (item !== null) && (!Number.isNaN(item)); });
     min = Math.min(min,Math.min(...(<number[]> setBValid)));
     max = Math.max(max,Math.max(...(<number[]> setBValid)));
@@ -184,8 +183,6 @@ export class BoxPlot implements IMeasureVisualization {
       .attr('class', 'x axis')
       .attr('transform', 'translate(0,' + (height  + margin.top + 10) + ')')
       .call(xAxis);
-
-    svgFigureGroup.selectAll('.x.axis .tick text').html((d) => d);
       // .append('text')             // text label for the x axis
       //   .attr('x', (width / 2) )
       //   .attr('y',  10 )
