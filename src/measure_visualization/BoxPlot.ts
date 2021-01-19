@@ -1,5 +1,4 @@
 import * as d3 from 'd3';
-import 'd3-grubert-boxplot/box'; // adds .box() function to d3
 import {IMeasureResult, IMeasureVisualization, ISetParameters} from '../base/interfaces';
 
 export class BoxPlot implements IMeasureVisualization {
