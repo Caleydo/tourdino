@@ -113,6 +113,13 @@ div.touring {
         }
       }
 
+      .details svg .axis path {
+        fill: none;
+        stroke-width: 1;
+        stroke: black;
+        shape-rendering: crispEdges;
+      }
+
       &.rowCmp {
         .details {
             overflow-x: auto;
