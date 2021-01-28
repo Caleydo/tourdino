@@ -113,10 +113,11 @@ div.touring {
         }
       }
 
-      .details svg .axis path {
+      .details svg .axis path,
+      .details svg .axis line {
         fill: none;
         stroke-width: 1;
-        stroke: black;
+        stroke:  $core_color_almost_black;
         shape-rendering: crispEdges;
       }
 
