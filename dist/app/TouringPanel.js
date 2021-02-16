@@ -1,4 +1,3 @@
-import '../scss/main.scss';
 import { RankingAdapter } from '../tasks/RankingAdapter';
 import * as d3 from 'd3';
 import 'd3.parsets/d3.parsets';
