@@ -42,7 +42,7 @@ export class ATouringTask {
         this.nodeObject.select('.form-horizontal').append('div')
             .attr('class', `form-group filter-missing`)
             .html(`
-        <label class="col-sm-4 control-label" for="${uniqueID}">
+        <label class="col-sm-4 col-form-label" for="${uniqueID}">
           Do you want to exclude missing values in each comparison?
         </label>
         <div class="col-sm-8">
@@ -288,7 +288,7 @@ export class ATouringTask {
         // button for mini visualization removal
         const that = this;
         const detailRemoveButton = divDetailInfoContainer.append('button');
-        detailRemoveButton.attr('class', 'btn btn-default removeMiniVis-btn');
+        detailRemoveButton.attr('class', 'btn btn-secondary removeMiniVis-btn');
         detailRemoveButton.on('click', function () { that.removeCellDetails.bind(that)(miniVisualisation); });
         detailRemoveButton.html('x');
         const divDetailInfo = divDetailInfoContainer.append('div')

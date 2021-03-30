@@ -20,7 +20,7 @@ const touringTemplate = `
 <div class="input">
   <div class="type form-horizontal"> <!-- https://getbootstrap.com/docs/3.3/css/#forms-horizontal -->
     <div class="form-group">
-      <label class="col-sm-4 control-label" style="padding-top: 0.5em;">What do you want to compare?</label> <!-- 1em top padding to center vertically-->
+      <label class="col-sm-4 col-form-label" style="padding-top: 0.5em;">What do you want to compare?</label> <!-- 1em top padding to center vertically-->
     </div>
   </div>
 </div>
@@ -55,7 +55,7 @@ export class TouringPanel {
         const taskButtons = taskSelectForm.selectAll('.btn-wrapper').data(tasks, (task) => task.id);
         taskButtons.enter() // enter: add a button for each task
             .append('div').attr('class', `btn-wrapper col-sm-${Math.max(Math.floor(8 / tasks.length), 1)}`)
-            .append('button').attr('class', 'task-btn btn btn-default btn-block')
+            .append('button').attr('class', 'task-btn btn btn-secondary btn-block')
             .classed('active', (d, i) => i === 0) // Activate first task
             .html((d) => `<img src="${d.icon}"/>${d.label}`);
         // update: nothing to do
