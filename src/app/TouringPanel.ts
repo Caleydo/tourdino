@@ -25,7 +25,7 @@ const touringTemplate = `
 </div>
 <div class="input">
   <div class="type form-horizontal"> <!-- https://getbootstrap.com/docs/3.3/css/#forms-horizontal -->
-    <div class="form-group">
+    <div class="form-row">
       <label class="col-sm-4 col-form-label" style="padding-top: 0.5em;">What do you want to compare?</label> <!-- 1em top padding to center vertically-->
     </div>
   </div>
@@ -64,7 +64,7 @@ export class TouringPanel {
   private insertTasks() {
     // For each Task, create a button
     // Link tasks with buttons
-    const taskSelectForm = d3.select(this.node).select('.input .type .form-group');
+    const taskSelectForm = d3.select(this.node).select('.input .type .form-row');
     const taskButtons = taskSelectForm.selectAll('.btn-wrapper').data(tasks, (task) => task.id);
 
     taskButtons.enter() // enter: add a button for each task
