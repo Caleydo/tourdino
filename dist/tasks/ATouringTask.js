@@ -288,7 +288,7 @@ export class ATouringTask {
         // button for mini visualization removal
         const that = this;
         const detailRemoveButton = divDetailInfoContainer.append('button');
-        detailRemoveButton.attr('class', 'btn btn-secondary removeMiniVis-btn');
+        detailRemoveButton.attr('class', 'btn btn-light removeMiniVis-btn');
         detailRemoveButton.on('click', function () { that.removeCellDetails.bind(that)(miniVisualisation); });
         detailRemoveButton.html('x');
         const divDetailInfo = divDetailInfoContainer.append('div')
