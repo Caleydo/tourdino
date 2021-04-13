@@ -69,7 +69,7 @@ export class TouringPanel {
 
     taskButtons.enter() // enter: add a button for each task
       .append('div').attr('class', `btn-wrapper col-sm-${Math.max(Math.floor(8 / tasks.length), 1)}`)
-      .append('button').attr('class', 'task-btn btn btn-secondary btn-block')
+      .append('button').attr('class', 'task-btn btn btn-light btn-block')
       .classed('active', (d, i) => i === 0) // Activate first task
       .html((d) => `<img src="${d.icon}"/>${d.label}`);
 
