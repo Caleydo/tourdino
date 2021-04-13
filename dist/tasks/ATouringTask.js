@@ -15,7 +15,7 @@ export class ATouringTask {
     }
     init(ranking, node) {
         this.ranking = ranking;
-        this.nodeObject = d3.select(node).append('div').attr('class', `task ${this.id}`);
+        this.nodeObject = d3.select(node).append('div').attr('class', `task ${this.id} py-3`);
         this.hide(); // hide initially
         this.initContent();
     }
