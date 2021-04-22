@@ -1,178 +1,41 @@
-import * as d3 from 'd3';
+import vegaEmbed from 'vega-embed';
 export class BoxPlot {
     formatData(setParameters) {
-        // console.log('Box Plot - formatData');
-        const rowBoxData = [];
-        let label = '';
-        // setA
-        const setABoxData = [];
-        let min = Infinity;
-        let max = -Infinity;
-        if (setParameters.setACategory && setParameters.setACategory.label) {
-            label = setParameters.setACategory.label;
-        }
-        // if(setParameters.setACategory && setParameters.setACategory.label) {
-        //   label = setParameters.setACategory.label;
-        // }
-        setABoxData.push('' + label);
+        var _a, _b, _c, _d, _e, _f;
+        const labelA = ((_a = setParameters.setACategory) === null || _a === void 0 ? void 0 : _a.label) || '';
         const setAValid = setParameters.setA.filter((item) => { return (item !== undefined) && (item !== null) && (!Number.isNaN(item)); });
-        setABoxData.push(setAValid);
-        min = Math.min(min, Math.min(...setAValid));
-        max = Math.max(max, Math.max(...setAValid));
-        setABoxData.push({ 'min': min, 'max': max });
-        // add the boxplot to all boxplots for this row
-        rowBoxData.push(setABoxData);
-        // setB
-        const setBBoxData = [];
-        min = Infinity;
-        max = -Infinity;
-        // if(setParameters.setBCategory) {
-        //   label = setParameters.setBCategory;
-        // }
-        if (setParameters.setBCategory && setParameters.setBCategory.label) {
-            label = setParameters.setBCategory.label;
-        }
-        setBBoxData.push('' + label);
+        const colorA = ((_b = setParameters.setADesc) === null || _b === void 0 ? void 0 : _b.color) || ((_c = setParameters.setACategory) === null || _c === void 0 ? void 0 : _c.color) || '#EFEFEF';
+        const labelB = ((_d = setParameters.setBCategory) === null || _d === void 0 ? void 0 : _d.label) || '';
         const setBValid = setParameters.setB.filter((item) => { return (item !== undefined) && (item !== null) && (!Number.isNaN(item)); });
-        min = Math.min(min, Math.min(...setBValid));
-        max = Math.max(max, Math.max(...setBValid));
-        // second elemnt is an array with all the values
-        setBBoxData.push(setBValid);
-        setBBoxData.push({ 'min': min, 'max': max });
-        // add the boxplot to all boxplots for this row
-        rowBoxData.push(setBBoxData);
-        const boxColor = setParameters.setBDesc.color ? setParameters.setBDesc.color : '#EFEFEF';
-        const rowBoxObj = {
-            color: boxColor,
-            data: rowBoxData,
-            domainMin: setParameters.setBDesc.domain ? setParameters.setBDesc.domain[0] : Math.min(rowBoxData[0][2].min, rowBoxData[1][2].min),
-            domainMax: setParameters.setBDesc.domain ? setParameters.setBDesc.domain[1] : Math.min(rowBoxData[0][2].max, rowBoxData[1][2].max)
-        };
-        return rowBoxObj;
+        const colorB = ((_e = setParameters.setBDesc) === null || _e === void 0 ? void 0 : _e.color) || ((_f = setParameters.setBCategory) === null || _f === void 0 ? void 0 : _f.color) || '#EFEFEF';
+        return [
+            ...setAValid.map((valA) => ({ 'group': labelA, 'value': valA, color: colorA })),
+            ...setBValid.map((valB) => ({ 'group': labelB, 'value': valB, color: colorB })),
+        ];
     }
     generateVisualization(miniVisualisation, setParameters, score) {
-        const formatData = this.formatData(setParameters);
-        // console.log('Box Plot - generateVisualization');
-        let data = formatData.data;
-        let min = Math.min(...data.map((a) => (a[2].min)));
-        let max = Math.max(...data.map((a) => (a[2].max)));
-        // check if the min and may are not infinte
-        min = isFinite(min) ? min : formatData.domainMin;
-        max = isFinite(max) ? max : formatData.domainMax;
-        // start min with 0 or highest negatice value
-        min = Math.min(min, 0);
-        // remove all empty sets
-        data = data.filter((item) => { return (item[1].length !== 0); });
-        // console.log('BoxPlot: ',{data,min,max});
-        const containerWidth = Number(miniVisualisation.style('width').slice(0, -2)) - 25; // -25 because of the scroll bar
-        const calcWidth = Math.max(containerWidth, data.length * 50 + 30);
-        const maxHeight = 220;
-        const margin = { top: 10, right: 0, bottom: 50, left: 55 };
-        const width = calcWidth - margin.left - margin.right;
-        const height = maxHeight - margin.top - margin.bottom;
-        const chart = d3.box()
-            .whiskers(function (d) {
-            const q1 = d.quartiles[0], q3 = d.quartiles[2], iqr = (q3 - q1) * 1.5;
-            let i = -1, j = d.length;
-            // tslint:disable-next-line:curly
-            while (d[++i] < q1 - iqr)
-                ;
-            // tslint:disable-next-line:curly
-            while (d[--j] > q3 + iqr)
-                ;
-            return [i, j];
-        })
-            .height(height)
-            .domain([min, max])
-            .showLabels(false);
-        const svgCanvas = miniVisualisation.append('svg')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom);
-        const svgFigureGroup = svgCanvas.append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-            .attr('class', 'boxplot');
-        // the x-axis
-        const x = d3.scale.ordinal()
-            .domain(data.map(function (d) { return d[0]; }))
-            .rangeRoundBands([0, width], 0.7, 0.3);
-        const xAxis = d3.svg.axis()
-            .scale(x)
-            .orient('bottom');
-        // the y-axis
-        const y = d3.scale.linear()
-            .domain([min, max]).nice()
-            .range([height + margin.top, 0 + margin.top]);
-        const yAxis = d3.svg.axis()
-            .scale(y)
-            .orient('left');
-        yAxis.tickFormat((d) => {
-            if ((Math.abs(d) < 1000 && Math.abs(d) > 0.01) || d === 0) {
-                return '' + Math.round(d * 100) / 100;
+        const spec = {
+            '$schema': 'https://vega.github.io/schema/vega-lite/v4.json',
+            data: { values: this.formatData(setParameters) },
+            title: setParameters.setBDesc.label,
+            width: { step: 30 },
+            mark: {
+                type: 'boxplot',
+                median: { color: 'black' }
+            },
+            encoding: {
+                x: { field: 'group', type: 'nominal', axis: { labelAngle: 45 }, title: null },
+                color: { field: 'color', type: 'nominal', legend: null, scale: null },
+                y: {
+                    field: 'value',
+                    type: 'quantitative',
+                    scale: { zero: false },
+                    axis: { grid: false },
+                    title: null
+                }
             }
-            return d3.format('0.1e')(d);
-        });
-        // draw the boxplots
-        svgFigureGroup.selectAll('.boxplot')
-            .data(data)
-            .enter().append('g')
-            .attr('class', function (d, i) {
-            const classString = 'box-element';
-            const dataLabel = `${d[0]}`;
-            const colorLabel = `category-gray`;
-            return `${classString} ${dataLabel} ${colorLabel}`;
-        })
-            .attr('transform', function (d) { return 'translate(' + x(d[0]) + ',' + margin.top + ')'; })
-            .call(chart.width(x.rangeBand()));
-        // add a title
-        svgFigureGroup.append('text')
-            .attr('x', (width / 2))
-            .attr('y', 0 + (margin.top / 2))
-            .attr('text-anchor', 'middle')
-            .style('font-size', '18px')
-            // .style('text-decoration', 'underline')
-            .text(setParameters.setBDesc.label);
-        // draw y axis
-        svgFigureGroup.append('g')
-            .attr('class', 'y axis')
-            .call(yAxis);
-        // .append('text') // and text1
-        // .attr('transform', 'rotate(-90)')
-        // .attr('y', 6)
-        // .attr('dy', '.71em')
-        // .style('text-anchor', 'end')
-        // .style('font-size', '16px')
-        // .text(cell.columnLabel);
-        // draw x axis
-        svgFigureGroup.append('g')
-            .attr('class', 'x axis')
-            .attr('transform', 'translate(0,' + (height + margin.top + 10) + ')')
-            .call(xAxis);
-        // .append('text')             // text label for the x axis
-        //   .attr('x', (width / 2) )
-        //   .attr('y',  10 )
-        // .attr('dy', '.71em')
-        //   .style('text-anchor', 'middle')
-        // .style('font-size', '16px')
-        //   .text(cell.columnLabel);
-        const boxElements = svgFigureGroup.selectAll('g.box-element').classed('selected', true);
-        const cirlceElements = boxElements.selectAll('circle')
-            .attr('r', 2);
-        if (formatData.color) {
-            const rectElements = boxElements.selectAll('rect').style('fill', formatData.color);
-            const cirlceElements = boxElements.selectAll('circle').style('fill', formatData.color).style('stroke', 'black');
-        }
-        // tooltip
-        boxElements.append('title')
-            .classed('tooltip.measure', true)
-            .text(function (d) {
-            const min = (d[1][0]).toFixed(2);
-            const q1 = (d[1].quartiles[0]).toFixed(2);
-            const median = (d[1].quartiles[1]).toFixed(2);
-            const q3 = (d[1].quartiles[2]).toFixed(2);
-            const max = (d[1][d[1].length - 1]).toFixed(2);
-            const text = `min = ${min}\nq1 = ${q1}\nmedian = ${median}\nq3 = ${q3}\nmax = ${max}`;
-            return text;
-        });
+        };
+        vegaEmbed(miniVisualisation.append('div').node(), spec, { actions: false, renderer: 'canvas' });
     }
 }
 //# sourceMappingURL=BoxPlot.js.map

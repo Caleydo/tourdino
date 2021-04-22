@@ -1,5 +1,4 @@
 import 'd3.parsets/d3.parsets';
-import 'd3-grubert-boxplot/box';
 import { LocalDataProvider } from 'lineupjs';
 import { PanelTab } from 'tdp_core/dist/lineup/internal/panel/PanelTab';
 import { IPanelTabExtensionDesc } from 'tdp_core/dist/lineup/internal/LineUpPanelActions';
