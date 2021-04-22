@@ -32,7 +32,7 @@ export class BoxPlot {
         if (setParameters.setBCategory && setParameters.setBCategory.label) {
             label = setParameters.setBCategory.label;
         }
-        setBBoxData.push('' + label);
+        setBBoxData.push('​' + label); // this label has a zero width space in between ''
         const setBValid = setParameters.setB.filter((item) => { return (item !== undefined) && (item !== null) && (!Number.isNaN(item)); });
         min = Math.min(min, Math.min(...setBValid));
         max = Math.max(max, Math.max(...setBValid));
@@ -147,6 +147,7 @@ export class BoxPlot {
             .attr('class', 'x axis')
             .attr('transform', 'translate(0,' + (height + margin.top + 10) + ')')
             .call(xAxis);
+        svgFigureGroup.selectAll('.x.axis .tick text').html((d) => d);
         // .append('text')             // text label for the x axis
         //   .attr('x', (width / 2) )
         //   .attr('y',  10 )
