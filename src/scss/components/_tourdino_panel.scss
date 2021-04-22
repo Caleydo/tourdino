@@ -528,42 +528,6 @@ div.touring {
       stroke: #fba74d !important;
     }
 
-    // ------ boxplot with D3
-    g.box-element text {
-      stroke: none;
-      fill: black;
-    }
-
-    g.box-element {
-      rect.box {
-        stroke: black;
-        stroke-width: 1;
-        stroke-opacity: 0;
-        fill-opacity: 0.5;
-      }
-
-      line.center,
-      line.median,
-      line.whisker {
-        stroke-opacity: 0.2;
-      }
-    }
-
-    g.box-element.selected {
-      rect.box {
-        stroke: black;
-        stroke-width: 1;
-        stroke-opacity: 1;
-        fill-opacity: 1;
-      }
-
-      line.center,
-      line.median,
-      line.whisker {
-        stroke-opacity: 1;
-      }
-    }
-
     // ------ scattter plot with D3
     g.scatterplot circle.datapoint {
       stroke: none;
