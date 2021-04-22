@@ -10,7 +10,8 @@ export class BoxPlot implements IMeasureVisualization {
     const setAValid = setParameters.setA.filter((item) => {return (item !== undefined) && (item !== null) && (!Number.isNaN(item));});
     const colorA = setParameters.setADesc?.color || setParameters.setACategory?.color || '#EFEFEF';
 
-    const labelB = setParameters.setBCategory?.label || '';
+    let labelB = setParameters.setBCategory?.label || '';
+    labelB = '​'+labelB; // add zero width space
     const setBValid = setParameters.setB.filter((item) => {return (item !== undefined) && (item !== null) && (!Number.isNaN(item));});
     const colorB = setParameters.setBDesc?.color || setParameters.setBCategory?.color || '#EFEFEF';
 
