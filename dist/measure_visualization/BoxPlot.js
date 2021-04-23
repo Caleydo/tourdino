@@ -18,7 +18,10 @@ export class BoxPlot {
         const spec = {
             '$schema': 'https://vega.github.io/schema/vega-lite/v4.json',
             data: { values: this.formatData(setParameters) },
-            title: setParameters.setBDesc.label,
+            title: {
+                text: setParameters.setBDesc.label,
+                limit: 400, dx: -100
+            },
             width: 'container',
             mark: {
                 type: 'boxplot',
@@ -52,6 +55,9 @@ export class BoxPlot {
                 header: {
                     titleFontSize: 16, titleFontWeight: 500, titleFont: 'Yantramanav',
                     labelFontSize: 12, labelLimit: 200, labelFont: 'Yantramanav'
+                },
+                title: {
+                    fontSize: 16, fontWeight: 500, font: 'Yantramanav',
                 }
             }
         };
