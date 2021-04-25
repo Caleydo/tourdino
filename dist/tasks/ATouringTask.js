@@ -15,7 +15,7 @@ export class ATouringTask {
     }
     init(ranking, node) {
         this.ranking = ranking;
-        this.nodeObject = d3.select(node).append('div').attr('class', `task ${this.id}`);
+        this.nodeObject = d3.select(node).append('div').attr('class', `task ${this.id} py-3`);
         this.hide(); // hide initially
         this.initContent();
     }
@@ -40,9 +40,9 @@ export class ATouringTask {
         const updateTable = this.updateTable.bind(this);
         const uniqueID = UniqueIdManager.getInstance().uniqueId();
         this.nodeObject.select('.form-horizontal').append('div')
-            .attr('class', `form-group filter-missing`)
+            .attr('class', `form-row form-group filter-missing`)
             .html(`
-        <label class="col-sm-4 control-label" for="${uniqueID}">
+        <label class="col-sm-4 col-form-label" for="${uniqueID}">
           Do you want to exclude missing values in each comparison?
         </label>
         <div class="col-sm-8">
@@ -288,7 +288,7 @@ export class ATouringTask {
         // button for mini visualization removal
         const that = this;
         const detailRemoveButton = divDetailInfoContainer.append('button');
-        detailRemoveButton.attr('class', 'btn btn-default removeMiniVis-btn');
+        detailRemoveButton.attr('class', 'btn btn-light removeMiniVis-btn');
         detailRemoveButton.on('click', function () { that.removeCellDetails.bind(that)(miniVisualisation); });
         detailRemoveButton.html('x');
         const divDetailInfo = divDetailInfoContainer.append('div')
