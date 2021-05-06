@@ -23,7 +23,7 @@ export class BoxPlot implements IMeasureVisualization {
 
   public generateVisualization(miniVisualisation: d3.Selection<any>, setParameters: ISetParameters, score: IMeasureResult) {
     const spec: VegaLiteSpec = {
-      '$schema': 'https://vega.github.io/schema/vega-lite/v4.json',
+      $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
       data: {values: this.formatData(setParameters)},
       title: {
         text: setParameters.setBDesc.label,

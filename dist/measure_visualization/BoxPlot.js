@@ -16,7 +16,7 @@ export class BoxPlot {
     }
     generateVisualization(miniVisualisation, setParameters, score) {
         const spec = {
-            '$schema': 'https://vega.github.io/schema/vega-lite/v4.json',
+            $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
             data: { values: this.formatData(setParameters) },
             title: {
                 text: setParameters.setBDesc.label,
