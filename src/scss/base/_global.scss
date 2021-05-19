@@ -20,7 +20,7 @@
 }
 
 .touring-highlight-hover-dark {
-  background-color: darken($highlight-color, 10%) !important;
+  background-color: shade-color($highlight-color, 10%) !important;
 }
 
 .touring-highlight-hover-border {
@@ -29,9 +29,9 @@
 
 .select2-dropdown {
   // dropdown is seperatly attached to DOM
-  $hover-background-color: darken(
-    $color: #ddd,
-    $amount: 20%
+  $hover-background-color: shade-color(
+    #ddd,
+    20%
   ) !default; // #ddd is default color for selected elements
   $hover-color: white !default;
 

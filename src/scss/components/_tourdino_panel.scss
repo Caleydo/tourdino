@@ -43,7 +43,7 @@ div.touring {
     $col-max-size: 15em !default;
 
     /*.select2-dropdown { // dropdown is seperatly attached to DOM
-      $hover-background-color: darken($color: #ddd, $amount: 20%); // #ddd is default color for selected elements
+      $hover-background-color: shade-color($color: #ddd, $amount: 20%); // #ddd is default color for selected elements
       $hover-color: white !default;
       .select2-results>.select2-results__options {
         max-height: 25vh; // 50% of browser window
@@ -300,7 +300,7 @@ div.touring {
           &:hover,
           &:focus {
             // = td.action:hover
-            background-color: darken(
+            background-color: shade-color(
               $highlight-color,
               25%
             ) !important; // important because to overwrite the htmml inline color definition
