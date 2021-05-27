@@ -40,7 +40,7 @@ export class ATouringTask {
         const updateTable = this.updateTable.bind(this);
         const uniqueID = UniqueIdManager.getInstance().uniqueId();
         this.nodeObject.select('.form-horizontal').append('div')
-            .attr('class', `form-row form-group filter-missing`)
+            .attr('class', `row mb-3 filter-missing`)
             .html(`
         <label class="col-sm-4 col-form-label" for="${uniqueID}">
           Do you want to exclude missing values in each comparison?
