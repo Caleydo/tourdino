@@ -20,6 +20,7 @@ div.touring {
 
     .task-btn.active {
       background-color: $active-color;
+      border-color: $dark-font-color;
     }
   }
 
@@ -119,20 +120,6 @@ div.touring {
         stroke-width: 1;
         stroke:  $core_color_almost_black;
         shape-rendering: crispEdges;
-      }
-
-      &.rowCmp {
-        .details {
-            overflow-x: auto;
-        }
-      }
-
-      &.colCmp {
-        .form-row {
-          > label {
-            padding-top: 0 !important;
-          }
-        }
       }
     }
 
