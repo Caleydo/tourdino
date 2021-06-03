@@ -21,6 +21,8 @@ const touringTemplate = `
   <div class="type form-horizontal"> <!-- https://getbootstrap.com/docs/3.3/css/#forms-horizontal -->
     <div class="row">
       <label class="col-sm-4 col-form-label" style="padding-top: 0.5em;">What do you want to compare?</label> <!-- 1em top padding to center vertically-->
+      <div class="btn-group col-sm-8 btn-wrapper" role="group" aria-label="Basic radio toggle button group">
+      </div>
     </div>
   </div>
 </div>
@@ -51,13 +53,15 @@ export class TouringPanel {
     insertTasks() {
         // For each Task, create a button
         // Link tasks with buttons
-        const taskSelectForm = d3.select(this.node).select('.input .type .row');
+        const taskSelectForm = d3.select(this.node).select('.input .type .row .btn-group');
         const taskButtons = taskSelectForm.selectAll('.btn-wrapper').data(tasks, (task) => task.id);
+        // TODO: Add in correct order and fix styling of selected button
         taskButtons.enter() // enter: add a button for each task
-            .append('div').attr('class', `btn-wrapper col-sm-${Math.max(Math.floor(8 / tasks.length), 1)} d-grid gap-2`)
-            .append('button').attr('class', 'task-btn btn btn-light').attr('data-bs-toggle', 'button')
-            .classed('active', (d, i) => i === 0) // Activate first task
-            .html((d) => `<img src="${d.icon}"/>${d.label}`);
+            .append('input').attr('class', `btn-check task-btn`).attr('type', 'radio').attr('id', (d, i) => `btnradio_${i}`).attr('checked', (d, i) => i === 0)
+            .classed('active', (d, i) => i === 0); // Activate first task
+        taskButtons.enter() // enter: add a button for each task
+            .append('label').attr('class', `btn btn-outline-secondary`).attr('for', (d, i) => `btnradio_${i}`)
+            .html((d) => `<img src="${d.icon}" style="height:70%" /> &nbsp;${d.label}`);
         // update: nothing to do
         taskButtons.exit().remove(); // exit: remove tasks no longer displayed
         taskButtons.order(); // order domelements as in the array
@@ -76,10 +80,11 @@ export class TouringPanel {
             this.currentTask.removeEventListeners();
         });
         // Click a different task
-        d3.select(this.node).selectAll('button.task-btn').on('click', (task) => {
-            const taskButtons = d3.select(this.node).selectAll('button.task-btn');
+        d3.select(this.node).selectAll('input.task-btn').on('click', (task) => {
+            const taskButtons = d3.select(this.node).selectAll('input.task-btn');
             if (this.currentTask && this.currentTask.id !== task.id) { // task changed
                 taskButtons.classed('active', (d) => d.id === task.id);
+                taskButtons.attr('checked', (d) => d.id === task.id);
                 this.currentTask.hide(); // hide old task
                 this.updateOutput(); // will show new task
             }
@@ -94,7 +99,7 @@ export class TouringPanel {
         }
     }
     updateTask() {
-        const activeButton = d3.select(this.node).select('button.task-btn.active');
+        const activeButton = d3.select(this.node).select('input.task-btn.active');
         if (activeButton.size() === 0) {
             console.warn('No comparison tasks registered and found.');
             return;

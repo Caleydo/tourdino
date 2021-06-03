@@ -17,13 +17,18 @@ div.touring {
 
     // task switcher & task input
     overflow: hidden; // from the bootstrap stuff we get some overflow which introduces scrollbars --> hide it
-
-    .task-btn.active {
-      background-color: $active-color;
-      border-color: $dark-font-color;
+  
+    .type {
+      .row {
+        .btn-group {
+          label {
+            height: 60%;
+          }
+        }
+      }
     }
   }
-
+  
   .removeMiniVis-btn {
     float: right !important;
     padding: 0px 7px !important;
