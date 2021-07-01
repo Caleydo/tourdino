@@ -17,12 +17,18 @@ div.touring {
 
     // task switcher & task input
     overflow: hidden; // from the bootstrap stuff we get some overflow which introduces scrollbars --> hide it
-
-    .task-btn.active {
-      background-color: $active-color;
+  
+    .type {
+      .row {
+        .btn-group {
+          label {
+            height: 60%;
+          }
+        }
+      }
     }
   }
-
+  
   .removeMiniVis-btn {
     float: right !important;
     padding: 0px 7px !important;
@@ -43,7 +49,7 @@ div.touring {
     $col-max-size: 15em !default;
 
     /*.select2-dropdown { // dropdown is seperatly attached to DOM
-      $hover-background-color: darken($color: #ddd, $amount: 20%); // #ddd is default color for selected elements
+      $hover-background-color: shade-color($color: #ddd, $amount: 20%); // #ddd is default color for selected elements
       $hover-color: white !default;
       .select2-results>.select2-results__options {
         max-height: 25vh; // 50% of browser window
@@ -119,20 +125,6 @@ div.touring {
         stroke-width: 1;
         stroke:  $core_color_almost_black;
         shape-rendering: crispEdges;
-      }
-
-      &.rowCmp {
-        .details {
-            overflow-x: auto;
-        }
-      }
-
-      &.colCmp {
-        .form-row {
-          > label {
-            padding-top: 0 !important;
-          }
-        }
       }
     }
 
@@ -300,7 +292,7 @@ div.touring {
           &:hover,
           &:focus {
             // = td.action:hover
-            background-color: darken(
+            background-color: shade-color(
               $highlight-color,
               25%
             ) !important; // important because to overwrite the htmml inline color definition
